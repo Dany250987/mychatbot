@@ -1,0 +1,16 @@
+# Node.js
+node_modules/
+
+# PHP / Composer
+vendor/
+
+# Archivos de entorno
+.env
+.env.local
+
+# Logs
+*.log
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
