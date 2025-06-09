@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>DanyBot | Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="src/css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-grid">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>DanyBot 💙</h2>
+      <ul>
+        <li><a href="#" onclick="showSection('tareas')">📋 Tareas</a></li>
+        <li><a href="#" onclick="showSection('recordatorios')">⏰ Recordatorios</a></li>
+        <li><a href="#" onclick="showSection('calendario')">📅 Calendario</a></li>
+        <li><a href="#" onclick="showSection('crecimiento')">🌱 Crecimiento Personal</a></li>
+        <li><a href="#" onclick="showSection('chistes')">😂 Chistes</a></li>
+        <li><a href="#" onclick="showSection('motivacion')">💡 Motivación</a></li>
+        <li><a href="#" onclick="logout()">🚪 Cerrar sesión</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+      <header class="main-header">
+        <div class="user-info">
+          <img id="user-avatar" class="avatar" src="" alt="Avatar" style="display: none;">
+          <h1 id="section-title">Bienvenida 💫</h1>
+        </div>
+        <div class="date-time" id="datetime"></div>
+      </header>
+
+      <section class="cards-overview">
+        <div class="card"><h3>Total de Tareas</h3><p>8</p></div>
+        <div class="card"><h3>Eventos Hoy</h3><p>3</p></div>
+        <div class="card"><h3>Recordatorios Activos</h3><p>5</p></div>
+        <div class="card highlight"><h3>Tu Energía</h3><p>💪 98%</p></div>
+      </section>
+
+      <section id="section-content" class="section-content">
+        <p>Selecciona una opción del menú para empezar.</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="src/js/dashboard.js"></script>
+</body>
+</html>
+

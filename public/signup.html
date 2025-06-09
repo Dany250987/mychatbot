@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>signup - DanyBot</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Special+Gothic&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/css/signup.css">
+  <script src="src/js/script.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
+
+
+</head>
+
+<body>
+  <div id="signup-card" class="card">
+    <div class="signup-header"> 
+      <div class="logo-container"><img src="src/img/danybot.png" alt="Logo" ></div>
+      <h1>Sign up for DanyBot</h1>
+      <p>
+        <span class="">Enter your details below to create your account and get started.</span>
+      </p>
+      <div class="form-row">
+        <div class="form-col">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Enter your name" required>
+        </div>
+        <div class="form-col">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-col">
+          <label for="date-of-birth">Date of birth</label>
+          <input type="date" id="date-of-birth" name="date-of-birth" placeholder="MM / DD / YYYY" required>
+        </div>
+        <div class="form-col">
+          <label for="phone-number">Phone Number</label>
+          <input type="tel" id="phone" name="phone-number" placeholder="+57 300 000 0000" required>
+        </div>
+      </div>
+     
+      <div class="form-row">
+        <!-- Campo Password -->
+      <div class="form-col password-wrapper">
+        <label for="password">Password</label>
+        <div class="input-group">
+          <input type="password" id="password" name="password" placeholder="••••••••" required />
+          <button type="button" class="toggle-password" onclick="togglePassword('password', this)">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Campo Confirm Password -->
+      <div class="form-col password-wrapper">
+        <label for="confirm-password">Confirm Password</label>
+        <div class="input-group">
+          <input type="password" id="confirm-password" name="confirm-password" placeholder="••••••••" required />
+          <button type="button" class="toggle-password" onclick="togglePassword('confirm-password', this)">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-cancel">Cancel</button>
+        <button type="button" id="btn-submit" class="btn-submit">Submit</button>
+      </div>   
+      <p class="signin-text">Already have an account? <a href="login_google_chatbot.html">Sign in</a></p>
+   </div>
+
+    <!-- Google Sign-In -->
+    <div id="g_id_onload"
+      data-client_id="625571352027-jgsi8eovhcd2b4or9uohaog1f8663d8i.apps.googleusercontent.com"
+      data-callback="handleCredentialResponse"
+      data-auto_prompt="false">
+    </div>
+
+    <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="outline"
+        data-text="sign_up_with"
+        data-shape="rectangular"
+        data-logo_alignment="left">
+    </div>
+</div>
+
+
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+
+    
+
+<script src="src/js/signup.js"></script>
+
+
+ 
+</body>
+</html>

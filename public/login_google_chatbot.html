@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login con Google - DanyBot</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Special+Gothic&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/css/login.css">
+  <script src="src/js/script.js" defer></script>
+
+</head>
+
+<body>
+  <div id="login-card" class="card">
+    <div class="card-header"> 
+      <div class="logo-container"><img src="src/img/danybot.png" alt="Logo" ></div>
+      <h1>Welcome back!</h1>
+      <p>
+        <span class="linea-arriba">Glad to see you again 👋</span>
+        <span class="linea-abajo">Login to your account below</span>
+      </p>      
+    </div>
+    
+
+    <!-- Login de Google -->
+    <div id="g_id_onload"
+        data-client_id="625571352027-jgsi8eovhcd2b4or9uohaog1f8663d8i.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+        data-auto_prompt="false">
+    </div>
+
+    <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="outline"
+        data-text="sign_in_with"
+        data-shape="rectangular"
+        data-logo_alignment="left">
+    </div>
+
+    <form id="login-form" class="form">
+
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password">
+      </div>
+      <button type="submit">Login</button>
+    </form>
+
+    <p class="signup-tex">Don't have an account? <a class="register" href="signup.html">Sign up for Free</a></p>
+    
+
+    <!-- Contenedor oculto del chatbot -->
+    <div id="chat-container">
+      <h3 id="user-name" style="margin-top: 10px;"></h3>
+      <img id="user-avatar" width="80" style="border-radius: 50%; margin-bottom: 10px;" />
+      <!-- <h3 id="user-name"></h3> -->
+      <p>✅ Acceso correcto. Aquí se cargará el chatbot...</p>
+    </div>
+  </div>
+ 
+</body>
+</html>

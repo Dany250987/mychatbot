@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Practice English Chatbot (Offline)</title>
+  <style>
+    #chat-container {
+      width: 400px;
+      margin: 50px auto;
+      border: 1px solid #ccc;
+      padding: 15px;
+      font-family: Arial, sans-serif;
+    }
+
+    #chat-box {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #fafafa;
+    }
+
+    #user-input {
+      width: 65%;
+      padding: 5px;
+    }
+
+    button {
+      padding: 6px 10px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <input type="text" id="user-input" placeholder="Write your message..." />
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="startListening()">🎤 Speak</button>
+  </div>
+
+  <script>
+    const responses = [
+      "Hi! How are you today?",
+      "That's great! Tell me more.",
+      "What do you like to do in your free time?",
+      "Let's practice some vocabulary!",
+      "Can you describe your day in English?",
+      "I'm happy to help you practice English!",
+      "Do you enjoy learning new languages?",
+      "Tell me about your hobbies.",
+      "What did you do last weekend?"
+    ];
+
+    function sendMessage() {
+      const input = document.getElementById("user-input");
+      const chatBox = document.getElementById("chat-box");
+      const userMessage = input.value.trim();
+
+      if (userMessage !== "") {
+        chatBox.innerHTML += `<p><strong>You:</strong> ${userMessage}</p>`;
+        input.value = "";
+
+        const botMessage = responses[Math.floor(Math.random() * responses.length)];
+        chatBox.innerHTML += `<p><strong>Bot:</strong> ${botMessage}</p>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        speak(botMessage);
+      }
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      utterance.rate = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    let recognition;
+    let isListening = false;
+
+    if (!SpeechRecognition) {
+      alert("Your browser does not support speech recognition. Use Google Chrome.");
+    } else {
+      recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        isListening = true;
+        console.log("🎙️ Listening...");
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        console.log("🛑 Stopped listening.");
+      };
+
+      recognition.onresult = function (event) {
+        const transcript = event.results[0][0].transcript;
+        console.log("📝 Transcript:", transcript);
+        document.getElementById("user-input").value = transcript;
+        sendMessage();
+      };
+    }
+
+    function startListening() {
+      if (!isListening) {
+        recognition.start();
+      } else {
+        console.log("❗ Already listening, ignoring duplicate call.");
+      }
+    }
+  </script>
+</body>
+</html>

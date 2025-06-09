@@ -1,0 +1,150 @@
+/* 1. Fondo general y tarjeta */
+
+body {
+    background-color: #f5f8ff;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+  
+#signup-card {
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 500px;
+}
+
+/* 2. Títulos y textos */
+
+.signup-header h1 {
+    color: #114e77;
+    font-size: 28px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+  
+  .signup-header p {
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+  
+
+/* 
+🧾 3. Inputs y selects */
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+  
+.form-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+  
+input, select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #f0f4ff;
+}
+  
+/* 4. Botones */
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+.btn-cancel, .btn-submit {
+    padding: 10px 0;
+    width: 48%;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+}
+  
+.btn-cancel {
+    background-color: transparent;
+    border: 1px solid #ccc;
+    color: #666;
+}
+  
+.btn-submit {
+    background-color: #114e77;
+    color: white;
+}
+
+.btn-confirm:hover {
+    background-color: #4922cc;
+}
+  
+/* 🔁 5. Texto con link para login */
+
+.signin-text {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 25px;
+}
+  
+.signin-text a {
+    color:  #114e77;
+    text-decoration: none;
+    font-weight: 500;
+}
+  
+.signin-text a:hover {
+    text-decoration: underline;
+}
+
+
+/* imagen de logo */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .logo-container img {
+    width: 80px;
+    height: auto;
+  }
+  
+
+  .input-group {
+  position: relative;
+  }
+
+.input-group input {
+  width: 100%;
+  padding-right: 40px; /* espacio para el botón */
+  box-sizing: border-box;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #444;
+  font-size: 1rem;
+}
