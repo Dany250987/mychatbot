@@ -42,3 +42,13 @@
     localStorage.removeItem("userData");
     window.location.href = "login_google_chatbot.html";
   }
+
+  document.addEventListener("DOMContentLoaded", function () {
+  const energiaCard = document.getElementById("card-energia");
+
+  if (energiaCard) {
+    energiaCard.addEventListener("click", function () {
+      window.location.href = "tuenergia.html"; 
+    });
+  }
+});

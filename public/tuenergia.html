@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tu Energía - DanyBot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/css/tuenergia.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>💪 Tu Energía de Hoy, Daniela</h1>
+    <p>Balance diario de tu bienestar</p>
+  </header>
+
+<section class="card-container">
+  <div class="card-box green">
+    <div class="icon">&#x1F4AA;</div>
+    <div class="info">
+      <h4>Ejercicio</h4>
+      <h5>1 h 45 min</h5>
+      <p>Hoy</p>
+    </div>
+  </div>
+
+  <div class="card-box blue">
+    <div class="icon">&#x1F957;</div>
+    <div class="info">
+      <h4>Alimentación</h4>
+      <h5>1500 Kcal</h5>
+      <p>Hoy</p>
+    </div>
+  </div>
+
+  <div class="card-box pink">
+    <div class="icon">&#x1F634;</div>
+    <div class="info">
+      <h4>Sueño</h4>
+      <h5>7h 45 min</h5>
+      <p>Última noche</p>
+    </div>
+  </div>
+
+  <div class="card-box yellow">
+    <div class="icon">&#x26A1;</div>
+    <div class="info">
+      <h4>Energía Total</h4>
+      <h5>84%</h5>
+      <p>Estimada</p>
+    </div>
+  </div>
+  
+  <div class="card-box purple">
+    <div class="icon">&#x1F634;</div>
+    <div class="info">
+      <h4>Sueño</h4>
+      <h5>1 h 45 min</h5>
+      <p>Última noche</p>
+    </div>
+  </div>
+  
+  <div class="card-box orange">
+    <div class="icon">&#x1F634;</div>
+    <div class="info">
+      <h4>Sueño</h4>
+      <h5>1 h 45 min</h5>
+      <p>Última noche</p>
+    </div>
+  </div>
+  
+  <div class="card-box teal">
+    <div class="icon">&#x1F634;</div>
+    <div class="info">
+      <h4>Sueño</h4>
+      <h5>1 h 45 min</h5>
+      <p>Última noche</p>
+    </div>
+  </div>
+  
+  <div class="card-box gray">
+    <div class="icon">&#x1F634;</div>
+    <div class="info">
+      <h4>Sueño</h4>
+      <h5>1 h 45 min</h5>
+      <p>Última noche</p>
+    </div>
+  </div>
+</section>
+<section class="chart-section"></section>
+
+  <!-- Agrega un canvas si quieres el gráfico aquí -->
+  <canvas id="energiaChart" height="120"></canvas>
+
+  <script>
+    const ctx = document.getElementById('energiaChart')?.getContext('2d');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['6am', '9am', '12pm', '3pm', '6pm', '9pm'],
+          datasets: [{
+            label: 'Nivel de energía',
+            data: [80, 75, 60, 55, 70, 65],
+            backgroundColor: 'rgba(106, 17, 203, 0.1)',
+            borderColor: '#6a11cb',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+
+.card-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 2rem;
+}
+
+.card-box {
+  flex: 1 1 calc(25% - 20px);
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 220px;
+  transition: transform 0.2s;
+  background: gray; /* default in case color class fails */
+}
+
+.card-box:hover {
+  transform: translateY(-4px);
+}
+
+.icon {
+  font-size: 2.5rem;
+  margin-right: 1rem;
+}
+
+.info {
+  flex: 1;
+}
+
+.info h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.info input {
+  width: 100%;
+  margin: 6px;
+  font-weight: bold;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  color: #333;
+  background: #fff;
+}
+
+.info input:focus {
+  outline: none;
+}
+
+.info p {
+  font-size: 0.85rem;
+  margin-top: 4px;
+  color: #eee;
+}
+
+/* Colores como en tu referencia */
+.green { background-color: #2ecc71; }
+.blue { background-color: #3498db; }
+.pink { background-color: #e74c3c; }
+.yellow { background-color: #f1c40f; }
+.purple { background-color: #9b59b6; }    /* Morado elegante */
+.orange { background-color: #e67e22; }    /* Naranja cálido */
+.teal   { background-color: #1abc9c; }    /* Verde agua */
+.gray   { background-color: #95a5a6; }    /* Gris neutro */
+
+
+
+
+
+
+        
