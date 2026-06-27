@@ -1,0 +1,168 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6fb;
+  color: #1f2937;
+}
+
+.expenses-container {
+  width: 90%;
+  max-width: 1100px;
+  margin: 40px auto;
+}
+
+.expenses-header {
+  background: linear-gradient(135deg, #463cec, #7c3aed);
+  color: white;
+  padding: 30px;
+  border-radius: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 25px rgba(70, 60, 236, 0.25);
+}
+
+.expenses-header h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.expenses-header p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  opacity: 0.95;
+}
+
+.back-link {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.18);
+  padding: 10px 16px;
+  border-radius: 12px;
+}
+
+.expenses-summary,
+.expenses-form-section,
+.expenses-filter,
+.expenses-list {
+  background: white;
+  padding: 25px;
+  border-radius: 18px;
+  margin-bottom: 25px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.expenses-summary h2,
+.expenses-form-section h2,
+.expenses-filter h2,
+.expenses-list h2 {
+  margin-bottom: 18px;
+  color: #111827;
+}
+
+#monthlyTotal {
+  font-size: 34px;
+  font-weight: bold;
+  color: #463cec;
+}
+
+#expenseForm {
+  display: grid;
+  gap: 14px;
+}
+
+#expenseForm label,
+.expenses-filter label {
+  font-weight: bold;
+  color: #374151;
+}
+
+#expenseForm input,
+#expenseForm select,
+.expenses-filter input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+}
+
+#expenseForm input:focus,
+#expenseForm select:focus,
+.expenses-filter input:focus {
+  border-color: #463cec;
+  box-shadow: 0 0 0 3px rgba(70, 60, 236, 0.12);
+}
+
+#expenseForm button {
+  margin-top: 10px;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: #463cec;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#expenseForm button:hover {
+  background: #372fd0;
+}
+
+#expenseMessage {
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+}
+
+thead {
+  background: #463cec;
+  color: white;
+}
+
+th,
+td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tbody tr:hover {
+  background: #f9fafb;
+}
+
+td:last-child {
+  text-transform: capitalize;
+}
+
+@media (max-width: 768px) {
+  .expenses-container {
+    width: 94%;
+    margin: 20px auto;
+  }
+
+  .expenses-header h1 {
+    font-size: 26px;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+  }
+}

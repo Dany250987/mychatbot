@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- Permite que la página se vea bien en celular y computador -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Mis gastos</title>
+
+  <!-- Conectamos el CSS de esta pantalla -->
+  <link rel="stylesheet" href="./src/css/gastos.css">
+</head>
+<body>
+
+  <!-- Contenedor principal de la pantalla -->
+  <main class="expenses-container">
+
+    <!-- Encabezado -->
+    <section class="expenses-header">
+      <h1>Mis gastos</h1>
+      <p>Registra tus facturas, gastos diarios y pagos del mes.</p>
+
+      <!-- Botón para volver al dashboard -->
+      <a href="./dashboard.html" class="back-link">← Volver al inicio</a>
+    </section>
+
+    <!-- Resumen mensual -->
+    <section class="expenses-summary">
+      <h2>Total gastado este mes</h2>
+      <p id="monthlyTotal">$0</p>
+    </section>
+
+    <!-- Formulario para registrar gastos -->
+    <section class="expenses-form-section">
+      <h2>Registrar gasto</h2>
+
+      <form id="expenseForm">
+
+        <label for="expenseDate">Fecha del gasto</label>
+        <input type="date" id="expenseDate" required>
+
+        <label for="category">Categoría</label>
+        <select id="category" required>
+          <option value="">Selecciona una categoría</option>
+          <option value="Factura">Factura</option>
+          <option value="Alimentación">Alimentación</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Pasajes">Pasajes</option>
+          <option value="Salud">Salud</option>
+          <option value="Entretenimiento">Entretenimiento</option>
+          <option value="Otro">Otro</option>
+        </select>
+
+        <label for="description">Descripción</label>
+        <input 
+          type="text" 
+          id="description" 
+          placeholder="Ej: VANTI-GAS, CHAT-GPT, almuerzo..." 
+          required
+        >
+
+        <label for="amount">Valor</label>
+        <input 
+          type="number" 
+          id="amount" 
+          placeholder="Ej: 51000" 
+          min="1" 
+          required
+        >
+
+        <!-- Por ahora será manual. Después agregamos voz -->
+        <input type="hidden" id="source" value="manual">
+
+        <input type="hidden" id="expenseId">
+
+        <button type="submit" id="submitExpenseButton">Guardar gasto</button>
+        <button type="button" id="cancelEditButton" style="display: none;">
+            Cancelar edición
+        </button>
+      </form>
+
+      <!-- Aquí mostraremos mensajes como: gasto guardado o error -->
+      <p id="expenseMessage"></p>
+    </section>
+
+    <!-- Filtro por mes -->
+    <section class="expenses-filter">
+      <h2>Consultar por mes</h2>
+
+      <label for="monthFilter">Selecciona el mes</label>
+      <input type="month" id="monthFilter">
+    </section>
+
+    <!-- Lista de gastos -->
+    <section class="expenses-list">
+      <h2>Gastos registrados</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Categoría</th>
+            <th>Descripción</th>
+            <th>Valor</th>
+            <th>Origen</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody id="expensesTableBody">
+          <!-- Los gastos se cargarán aquí desde gastos.js -->
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <!-- Conectamos el JavaScript de esta pantalla -->
+  <script src="./src/js/gastos.js"></script>
+</body>
+</html>
