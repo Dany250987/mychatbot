@@ -14,3 +14,6 @@ vendor/
 # Archivos de sistema
 .DS_Store
 Thumbs.db
+
+# Variables de entorno y credenciales privadas
+.env

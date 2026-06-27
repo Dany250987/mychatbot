@@ -32,6 +32,7 @@
       recordatorios: "Tus recordatorios ⏰",
       calendario: "Tu calendario 📅",
       crecimiento: "Crecimiento Personal 🌱",
+      gastos: "Control de Gastos 💰" ,
       chistes: "Chistes del día 😂"
     };
 
