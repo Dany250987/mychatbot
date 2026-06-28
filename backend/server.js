@@ -3,6 +3,7 @@ const path = require('path');
 const authRoutes = require('./routes/authRoutes'); // ← también debe ir después de express
 const expenseRoutes = require('./routes/expenseRoutes'); 
 const incomeRoutes = require('./routes/incomeRoutes');
+const taskRoutes = require('./routes/taskRoutes'); // ← también debe ir después de express
 const app = express(); // ← PRIMERO crear la app
 
 // Middleware
@@ -14,6 +15,7 @@ app.use(express.static(path.join(__dirname, '../public'))); // si public está f
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes); // Rutas para gastos
 app.use('/api/incomes', incomeRoutes);
+app.use('/api/tasks', taskRoutes);
 
 // Ruta para cargar el HTML principal (opcional)
 app.get('/', (req, res) => {

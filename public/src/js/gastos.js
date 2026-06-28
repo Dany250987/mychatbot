@@ -6,7 +6,7 @@ const userData = localStorage.getItem("userData");
 // Si no hay sesión activa, redirigimos al login
 if (!userData) {
   alert("⚠️ Sesión no iniciada. Por favor, inicia sesión.");
-  window.location.href = "login_google_chatbot.html";
+  window.location.href = "login_google.html";
 }
 
 // Convertimos el texto guardado en localStorage a un objeto JavaScript

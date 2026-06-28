@@ -1,17 +1,21 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Login con Google - DanyBot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DanyBot | Iniciar sesión</title>
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Special+Gothic&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="src/css/login.css">
-  <script src="src/js/script.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="src/css/login_google.css">
+  <script src="src/js/script.js" defer></script>
 </head>
 
 <body>
@@ -42,18 +46,39 @@
         data-logo_alignment="left">
     </div>
 
+    <div class="login-divider">
+      <span>o ingresa con tu correo</span>
+    </div>
+
     <form id="login-form" class="form">
 
       <div>
         <label for="email">Correo electrónico:</label>
-        <input type="email" id="email" name="email" placeholder="Ingresa tu correo electrónico">
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          placeholder="Ingresa tu correo electrónico"
+          autocomplete="email"
+          required
+        >
         <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" placeholder="Ingresa tu contraseña">
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          placeholder="Ingresa tu contraseña"
+          autocomplete="current-password"
+          required
+        >
       </div>
       <button type="submit">Iniciar sesión</button>
     </form>
 
-    <p class="signup-tex">No tienes una cuenta? <a class="register" href="signup.html">Crear cuenta gratis</a></p>
+    <p class="signup-text">
+      ¿No tienes una cuenta?
+      <a class="register" href="signup.html">Crear cuenta gratis</a>
+    </p>
     
 
     <!-- Contenedor oculto del chatbot -->

@@ -15,20 +15,31 @@
 
     <!-- Íconos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- Alertas modernas -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
+    <!-- CSS compartido del menú lateral -->
+    <link rel="stylesheet" href="./src/css/sidebar.css">
+
     <!-- CSS propio -->
     <link rel="stylesheet" href="./src/css/gastos.css">
-    </head>
-    <body>
+</head>
+
 
   <!-- Contenedor principal de la pantalla -->
-  <main class="expenses-container">
+<body>
 
-    <!-- Encabezado -->
+  <div class="app-layout">
+    <aside id="appSidebar"></aside>
+
+    <!-- Contenedor principal de la pantalla -->
+    <main class="expenses-container">
+
+      <!-- Encabezado -->
     <section class="expenses-header">
+
         <div class="header-content">
             <div class="header-badge">
             <i class="bi bi-stars"></i>
@@ -119,102 +130,102 @@
 
     <section class="income-panel">
 
-  <div class="income-panel-header">
-    <div>
-      <h2>
-        <i class="bi bi-piggy-bank"></i>
-        Ingresos y ahorro
-      </h2>
-      <p>Registra tu ingreso mensual y otros ingresos adicionales del mes.</p>
-    </div>
-  </div>
+      <div class="income-panel-header">
+        <div>
+          <h2>
+            <i class="bi bi-piggy-bank"></i>
+            Ingresos y ahorro
+          </h2>
+          <p>Registra tu ingreso mensual y otros ingresos adicionales del mes.</p>
+        </div>
+      </div>
 
-  <div class="income-summary-row">
-    <div class="income-summary-item">
-      <span>Ingreso mensual</span>
-      <strong id="monthlyIncome">$0</strong>
-    </div>
+      <div class="income-summary-row">
+        <div class="income-summary-item">
+          <span>Ingreso mensual</span>
+          <strong id="monthlyIncome">$0</strong>
+        </div>
 
-    <div class="income-summary-item">
-      <span>Ingresos adicionales</span>
-      <strong id="additionalIncomeTotal">$0</strong>
-    </div>
+        <div class="income-summary-item">
+          <span>Ingresos adicionales</span>
+          <strong id="additionalIncomeTotal">$0</strong>
+        </div>
 
-    <div class="income-summary-item">
-      <span>Ahorro estimado</span>
-      <strong id="monthlySavings">$0</strong>
-    </div>
-  </div>
+        <div class="income-summary-item">
+          <span>Ahorro estimado</span>
+          <strong id="monthlySavings">$0</strong>
+        </div>
+      </div>
 
-  <div class="income-forms-grid">
+      <div class="income-forms-grid">
 
-    <div class="income-form-box">
-      <h3>Ingreso principal</h3>
+        <div class="income-form-box">
+          <h3>Ingreso principal</h3>
 
-      <label for="incomeAmount">Valor del ingreso mensual</label>
-      <input 
-        type="number" 
-        id="incomeAmount" 
-        placeholder="Ej: 3000000"
-        min="0"
-      >
+          <label for="incomeAmount">Valor del ingreso mensual</label>
+          <input 
+            type="number" 
+            id="incomeAmount" 
+            placeholder="Ej: 3000000"
+            min="0"
+          >
 
-      <label for="incomeDescription">Descripción</label>
-      <input 
-        type="text" 
-        id="incomeDescription" 
-        placeholder="Ej: Salario mensual, pago de nómina..."
-      >
+          <label for="incomeDescription">Descripción</label>
+          <input 
+            type="text" 
+            id="incomeDescription" 
+            placeholder="Ej: Salario mensual, pago de nómina..."
+          >
 
-      <button type="button" id="saveIncomeButton">
-        <i class="bi bi-check-circle"></i>
-        Guardar ingreso principal
-      </button>
-    </div>
+          <button type="button" id="saveIncomeButton">
+            <i class="bi bi-check-circle"></i>
+            Guardar ingreso principal
+          </button>
+        </div>
 
-    <div class="income-form-box">
-      <h3>Ingreso adicional</h3>
+        <div class="income-form-box">
+          <h3>Ingreso adicional</h3>
 
-      <label for="additionalIncomeDate">Fecha</label>
-      <input 
-        type="date" 
-        id="additionalIncomeDate"
-      >
+          <label for="additionalIncomeDate">Fecha</label>
+          <input 
+            type="date" 
+            id="additionalIncomeDate"
+          >
 
-      <label for="additionalIncomeDescription">Descripción</label>
-      <input 
-        type="text" 
-        id="additionalIncomeDescription" 
-        placeholder="Ej: Freelance, venta, prima, bono..."
-      >
+          <label for="additionalIncomeDescription">Descripción</label>
+          <input 
+            type="text" 
+            id="additionalIncomeDescription" 
+            placeholder="Ej: Freelance, venta, prima, bono..."
+          >
 
-      <label for="additionalIncomeAmount">Valor</label>
-      <input 
-        type="number" 
-        id="additionalIncomeAmount" 
-        placeholder="Ej: 300000"
-        min="0"
-      >
+          <label for="additionalIncomeAmount">Valor</label>
+          <input 
+            type="number" 
+            id="additionalIncomeAmount" 
+            placeholder="Ej: 300000"
+            min="0"
+          >
 
-      <button type="button" id="saveAdditionalIncomeButton">
-        <i class="bi bi-plus-circle"></i>
-        Agregar ingreso adicional
-      </button>
-    </div>
+          <button type="button" id="saveAdditionalIncomeButton">
+            <i class="bi bi-plus-circle"></i>
+            Agregar ingreso adicional
+          </button>
+        </div>
 
-  </div>
+      </div>
 
-  <div class="additional-income-list">
-    <h3>Ingresos adicionales registrados</h3>
+      <div class="additional-income-list">
+        <h3>Ingresos adicionales registrados</h3>
 
-    <div id="additionalIncomesList" class="additional-incomes-list">
-      <p class="empty-additional-income">
-        No hay ingresos adicionales registrados para este mes.
-      </p>
-    </div>
-  </div>
+        <div id="additionalIncomesList" class="additional-incomes-list">
+          <p class="empty-additional-income">
+            No hay ingresos adicionales registrados para este mes.
+          </p>
+        </div>
+      </div>
 
-</section>
+    </section>
 
     <!-- Formulario para registrar gastos -->
     <section class="expenses-form-section">
@@ -368,12 +379,17 @@
       </table>
     </section>
 
-  </main>
+      </main>
+  </div>
 
-  <!-- Conectamos el JavaScript de esta pantalla -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- Librería para generar archivos Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <script src="./src/js/sidebar.js"></script>
+  <script>
+    renderSidebar("gastos");
+  </script>
+
   <script src="./src/js/gastos.js"></script>
 </body>
 </html>

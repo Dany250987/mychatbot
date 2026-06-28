@@ -1,5 +1,5 @@
 const input = document.querySelector("#phone");
-const LOGIN_PAGE = "login_google_chatbot.html";
+const LOGIN_PAGE = "login_google.html";
 
 
 window.intlTelInput(input, {

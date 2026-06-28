@@ -37,68 +37,76 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// 🔐 Registro/Login con Google
+// 🔐 Registro/Login con Googles
 router.post('/google-login', (req, res) => {
-  console.log('📩 Llamada recibida en /google-login');
-  console.log('🧠 Cuerpo recibido:', req.body);
-
   const { name, email, picture } = req.body;
 
-  console.log('🧠 Datos extraídos:', { name, email, picture });
-
-  if (!name || !email || !picture) {
-    console.error('❌ Faltan datos del usuario de Google:', req.body);
-    return res.status(400).json({ error: 'Faltan datos del usuario de Google' });
+  if (!name || !email) {
+    return res.status(400).json({
+      error: 'Faltan datos del usuario de Google'
+    });
   }
 
   const checkQuery = 'SELECT * FROM users WHERE email = ?';
+
   connection.query(checkQuery, [email], (err, results) => {
     if (err) {
       console.error('❌ Error al buscar usuario:', err);
-      return res.status(500).json({ error: 'Error en el servidor' });
+
+      return res.status(500).json({
+        error: 'Error en el servidor'
+      });
     }
 
     if (results.length > 0) {
-      console.log('✅ Usuario ya existe en la BD');
-      return res.status(200).json({
-        message: '✅ Bienvenido de nuevo (Google)',
-        user: {
-          id: results[0].id,
-          name: results[0].name,
-          email: results[0].email
-        }
-      });
-    } else {
-      console.log('🆕 Usuario nuevo, insertando en la BD');
-      const insertQuery = 'INSERT INTO users (name, email, picture) VALUES (?, ?, ?)';
-      connection.query(insertQuery, [name, email, picture], (err, result) => {
-        if (err) {
-          console.error('❌ Error al registrar con Google:', err);
-          return res.status(500).json({ error: 'Error al registrar usuario de Google' });
-        }
+      const user = results[0];
 
-        console.log('✅ Usuario registrado con Google en la BD');
-        return res.status(201).json({
-          message: '✅ Usuario creado con Google',
-          user: {
-            id: result.insertId,
-            name,
-            email,
-            picture
-          }
-        });
+      return res.status(200).json({
+        message: 'Bienvenido de nuevo',
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          picture: user.picture || picture || null
+        }
       });
     }
+
+    const insertQuery = `
+      INSERT INTO users (name, email, picture)
+      VALUES (?, ?, ?)
+    `;
+
+    connection.query(insertQuery, [name, email, picture || null], (err, result) => {
+      if (err) {
+        console.error('❌ Error al registrar usuario de Google:', err);
+
+        return res.status(500).json({
+          error: 'Error al registrar usuario de Google'
+        });
+      }
+
+      return res.status(201).json({
+        message: 'Usuario creado con Google',
+        user: {
+          id: result.insertId,
+          name,
+          email,
+          picture: picture || null
+        }
+      });
+    });
   });
 });
+
 // 🔐 Login clásico con email y contraseña
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  console.log("📨 Intento de login:", email);
-
   if (!email || !password) {
-    return res.status(400).json({ error: 'Faltan email o contraseña' });
+    return res.status(400).json({
+      error: 'Faltan email o contraseña'
+    });
   }
 
   const query = 'SELECT * FROM users WHERE email = ?';
@@ -106,35 +114,38 @@ router.post('/login', (req, res) => {
   connection.query(query, [email], async (err, results) => {
     if (err) {
       console.error('❌ Error al buscar usuario:', err);
-      return res.status(500).json({ error: 'Error del servidor' });
+
+      return res.status(500).json({
+        error: 'Error del servidor'
+      });
     }
 
     if (results.length === 0) {
-       console.warn("❌ Usuario no encontrado:", email);
-      return res.status(401).json({ error: 'Usuario no encontrado' });
+      return res.status(401).json({
+        error: 'Correo o contraseña incorrectos'
+      });
     }
 
     const user = results[0];
 
-    console.log('🧠 contraseña recibida:', password);
-    console.log('🧠 contraseña en BD:', user.password);
     const validPassword = await bcrypt.compare(password, user.password);
-    console.log("✅ Resultado de comparación:", validPassword);
+
     if (!validPassword) {
-      return res.status(401).json({ error: 'Contraseña incorrecta' });
+      return res.status(401).json({
+        error: 'Correo o contraseña incorrectos'
+      });
     }
 
-    console.log('✅ Login exitoso:', user.email);
     return res.json({
-      message: '✅ Login exitoso',
+      message: 'Login exitoso',
       user: {
         id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        picture: user.picture || null
       }
     });
   });
 });
-
 
 module.exports = router;

@@ -1502,18 +1502,7 @@ td {
    PANEL DE INGRESO Y AHORRO
 ================================ */
 
-.income-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 22px;
-  padding: 20px 24px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid var(--border);
-  box-shadow: 0 14px 35px rgba(31, 41, 55, 0.08);
-}
+
 
 .income-panel-info {
   display: flex;
@@ -1615,14 +1604,16 @@ td {
 ================================ */
 
 .income-panel {
-  display: grid;
-  gap: 22px;
-  margin-bottom: 22px;
-  padding: 26px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid var(--border);
-  box-shadow: 0 14px 35px rgba(31, 41, 55, 0.08);
+    display: grid;
+    gap: 22px;
+    margin-bottom: 22px;
+    padding: 26px;
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid var(--border);
+    box-shadow: 0 14px 35px rgba(31, 41, 55, 0.08);
+    align-content: stretch;
+    justify-content: stretch;
 }
 
 .income-panel-header h2 {

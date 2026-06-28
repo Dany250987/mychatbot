@@ -3,7 +3,8 @@ Proyecto de software avanzado que integra autenticación con Node.js, PHP y fron
 
 ## Tecnologías
 - Node.js
-- PHP
+- javascript
+- express
 - MySQL
 - HTML, CSS, JS
 
