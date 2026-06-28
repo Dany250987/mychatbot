@@ -18,6 +18,8 @@ const USER_ID = user.id;
 // Ruta base del backend para gastos.
 const API_URL = '/api/expenses';
 
+const INCOME_API_URL = '/api/incomes';
+
 // Tomamos los elementos del HTML que vamos a usar.
 const expenseForm = document.getElementById('expenseForm');
 const expenseDate = document.getElementById('expenseDate');
@@ -28,12 +30,36 @@ const source = document.getElementById('source');
 const expenseId = document.getElementById('expenseId');
 const submitExpenseButton = document.getElementById('submitExpenseButton');
 const cancelEditButton = document.getElementById('cancelEditButton');
+const voiceButton = document.getElementById('voiceButton');
+const voiceText = document.getElementById('voiceText');
+const downloadExcelButton = document.getElementById('downloadExcelButton');
+const monthlyIncome = document.getElementById('monthlyIncome');
+const monthlySavings = document.getElementById('monthlySavings');
+const incomeAmount = document.getElementById('incomeAmount');
+const incomeDescription = document.getElementById('incomeDescription');
+const saveIncomeButton = document.getElementById('saveIncomeButton');
+
+const additionalIncomeTotal = document.getElementById('additionalIncomeTotal');
+const additionalIncomeDate = document.getElementById('additionalIncomeDate');
+const additionalIncomeDescription = document.getElementById('additionalIncomeDescription');
+const additionalIncomeAmount = document.getElementById('additionalIncomeAmount');
+const saveAdditionalIncomeButton = document.getElementById('saveAdditionalIncomeButton');
+const additionalIncomesList = document.getElementById('additionalIncomesList');
+
 
 const expensesTableBody = document.getElementById('expensesTableBody');
 const monthlyTotal = document.getElementById('monthlyTotal');
 const expenseMessage = document.getElementById('expenseMessage');
+const expenseCount = document.getElementById('expenseCount');
+const highestExpense = document.getElementById('highestExpense');
 const monthFilter = document.getElementById('monthFilter');
 let currentExpenses = [];
+let filteredExpenses = [];
+let currentIncomeAmount = 0;
+let currentExpensesTotal = 0;
+let currentAdditionalIncomeTotal = 0;
+let currentAdditionalIncomes = [];
+let editingAdditionalIncomeId = null;
 
 
 // Esta función consulta los gastos desde el backend.
@@ -102,9 +128,16 @@ async function saveExpense(event) {
       return;
     }
 
-    expenseMessage.textContent = editingId
-        ? '✅ Gasto actualizado correctamente.'
-        : '✅ Gasto guardado correctamente.';
+    await Swal.fire({
+        title: editingId ? 'Gasto actualizado' : 'Gasto registrado',
+        text: editingId
+            ? 'La información del gasto fue actualizada correctamente.'
+            : 'El gasto fue guardado correctamente.',
+        icon: 'success',
+        confirmButtonColor: '#3c0000'
+        });
+
+        expenseMessage.textContent = '';
 
         resetFormMode();
 
@@ -117,17 +150,17 @@ async function saveExpense(event) {
   }
 }
 
-// Esta función filtra los gastos según el mes seleccionado.
 function applyMonthFilter() {
   const selectedMonth = monthFilter.value;
 
   if (!selectedMonth) {
-    showExpenses(currentExpenses);
-    calculateMonthlyTotal(currentExpenses);
+    filteredExpenses = currentExpenses;
+    showExpenses(filteredExpenses);
+    calculateMonthlyTotal(filteredExpenses);
     return;
   }
 
-  const filteredExpenses = currentExpenses.filter((expense) => {
+  filteredExpenses = currentExpenses.filter((expense) => {
     const expenseMonth = formatDateForInput(expense.expense_date).slice(0, 7);
     return expenseMonth === selectedMonth;
   });
@@ -144,7 +177,13 @@ function showExpenses(expenses) {
   if (expenses.length === 0) {
     expensesTableBody.innerHTML = `
         <tr>
-            <td colspan="6">No tienes gastos registrados.</td>
+            <td colspan="6">
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h3>No hay gastos para este mes</h3>
+                <p>Cuando registres un gasto, aparecerá listado en esta sección.</p>
+            </div>
+            </td>
         </tr>
         `;
     return;
@@ -154,21 +193,55 @@ function showExpenses(expenses) {
     const row = document.createElement('tr');
 
     row.innerHTML = `
-        <td>${formatDate(expense.expense_date)}</td>
-        <td>${expense.category}</td>
-        <td>${expense.description}</td>
-        <td>${formatMoney(expense.amount)}</td>
-        <td>${expense.source}</td>
-        <td>
-            <button type="button" onclick="startEditExpense(${expense.id})">
-                Editar
-            </button>
+    <td>
+        <span class="date-pill">
+        <i class="bi bi-calendar-event"></i>
+        ${formatDate(expense.expense_date)}
+        </span>
+    </td>
 
-            <button type="button" onclick="deleteExpense(${expense.id})">
-                Eliminar
-            </button>
-        </td>
-        `;
+    <td>
+        <span class="category-badge ${getCategoryClass(expense.category)}">
+        ${expense.category}
+        </span>
+    </td>
+
+    <td>
+        <strong class="expense-description">${expense.description}</strong>
+    </td>
+
+    <td>
+        <strong class="amount-cell">${formatMoney(expense.amount)}</strong>
+    </td>
+
+    <td>
+        <span class="source-badge ${getSourceClass(expense.source)}">
+        ${getSourceLabel(expense.source)}
+        </span>
+    </td>
+
+    <td>
+        <div class="action-buttons">
+        <button 
+            type="button" 
+            class="action-btn edit-btn" 
+            onclick="startEditExpense(${expense.id})"
+        >
+            <i class="bi bi-pencil-square"></i>
+            Editar
+        </button>
+
+        <button 
+            type="button" 
+            class="action-btn delete-btn" 
+            onclick="deleteExpense(${expense.id})"
+        >
+            <i class="bi bi-trash3"></i>
+            Eliminar
+        </button>
+        </div>
+    </td>
+    `;
 
     expensesTableBody.appendChild(row);
   });
@@ -178,14 +251,62 @@ function showExpenses(expenses) {
 // Esta función calcula el total de los gastos que se están mostrando.
 function calculateMonthlyTotal(expenses) {
   let total = 0;
+  let highest = 0;
 
   expenses.forEach((expense) => {
-    total += Number(expense.amount);
+    const amountValue = Number(expense.amount);
+
+    total += amountValue;
+
+    if (amountValue > highest) {
+      highest = amountValue;
+    }
   });
 
+  currentExpensesTotal = total;
+
   monthlyTotal.textContent = formatMoney(total);
+  expenseCount.textContent = expenses.length;
+  highestExpense.textContent = formatMoney(highest);
+
+  updateSavings();
 }
 
+// Esta función asigna una clase de color según la categoría del gasto.
+function getCategoryClass(category) {
+  const categoryClasses = {
+    Factura: 'badge-purple',
+    Alimentación: 'badge-green',
+    Transporte: 'badge-blue',
+    Pasajes: 'badge-cyan',
+    Salud: 'badge-red',
+    Entretenimiento: 'badge-pink',
+    Otro: 'badge-gray'
+  };
+
+  return categoryClasses[category] || 'badge-gray';
+}
+
+// Esta función muestra el nombre del origen de forma más amigable.
+function getSourceLabel(source) {
+  const labels = {
+    manual: 'Manual',
+    voice: 'Por voz'
+  };
+
+  return labels[source] || 'Manual';
+}
+
+
+// Esta función asigna una clase visual al origen del gasto.
+function getSourceClass(source) {
+  const sourceClasses = {
+    manual: 'source-manual',
+    voice: 'source-voice'
+  };
+
+  return sourceClasses[source] || 'source-manual';
+}
 
 // Esta función da formato de moneda colombiana.
 function formatMoney(value) {
@@ -260,7 +381,7 @@ function startEditExpense(id) {
   amount.value = Number(expense.amount);
   source.value = expense.source || 'manual';
 
-  submitExpenseButton.textContent = 'Actualizar gasto';
+  submitExpenseButton.innerHTML = '<i class="bi bi-check2-circle"></i> Actualizar gasto';
   cancelEditButton.style.display = 'block';
 
   expenseMessage.textContent = 'Editando gasto seleccionado.';
@@ -268,9 +389,18 @@ function startEditExpense(id) {
 
 // Esta función elimina un gasto desde la pantalla.
 async function deleteExpense(expenseId) {
-  const confirmDelete = confirm('¿Seguro que deseas eliminar este gasto?');
+  const result = await Swal.fire({
+    title: '¿Eliminar gasto?',
+    text: 'Esta acción no se puede deshacer.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#3c0000',
+    cancelButtonColor: '#6b7280'
+  });
 
-  if (!confirmDelete) {
+  if (!result.isConfirmed) {
     return;
   }
 
@@ -282,17 +412,33 @@ async function deleteExpense(expenseId) {
     const data = await response.json();
 
     if (!response.ok) {
-      expenseMessage.textContent = data.mensaje || 'No se pudo eliminar el gasto.';
+      Swal.fire({
+        title: 'No se pudo eliminar',
+        text: data.mensaje || 'Ocurrió un error.',
+        icon: 'error',
+        confirmButtonColor: '#3c0000'
+      });
       return;
     }
 
-    expenseMessage.textContent = '✅ Gasto eliminado correctamente.';
+    await Swal.fire({
+      title: 'Gasto eliminado',
+      text: 'El gasto fue eliminado correctamente.',
+      icon: 'success',
+      confirmButtonColor: '#3c0000'
+    });
 
     loadExpenses();
 
   } catch (error) {
     console.error('Error al eliminar gasto:', error);
-    expenseMessage.textContent = 'Ocurrió un error al eliminar el gasto.';
+
+    Swal.fire({
+      title: 'Error',
+      text: 'Ocurrió un error al eliminar el gasto.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
   }
 }
 
@@ -303,18 +449,900 @@ function resetFormMode() {
   expenseId.value = '';
   source.value = 'manual';
 
-  submitExpenseButton.textContent = 'Guardar gasto';
+  submitExpenseButton.innerHTML = '<i class="bi bi-save2"></i> Guardar gasto';
   cancelEditButton.style.display = 'none';
 
   setTodayDate();
 }
 
+function startVoiceExpense() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    Swal.fire({
+      title: 'Reconocimiento de voz no disponible',
+      text: 'Tu navegador no permite usar dictado por voz en esta página. Prueba con Chrome.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = 'es-CO';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  voiceButton.classList.add('listening');
+  voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Escuchando...';
+
+  recognition.start();
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript.toLowerCase();
+
+    voiceText.textContent = `Texto detectado: "${transcript}"`;
+
+    fillExpenseFromVoice(transcript);
+  };
+
+  recognition.onerror = () => {
+    Swal.fire({
+      title: 'No se pudo escuchar',
+      text: 'Revisa el permiso del micrófono o intenta hablar más cerca del dispositivo.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
+  };
+
+  recognition.onend = () => {
+    voiceButton.classList.remove('listening');
+    voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+  };
+}
+
+function fillExpenseFromVoice(text) {
+  const detectedAmount = extractAmount(text);
+  const detectedCategory = extractCategory(text);
+  const detectedDescription = extractDescription(text);
+  const detectedDate = extractDate(text);
+
+  if (detectedAmount) {
+    amount.value = detectedAmount;
+  }
+
+  if (detectedCategory) {
+    category.value = detectedCategory;
+  }
+
+  if (detectedDescription) {
+    description.value = detectedDescription;
+  }
+
+  expenseDate.value = detectedDate || getLocalDate();
+  source.value = 'voice';
+
+  Swal.fire({
+    title: 'Gasto detectado',
+    text: 'Revisa la información antes de guardarla.',
+    icon: 'info',
+    confirmButtonColor: '#3c0000'
+  });
+}
+
+function extractAmount(text) {
+  let cleanedText = text.toLowerCase();
+
+  // Caso 1: números separados por espacios, ejemplo: "272 000"
+  const spacedNumberMatch = cleanedText.match(/\b\d{1,3}(?:\s+\d{3})+\b/);
+
+  if (spacedNumberMatch) {
+    return Number(spacedNumberMatch[0].replace(/\s+/g, ''));
+  }
+
+  // Caso 2: números con punto o coma, ejemplo: "272.000" o "272,000"
+  cleanedText = cleanedText.replace(/\./g, '');
+  cleanedText = cleanedText.replace(/,/g, '');
+
+  // Caso 3: números con la palabra mil, ejemplo: "272 mil"
+  const milMatch = cleanedText.match(/\b(\d+)\s*mil\b/);
+
+  if (milMatch) {
+    return Number(milMatch[1]) * 1000;
+  }
+
+  // Caso 4: número normal, ejemplo: "12000"
+  const numberMatch = cleanedText.match(/\b\d+\b/);
+
+  if (numberMatch) {
+    return Number(numberMatch[0]);
+  }
+
+  return '';
+}
+
+
+function extractCategory(text) {
+  if (text.includes('factura') || text.includes('servicio') || text.includes('recibo')) {
+    return 'Factura';
+  }
+
+  if (text.includes('comida') || text.includes('almuerzo') || text.includes('desayuno') || text.includes('mercado') || text.includes('alimentos')) {
+    return 'Alimentación';
+  }
+
+  if (text.includes('transporte') || text.includes('taxi') || text.includes('uber')) {
+    return 'Transporte';
+  }
+
+  if (text.includes('pasaje') || text.includes('pasajes') || text.includes('tu llave') || text.includes('bus') || text.includes('transmilenio')) {
+    return 'Pasajes';
+  }
+
+  if (text.includes('salud') || text.includes('medicina') || text.includes('doctor') || text.includes('cita médica')) {
+    return 'Salud';
+  }
+
+  if (text.includes('cine') || text.includes('salida') || text.includes('entretenimiento')) {
+    return 'Entretenimiento';
+  }
+
+  return 'Otro';
+}
+
+
+function extractDescription(text) {
+  let descriptionText = text;
+
+  descriptionText = descriptionText.replace('agrega', '');
+  descriptionText = descriptionText.replace('añade', '');
+  descriptionText = descriptionText.replace('registra', '');
+  descriptionText = descriptionText.replace('un gasto', '');
+  descriptionText = descriptionText.replace('gasto', '');
+  descriptionText = descriptionText.replace('por valor de', '');
+  descriptionText = descriptionText.replace('por', '');
+  descriptionText = descriptionText.replace(/\d+/g, '');
+
+  return descriptionText.trim() || 'Gasto registrado por voz';
+}
+
+
+function extractDate(text) {
+  if (text.includes('hoy')) {
+    return getLocalDate();
+  }
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (text.includes('ayer')) {
+    const year = yesterday.getFullYear();
+    const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+    const day = String(yesterday.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  return getLocalDate();
+}
+
+function downloadExpensesExcel() {
+  const selectedMonth = monthFilter.value || getLocalMonth();
+
+  const expenses = filteredExpenses || [];
+  const additionalIncomes = currentAdditionalIncomes || [];
+
+  const totalExpenses = expenses.reduce((sum, expense) => {
+    return sum + Number(expense.amount);
+  }, 0);
+
+  const totalAdditionalIncomes = additionalIncomes.reduce((sum, income) => {
+    return sum + Number(income.amount);
+  }, 0);
+
+  const savings = currentIncomeAmount + totalAdditionalIncomes - totalExpenses;
+
+  if (
+    currentIncomeAmount === 0 &&
+    totalAdditionalIncomes === 0 &&
+    totalExpenses === 0
+  ) {
+    Swal.fire({
+      title: 'Sin datos para exportar',
+      text: 'No hay ingresos ni gastos registrados para el mes seleccionado.',
+      icon: 'info',
+      confirmButtonColor: '#3c0000'
+    });
+
+    return;
+  }
+
+  const workbook = XLSX.utils.book_new();
+
+  const moneyFormat = '"$"#,##0';
+
+  const styles = {
+    title: {
+      font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 16 },
+      fill: { fgColor: { rgb: '463CEC' } },
+      alignment: { horizontal: 'center', vertical: 'center' }
+    },
+    header: {
+      font: { bold: true, color: { rgb: 'FFFFFF' } },
+      fill: { fgColor: { rgb: '463CEC' } },
+      alignment: { horizontal: 'center', vertical: 'center' },
+      border: {
+        top: { style: 'thin', color: { rgb: 'D1D5DB' } },
+        bottom: { style: 'thin', color: { rgb: 'D1D5DB' } },
+        left: { style: 'thin', color: { rgb: 'D1D5DB' } },
+        right: { style: 'thin', color: { rgb: 'D1D5DB' } }
+      }
+    },
+    label: {
+      font: { bold: true, color: { rgb: '111827' } },
+      fill: { fgColor: { rgb: 'EEF2FF' } },
+      border: {
+        top: { style: 'thin', color: { rgb: 'D1D5DB' } },
+        bottom: { style: 'thin', color: { rgb: 'D1D5DB' } },
+        left: { style: 'thin', color: { rgb: 'D1D5DB' } },
+        right: { style: 'thin', color: { rgb: 'D1D5DB' } }
+      }
+    },
+    normal: {
+      alignment: { vertical: 'center' },
+      border: {
+        top: { style: 'thin', color: { rgb: 'E5E7EB' } },
+        bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
+        left: { style: 'thin', color: { rgb: 'E5E7EB' } },
+        right: { style: 'thin', color: { rgb: 'E5E7EB' } }
+      }
+    },
+    money: {
+      numFmt: moneyFormat,
+      alignment: { horizontal: 'right', vertical: 'center' },
+      border: {
+        top: { style: 'thin', color: { rgb: 'E5E7EB' } },
+        bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
+        left: { style: 'thin', color: { rgb: 'E5E7EB' } },
+        right: { style: 'thin', color: { rgb: 'E5E7EB' } }
+      }
+    },
+    total: {
+      font: { bold: true, color: { rgb: '111827' } },
+      fill: { fgColor: { rgb: 'DBEAFE' } },
+      numFmt: moneyFormat,
+      border: {
+        top: { style: 'thin', color: { rgb: '93C5FD' } },
+        bottom: { style: 'thin', color: { rgb: '93C5FD' } },
+        left: { style: 'thin', color: { rgb: '93C5FD' } },
+        right: { style: 'thin', color: { rgb: '93C5FD' } }
+      }
+    },
+    positive: {
+      font: { bold: true, color: { rgb: '166534' } },
+      fill: { fgColor: { rgb: 'DCFCE7' } },
+      numFmt: moneyFormat
+    },
+    negative: {
+      font: { bold: true, color: { rgb: '991B1B' } },
+      fill: { fgColor: { rgb: 'FEE2E2' } },
+      numFmt: moneyFormat
+    }
+  };
+
+  function applyStyle(worksheet, cellAddress, style) {
+    if (worksheet[cellAddress]) {
+      worksheet[cellAddress].s = style;
+    }
+  }
+
+  function applyTableStyle(worksheet, moneyColumns = []) {
+    if (!worksheet['!ref']) return;
+
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+
+    for (let row = range.s.r; row <= range.e.r; row++) {
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+
+        if (!worksheet[cellAddress]) continue;
+
+        worksheet[cellAddress].s = styles.normal;
+
+        const columnLetter = XLSX.utils.encode_col(col);
+
+        if (moneyColumns.includes(columnLetter)) {
+          worksheet[cellAddress].s = styles.money;
+        }
+      }
+    }
+  }
+
+  function applyHeaderStyle(worksheet, rowNumber, startColumn, endColumn) {
+    for (let col = startColumn; col <= endColumn; col++) {
+      const cellAddress = XLSX.utils.encode_cell({
+        r: rowNumber - 1,
+        c: col
+      });
+
+      applyStyle(worksheet, cellAddress, styles.header);
+    }
+  }
+
+  // Hoja 1: Resumen
+  const summaryData = [
+    ['REPORTE MENSUAL DANYBOT', ''],
+    [],
+    ['Mes', selectedMonth],
+    ['Ingreso mensual principal', currentIncomeAmount],
+    ['Descripción ingreso mensual', incomeDescription.value || 'Sin descripción'],
+    ['Total ingresos adicionales', totalAdditionalIncomes],
+    ['Total gastos', totalExpenses],
+    ['Ahorro final', savings]
+  ];
+
+  const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+
+  summaryWorksheet['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }
+  ];
+
+  summaryWorksheet['!cols'] = [
+    { wch: 35 },
+    { wch: 30 }
+  ];
+
+  applyStyle(summaryWorksheet, 'A1', styles.title);
+
+  ['A3', 'A4', 'A5', 'A6', 'A7', 'A8'].forEach((cell) => {
+    applyStyle(summaryWorksheet, cell, styles.label);
+  });
+
+  ['B3', 'B5'].forEach((cell) => {
+    applyStyle(summaryWorksheet, cell, styles.normal);
+  });
+
+  ['B4', 'B6', 'B7'].forEach((cell) => {
+    applyStyle(summaryWorksheet, cell, styles.money);
+  });
+
+  applyStyle(summaryWorksheet, 'B8', savings >= 0 ? styles.positive : styles.negative);
+
+  XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Resumen');
+
+  // Hoja 2: Ingresos adicionales
+  const additionalIncomeRows = [
+    ['Fecha', 'Descripción', 'Valor', 'Origen']
+  ];
+
+  if (additionalIncomes.length > 0) {
+    additionalIncomes.forEach((income) => {
+      additionalIncomeRows.push([
+        formatDate(income.income_date),
+        income.description,
+        Number(income.amount),
+        getSourceLabel(income.source)
+      ]);
+    });
+
+    additionalIncomeRows.push([]);
+    additionalIncomeRows.push([
+      '',
+      'TOTAL INGRESOS ADICIONALES',
+      totalAdditionalIncomes,
+      ''
+    ]);
+  } else {
+    additionalIncomeRows.push([
+      '',
+      'No hay ingresos adicionales registrados para este mes',
+      '',
+      ''
+    ]);
+  }
+
+  const additionalIncomeWorksheet = XLSX.utils.aoa_to_sheet(additionalIncomeRows);
+
+  additionalIncomeWorksheet['!cols'] = [
+    { wch: 14 },
+    { wch: 45 },
+    { wch: 16 },
+    { wch: 14 }
+  ];
+
+  additionalIncomeWorksheet['!autofilter'] = {
+    ref: 'A1:D1'
+  };
+
+  applyTableStyle(additionalIncomeWorksheet, ['C']);
+  applyHeaderStyle(additionalIncomeWorksheet, 1, 0, 3);
+
+  if (additionalIncomes.length > 0) {
+    const totalRowNumber = additionalIncomeRows.length;
+    applyStyle(additionalIncomeWorksheet, `B${totalRowNumber}`, styles.total);
+    applyStyle(additionalIncomeWorksheet, `C${totalRowNumber}`, styles.total);
+  }
+
+  XLSX.utils.book_append_sheet(workbook, additionalIncomeWorksheet, 'Ingresos adicionales');
+
+  // Hoja 3: Gastos
+  const expenseRows = [
+    ['Fecha', 'Categoría', 'Descripción', 'Valor', 'Origen', 'Fecha de registro']
+  ];
+
+  if (expenses.length > 0) {
+    expenses.forEach((expense) => {
+      expenseRows.push([
+        formatDate(expense.expense_date),
+        expense.category,
+        expense.description,
+        Number(expense.amount),
+        getSourceLabel(expense.source),
+        formatDate(expense.created_at)
+      ]);
+    });
+
+    expenseRows.push([]);
+    expenseRows.push([
+      '',
+      '',
+      'TOTAL GASTOS DEL MES',
+      totalExpenses,
+      '',
+      ''
+    ]);
+  } else {
+    expenseRows.push([
+      '',
+      '',
+      'No hay gastos registrados para este mes',
+      '',
+      '',
+      ''
+    ]);
+  }
+
+  const expensesWorksheet = XLSX.utils.aoa_to_sheet(expenseRows);
+
+  expensesWorksheet['!cols'] = [
+    { wch: 14 },
+    { wch: 18 },
+    { wch: 45 },
+    { wch: 16 },
+    { wch: 14 },
+    { wch: 18 }
+  ];
+
+  expensesWorksheet['!autofilter'] = {
+    ref: 'A1:F1'
+  };
+
+  applyTableStyle(expensesWorksheet, ['D']);
+  applyHeaderStyle(expensesWorksheet, 1, 0, 5);
+
+  if (expenses.length > 0) {
+    const totalRowNumber = expenseRows.length;
+    applyStyle(expensesWorksheet, `C${totalRowNumber}`, styles.total);
+    applyStyle(expensesWorksheet, `D${totalRowNumber}`, styles.total);
+  }
+
+  XLSX.utils.book_append_sheet(workbook, expensesWorksheet, 'Gastos');
+
+  const fileName = `reporte-mensual-${selectedMonth}.xlsx`;
+
+  XLSX.writeFile(workbook, fileName);
+
+  Swal.fire({
+    title: 'Excel generado',
+    text: 'El reporte mensual fue descargado correctamente.',
+    icon: 'success',
+    confirmButtonColor: '#3c0000'
+  });
+}
+
+async function loadMonthlyIncome() {
+  const selectedMonth = monthFilter.value || getLocalMonth();
+
+  try {
+    const response = await fetch(`${INCOME_API_URL}?user_id=${USER_ID}&month=${selectedMonth}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      currentIncomeAmount = 0;
+      updateIncomePanel();
+      return;
+    }
+
+    if (!data.income) {
+        currentIncomeAmount = 0;
+        incomeAmount.value = '';
+        incomeDescription.value = '';
+        updateIncomePanel();
+        return;
+    }
+
+    currentIncomeAmount = Number(data.income.amount);
+    incomeAmount.value = currentIncomeAmount;
+    incomeDescription.value = data.income.description || '';
+
+    updateIncomePanel();
+
+  } catch (error) {
+    console.error('Error al consultar ingreso mensual:', error);
+  }
+}
+
+
+async function saveMonthlyIncome() {
+  const selectedMonth = monthFilter.value || getLocalMonth();
+  const amountValue = Number(incomeAmount.value);
+
+  if (!amountValue || amountValue < 0) {
+    Swal.fire({
+      title: 'Ingreso inválido',
+      text: 'Ingresa un valor válido para el ingreso mensual.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+    return;
+  }
+
+  try {
+    const response = await fetch(INCOME_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_id: USER_ID,
+        month_key: selectedMonth,
+        amount: amountValue,
+        description: incomeDescription.value || 'Ingreso mensual principal'
+    })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      Swal.fire({
+        title: 'No se pudo guardar',
+        text: data.mensaje || 'Ocurrió un error al guardar el ingreso.',
+        icon: 'error',
+        confirmButtonColor: '#3c0000'
+      });
+      return;
+    }
+
+    currentIncomeAmount = amountValue;
+    updateIncomePanel();
+
+    Swal.fire({
+      title: 'Ingreso guardado',
+      text: 'El ingreso mensual fue guardado correctamente.',
+      icon: 'success',
+      confirmButtonColor: '#3c0000'
+    });
+
+  } catch (error) {
+    console.error('Error al guardar ingreso:', error);
+
+    Swal.fire({
+      title: 'Error',
+      text: 'Ocurrió un error al guardar el ingreso mensual.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
+  }
+}
+
+
+function updateIncomePanel() {
+  monthlyIncome.textContent = formatMoney(currentIncomeAmount);
+  additionalIncomeTotal.textContent = formatMoney(currentAdditionalIncomeTotal);
+  updateSavings();
+}
+
+
+function updateSavings() {
+  const savings = currentIncomeAmount + currentAdditionalIncomeTotal - currentExpensesTotal;
+
+  monthlySavings.textContent = formatMoney(savings);
+
+  monthlySavings.classList.remove('positive-saving', 'negative-saving');
+
+  if (savings >= 0) {
+    monthlySavings.classList.add('positive-saving');
+  } else {
+    monthlySavings.classList.add('negative-saving');
+  }
+}
+
+async function loadAdditionalIncomes() {
+  const selectedMonth = monthFilter.value || getLocalMonth();
+
+  try {
+    const response = await fetch(`${INCOME_API_URL}/additional?user_id=${USER_ID}&month=${selectedMonth}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      currentAdditionalIncomes = [];
+      currentAdditionalIncomeTotal = 0;
+      renderAdditionalIncomes();
+      updateIncomePanel();
+      return;
+    }
+
+    currentAdditionalIncomes = data.additionalIncomes || [];
+
+    currentAdditionalIncomeTotal = currentAdditionalIncomes.reduce((total, income) => {
+      return total + Number(income.amount);
+    }, 0);
+
+    renderAdditionalIncomes();
+    updateIncomePanel();
+
+  } catch (error) {
+    console.error('Error al consultar ingresos adicionales:', error);
+  }
+}
+
+
+async function saveAdditionalIncome() {
+  const selectedMonth = monthFilter.value || getLocalMonth();
+
+  const additionalIncomeData = {
+    user_id: USER_ID,
+    month_key: selectedMonth,
+    income_date: additionalIncomeDate.value || getLocalDate(),
+    description: additionalIncomeDescription.value.trim(),
+    amount: Number(additionalIncomeAmount.value),
+    source: 'manual'
+  };
+
+  if (
+    !additionalIncomeData.income_date ||
+    !additionalIncomeData.description ||
+    !additionalIncomeData.amount
+  ) {
+    Swal.fire({
+      title: 'Datos incompletos',
+      text: 'Completa la fecha, descripción y valor del ingreso adicional.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+    return;
+  }
+
+  const isEditing = editingAdditionalIncomeId !== null;
+
+  const url = isEditing
+    ? `${INCOME_API_URL}/additional/${editingAdditionalIncomeId}`
+    : `${INCOME_API_URL}/additional`;
+
+  const method = isEditing ? 'PUT' : 'POST';
+
+
+  try {
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(additionalIncomeData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      Swal.fire({
+        title: isEditing ? 'No se pudo actualizar' : 'No se pudo guardar',
+        text: data.mensaje || 'Ocurrió un error al procesar el ingreso adicional.',
+        icon: 'error',
+        confirmButtonColor: '#3c0000'
+      });
+      return;
+    }
+
+    additionalIncomeDescription.value = '';
+    additionalIncomeAmount.value = '';
+    additionalIncomeDate.value = getLocalDate();
+
+    editingAdditionalIncomeId = null;
+    saveAdditionalIncomeButton.innerHTML = `
+     <i class="bi bi-plus-circle"></i>
+     Agregar ingreso adicional
+    `;
+
+    await loadAdditionalIncomes();
+
+    Swal.fire({
+      title: isEditing ? 'Ingreso adicional actualizado' : 'Ingreso adicional guardado',
+      text: isEditing
+        ? 'El ingreso adicional fue actualizado correctamente.'
+        : 'El ingreso adicional fue registrado correctamente.',
+      icon: 'success',
+      confirmButtonColor: '#3c0000'
+    });
+
+  } catch (error) {
+    console.error('Error al procesar ingreso adicional:', error);
+
+    Swal.fire({
+      title: 'Error',
+      text: 'Ocurrió un error al procesar el ingreso adicional.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
+  }
+}
+
+async function deleteAdditionalIncome(additionalIncomeId) {
+  const result = await Swal.fire({
+    title: '¿Eliminar ingreso adicional?',
+    text: 'Esta acción no se puede deshacer.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#3c0000',
+    cancelButtonColor: '#6b7280'
+  });
+
+  if (!result.isConfirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${INCOME_API_URL}/additional/${additionalIncomeId}?user_id=${USER_ID}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      Swal.fire({
+        title: 'No se pudo eliminar',
+        text: data.mensaje || 'Ocurrió un error al eliminar el ingreso adicional.',
+        icon: 'error',
+        confirmButtonColor: '#3c0000'
+      });
+      return;
+    }
+
+    if (editingAdditionalIncomeId === additionalIncomeId) {
+      editingAdditionalIncomeId = null;
+
+      additionalIncomeDescription.value = '';
+      additionalIncomeAmount.value = '';
+      additionalIncomeDate.value = getLocalDate();
+
+      saveAdditionalIncomeButton.innerHTML = `
+        <i class="bi bi-plus-circle"></i>
+        Agregar ingreso adicional
+      `;
+    }
+
+    await loadAdditionalIncomes();
+
+    Swal.fire({
+      title: 'Ingreso adicional eliminado',
+      text: 'El ingreso adicional fue eliminado correctamente.',
+      icon: 'success',
+      confirmButtonColor: '#3c0000'
+    });
+
+  } catch (error) {
+    console.error('Error al eliminar ingreso adicional:', error);
+
+    Swal.fire({
+      title: 'Error',
+      text: 'Ocurrió un error al eliminar el ingreso adicional.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
+  }
+}
+
+
+function renderAdditionalIncomes() {
+  if (!currentAdditionalIncomes || currentAdditionalIncomes.length === 0) {
+    additionalIncomesList.innerHTML = `
+      <p class="empty-additional-income">
+        No hay ingresos adicionales registrados para este mes.
+      </p>
+    `;
+    return;
+  }
+
+  additionalIncomesList.innerHTML = '';
+
+  currentAdditionalIncomes.forEach((income) => {
+    const card = document.createElement('div');
+
+    card.classList.add('additional-income-card');
+
+    card.innerHTML = `
+      <div class="additional-income-card-info">
+        <strong>${income.description}</strong>
+        <span>${formatDate(income.income_date)} · ${getSourceLabel(income.source)}</span>
+      </div>
+
+      <div class="additional-income-card-amount">
+        ${formatMoney(income.amount)}
+      </div>
+
+      <div class="additional-income-card-actions">
+        <button 
+          type="button" 
+          class="edit-additional-income-btn"
+          data-id="${income.id}"
+        >
+          <i class="bi bi-pencil"></i>
+        </button>
+
+        <button 
+          type="button" 
+          class="delete-additional-income-btn"
+          data-id="${income.id}"
+        >
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    `;
+
+    const editButton = card.querySelector('.edit-additional-income-btn');
+    const deleteButton = card.querySelector('.delete-additional-income-btn');
+
+    editButton.addEventListener('click', () => {
+        editingAdditionalIncomeId = income.id;
+
+        additionalIncomeDate.value = income.income_date.split('T')[0];
+        additionalIncomeDescription.value = income.description;
+        additionalIncomeAmount.value = income.amount;
+
+        saveAdditionalIncomeButton.innerHTML = `
+         <i class="bi bi-check-circle"></i>
+         Actualizar ingreso
+        `;
+
+        Swal.fire({
+            icon: 'info',
+            title: 'Editar ingreso adicional',
+            text: 'Los datos se cargaron en el formulario. Modifica la información y presiona Actualizar ingreso.',
+            confirmButtonText: 'Entendido'
+        });
+    });
+
+    deleteButton.addEventListener('click', () => {
+      deleteAdditionalIncome(income.id);
+    });
+
+    additionalIncomesList.appendChild(card);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   setTodayDate();
   setCurrentMonthFilter();
+
   loadExpenses();
+  loadMonthlyIncome();
+  loadAdditionalIncomes();
+
+  additionalIncomeDate.value = getLocalDate();
 
   expenseForm.addEventListener('submit', saveExpense);
   cancelEditButton.addEventListener('click', resetFormMode);
-  monthFilter.addEventListener('change', applyMonthFilter);
+
+  monthFilter.addEventListener('change', () => {
+    applyMonthFilter();
+    loadMonthlyIncome();
+    loadAdditionalIncomes();
+  });
+
+  voiceButton.addEventListener('click', startVoiceExpense);
+  downloadExcelButton.addEventListener('click', downloadExpensesExcel);
+  saveIncomeButton.addEventListener('click', saveMonthlyIncome);
+  saveAdditionalIncomeButton.addEventListener('click', saveAdditionalIncome);
 });

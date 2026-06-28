@@ -8,93 +8,347 @@
 
   <title>Mis gastos</title>
 
-  <!-- Conectamos el CSS de esta pantalla -->
-  <link rel="stylesheet" href="./src/css/gastos.css">
-</head>
-<body>
+    <!-- Fuente moderna -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Íconos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Alertas modernas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- CSS propio -->
+    <link rel="stylesheet" href="./src/css/gastos.css">
+    </head>
+    <body>
 
   <!-- Contenedor principal de la pantalla -->
   <main class="expenses-container">
 
     <!-- Encabezado -->
     <section class="expenses-header">
-      <h1>Mis gastos</h1>
-      <p>Registra tus facturas, gastos diarios y pagos del mes.</p>
+        <div class="header-content">
+            <div class="header-badge">
+            <i class="bi bi-stars"></i>
+            Control financiero personal
+            </div>
 
-      <!-- Botón para volver al dashboard -->
-      <a href="./dashboard.html" class="back-link">← Volver al inicio</a>
+            <h1>
+            Organiza tus gastos de forma simple
+            </h1>
+
+            <p>
+            Registra facturas, pagos diarios y compras del mes para visualizar mejor en qué estás gastando tu dinero.
+            </p>
+
+            <div class="header-actions">
+            <a href="./dashboard.html" class="back-link">
+                <i class="bi bi-arrow-left-circle"></i>
+                Volver al inicio
+            </a>
+
+            <a href="#expenseForm" class="primary-header-link">
+                <i class="bi bi-plus-circle"></i>
+                Registrar gasto
+            </a>
+            </div>
+        </div>
+
+        <div class="header-visual">
+            <div class="floating-card card-one">
+            <i class="bi bi-receipt"></i>
+            <div>
+                <span>Facturas</span>
+                <strong>Servicios y pagos</strong>
+            </div>
+            </div>
+
+            <div class="floating-card card-two">
+            <i class="bi bi-cash-coin"></i>
+            <div>
+                <span>Gastos diarios</span>
+                <strong>Control mensual</strong>
+            </div>
+            </div>
+
+            <div class="header-orb">
+            <i class="bi bi-wallet2"></i>
+            </div>
+        </div>
     </section>
 
     <!-- Resumen mensual -->
-    <section class="expenses-summary">
-      <h2>Total gastado este mes</h2>
-      <p id="monthlyTotal">$0</p>
+    <section class="expenses-summary-grid">
+
+        <article class="summary-card main-summary">
+            <div class="summary-icon">
+            <i class="bi bi-wallet2"></i>
+            </div>
+
+            <div>
+            <span>Total del mes</span>
+            <p id="monthlyTotal">$0</p>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <div class="summary-icon soft-blue">
+            <i class="bi bi-receipt-cutoff"></i>
+            </div>
+
+            <div>
+            <span>Gastos registrados</span>
+            <p id="expenseCount">0</p>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <div class="summary-icon soft-pink">
+            <i class="bi bi-arrow-up-circle"></i>
+            </div>
+
+            <div>
+            <span>Gasto más alto</span>
+            <p id="highestExpense">$0</p>
+            </div>
+        </article>
+
     </section>
+
+    <section class="income-panel">
+
+  <div class="income-panel-header">
+    <div>
+      <h2>
+        <i class="bi bi-piggy-bank"></i>
+        Ingresos y ahorro
+      </h2>
+      <p>Registra tu ingreso mensual y otros ingresos adicionales del mes.</p>
+    </div>
+  </div>
+
+  <div class="income-summary-row">
+    <div class="income-summary-item">
+      <span>Ingreso mensual</span>
+      <strong id="monthlyIncome">$0</strong>
+    </div>
+
+    <div class="income-summary-item">
+      <span>Ingresos adicionales</span>
+      <strong id="additionalIncomeTotal">$0</strong>
+    </div>
+
+    <div class="income-summary-item">
+      <span>Ahorro estimado</span>
+      <strong id="monthlySavings">$0</strong>
+    </div>
+  </div>
+
+  <div class="income-forms-grid">
+
+    <div class="income-form-box">
+      <h3>Ingreso principal</h3>
+
+      <label for="incomeAmount">Valor del ingreso mensual</label>
+      <input 
+        type="number" 
+        id="incomeAmount" 
+        placeholder="Ej: 3000000"
+        min="0"
+      >
+
+      <label for="incomeDescription">Descripción</label>
+      <input 
+        type="text" 
+        id="incomeDescription" 
+        placeholder="Ej: Salario mensual, pago de nómina..."
+      >
+
+      <button type="button" id="saveIncomeButton">
+        <i class="bi bi-check-circle"></i>
+        Guardar ingreso principal
+      </button>
+    </div>
+
+    <div class="income-form-box">
+      <h3>Ingreso adicional</h3>
+
+      <label for="additionalIncomeDate">Fecha</label>
+      <input 
+        type="date" 
+        id="additionalIncomeDate"
+      >
+
+      <label for="additionalIncomeDescription">Descripción</label>
+      <input 
+        type="text" 
+        id="additionalIncomeDescription" 
+        placeholder="Ej: Freelance, venta, prima, bono..."
+      >
+
+      <label for="additionalIncomeAmount">Valor</label>
+      <input 
+        type="number" 
+        id="additionalIncomeAmount" 
+        placeholder="Ej: 300000"
+        min="0"
+      >
+
+      <button type="button" id="saveAdditionalIncomeButton">
+        <i class="bi bi-plus-circle"></i>
+        Agregar ingreso adicional
+      </button>
+    </div>
+
+  </div>
+
+  <div class="additional-income-list">
+    <h3>Ingresos adicionales registrados</h3>
+
+    <div id="additionalIncomesList" class="additional-incomes-list">
+      <p class="empty-additional-income">
+        No hay ingresos adicionales registrados para este mes.
+      </p>
+    </div>
+  </div>
+
+</section>
 
     <!-- Formulario para registrar gastos -->
     <section class="expenses-form-section">
-      <h2>Registrar gasto</h2>
+      <h2><i class="bi bi-plus-circle"></i> Registrar gasto</h2>
 
-      <form id="expenseForm">
+      <form id="expenseForm" class="modern-expense-form">
 
-        <label for="expenseDate">Fecha del gasto</label>
-        <input type="date" id="expenseDate" required>
+        <div class="form-field">
+            <label for="expenseDate">
+            <i class="bi bi-calendar-check"></i>
+            Fecha del gasto
+            </label>
 
-        <label for="category">Categoría</label>
-        <select id="category" required>
-          <option value="">Selecciona una categoría</option>
-          <option value="Factura">Factura</option>
-          <option value="Alimentación">Alimentación</option>
-          <option value="Transporte">Transporte</option>
-          <option value="Pasajes">Pasajes</option>
-          <option value="Salud">Salud</option>
-          <option value="Entretenimiento">Entretenimiento</option>
-          <option value="Otro">Otro</option>
-        </select>
+            <div class="input-shell">
+            <i class="bi bi-calendar3"></i>
+            <input type="date" id="expenseDate" required>
+            </div>
+        </div>
 
-        <label for="description">Descripción</label>
-        <input 
-          type="text" 
-          id="description" 
-          placeholder="Ej: VANTI-GAS, CHAT-GPT, almuerzo..." 
-          required
-        >
+        <div class="form-field">
+            <label for="category">
+            <i class="bi bi-tags"></i>
+            Categoría
+            </label>
 
-        <label for="amount">Valor</label>
-        <input 
-          type="number" 
-          id="amount" 
-          placeholder="Ej: 51000" 
-          min="1" 
-          required
-        >
+            <div class="input-shell">
+            <i class="bi bi-grid"></i>
+            <select id="category" required>
+                <option value="">Selecciona una categoría</option>
+                <option value="Factura">Factura</option>
+                <option value="Alimentación">Alimentación</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Pasajes">Pasajes</option>
+                <option value="Salud">Salud</option>
+                <option value="Entretenimiento">Entretenimiento</option>
+                <option value="Prestamos">Prestamos</option>
+                <option value="Otro">Otro</option>
+            </select>
+            </div>
+        </div>
 
-        <!-- Por ahora será manual. Después agregamos voz -->
+        <div class="form-field full-field">
+            <label for="description">
+            <i class="bi bi-card-text"></i>
+            Descripción
+            </label>
+
+            <div class="input-shell">
+            <i class="bi bi-pencil"></i>
+            <input 
+                type="text" 
+                id="description" 
+                placeholder="Ej: Pago de servicio público, compra de alimentos, transporte diario..." 
+                required
+            >
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label for="amount">
+            <i class="bi bi-currency-dollar"></i>
+            Valor
+            </label>
+
+            <div class="input-shell">
+            <i class="bi bi-cash-stack"></i>
+            <input 
+                type="number" 
+                id="amount" 
+                placeholder="Ej: 51000" 
+                min="1" 
+                required
+            >
+            </div>
+        </div>
+
         <input type="hidden" id="source" value="manual">
-
         <input type="hidden" id="expenseId">
 
-        <button type="submit" id="submitExpenseButton">Guardar gasto</button>
-        <button type="button" id="cancelEditButton" style="display: none;">
-            Cancelar edición
-        </button>
-      </form>
+        <div class="voice-box full-field">
+            <button type="button" id="voiceButton" class="voice-button">
+                <i class="bi bi-mic-fill"></i>
+                Dictar gasto por voz
+            </button>
+
+            <p id="voiceText" class="voice-text">
+                Puedes decir algo como: “Agrega un gasto de 12000 en pasajes por recarga de tarjeta tu llave”.
+            </p>
+            </div>
+
+            <div class="form-actions full-field">
+            <button type="submit" id="submitExpenseButton">
+                <i class="bi bi-save2"></i> Guardar gasto
+            </button>
+
+            <button type="button" id="cancelEditButton" style="display: none;">
+                <i class="bi bi-x-circle"></i> Cancelar edición
+            </button>
+        </div>
+</form>
 
       <!-- Aquí mostraremos mensajes como: gasto guardado o error -->
       <p id="expenseMessage"></p>
     </section>
 
     <!-- Filtro por mes -->
-    <section class="expenses-filter">
-      <h2>Consultar por mes</h2>
+    <section class="expenses-toolbar">
+        <div class="toolbar-info">
+            <span class="toolbar-icon">
+            <i class="bi bi-calendar3"></i>
+            </span>
 
-      <label for="monthFilter">Selecciona el mes</label>
-      <input type="month" id="monthFilter">
+            <div>
+            <h2>Gastos del mes</h2>
+            <p>Filtra tus movimientos y descarga el reporte mensual.</p>
+            </div>
+        </div>
+
+        <div class="toolbar-actions">
+            <div class="month-control">
+            <label for="monthFilter">Mes</label>
+            <input type="month" id="monthFilter">
+            </div>
+
+            <button type="button" id="downloadExcelButton" class="download-excel-button">
+            <i class="bi bi-file-earmark-excel"></i>
+            Descargar Excel
+            </button>
+        </div>
     </section>
 
     <!-- Lista de gastos -->
     <section class="expenses-list">
-      <h2>Gastos registrados</h2>
+      <h2><i class="bi bi-receipt"></i> Gastos registrados</h2>
 
       <table>
         <thead>
@@ -117,6 +371,9 @@
   </main>
 
   <!-- Conectamos el JavaScript de esta pantalla -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Librería para generar archivos Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="./src/js/gastos.js"></script>
 </body>
 </html>

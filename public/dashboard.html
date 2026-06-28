@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DanyBot | Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="src/css/dashboard.css">
@@ -10,17 +11,69 @@
   <div class="dashboard-grid">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <h2>DanyBot 💙</h2>
+      <h2 class="brand-title">
+        <span class="brand-icon">
+          <i class="fa-solid fa-robot"></i>
+        </span>
+        <span>DanyBot</span>
+      </h2>
       <ul>
-        <li><a href="#" onclick="showSection('tareas')">📋 Tareas</a></li>
-        <li><a href="#" onclick="showSection('recordatorios')">⏰ Recordatorios</a></li>
-        <li><a href="#" onclick="showSection('calendario')">📅 Calendario</a></li>
-        <li><a href="#" onclick="showSection('crecimiento')">🌱 Crecimiento Personal</a></li>
-        <li><a href="./gastos.html">💰 Gastos</a></li>
-        <li><a href="#" onclick="showSection('chistes')">😂 Chistes</a></li>
-        <li><a href="#" onclick="showSection('motivacion')">💡 Motivación</a></li>
-        <li><a href="#" onclick="logout()">🚪 Cerrar sesión</a></li>
-      </ul>
+      <li>
+        <a href="#" class="menu-link" onclick="showSection('tareas', this)">
+          <i class="fa-solid fa-list-check"></i>
+          <span>Tareas</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="menu-link" onclick="showSection('recordatorios', this)">
+          <i class="fa-solid fa-bell"></i>
+          <span>Recordatorios</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="menu-link" onclick="showSection('calendario', this)">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Calendario</span>
+      </a>
+      </li>
+
+      <li>
+        <a href="#" class="menu-link" onclick="showSection('crecimiento', this)">
+          <i class="fa-solid fa-seedling"></i>
+          <span>Crecimiento Personal</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="./gastos.html">
+          <i class="fa-solid fa-wallet"></i>
+          <span>Gastos</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="menu-link" onclick="showSection('chistes', this)">
+          <i class="fa-solid fa-face-laugh-squint"></i>
+          <span>Chistes</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="#" class="menu-link" onclick="showSection('motivacion', this)">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>Motivación</span>
+      </a>
+      </li>
+
+      <li>
+        <a href="#" onclick="logout()" class="logout-link">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Cerrar sesión</span>
+        </a>
+      </li>
+    </ul>
     </aside>
 
     <!-- Main content -->
@@ -34,16 +87,84 @@
       </header>
 
       <section class="cards-overview">
-        <div class="card"><h3>Total de Tareas</h3><p>8</p></div>
-        <div class="card"><h3>Eventos Hoy</h3><p>3</p></div>
-        <div class="card"><h3>Recordatorios Activos</h3><p>5</p></div>
-        <div class="card highlight" id="card-energia"><h3>
-          Tu Energía</h3><p>💪 98%</p>
+        <div class="card dashboard-card">
+          <div class="card-icon tasks-icon">
+            <i class="fa-solid fa-list-check"></i>
+          </div>
+
+          <div class="card-info">
+            <h3>Total de Tareas</h3>
+            <p id="totalTasksCount">0</p>
+          </div>
+        </div>
+
+        <div class="card dashboard-card">
+          <div class="card-icon events-icon">
+            <i class="fa-solid fa-calendar-check"></i>
+          </div>
+
+          <div class="card-info">
+            <h3>Eventos Hoy</h3>
+            <p>3</p>
+          </div>
+        </div>
+
+        <div class="card dashboard-card">
+          <div class="card-icon reminders-icon">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+
+          <div class="card-info">
+            <h3>Recordatorios Activos</h3>
+            <p>5</p>
+          </div>
+        </div>
+
+        <div class="card dashboard-card highlight" id="card-energia">
+          <div class="card-icon energy-icon">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+
+          <div class="card-info">
+            <h3>Tu Energía</h3>
+            <p>98%</p>
+          </div>
         </div>
       </section>
 
       <section id="section-content" class="section-content">
-        <p>Selecciona una opción del menú para empezar.</p>
+        <div class="welcome-panel">
+          <div class="welcome-text">
+            <span class="welcome-badge">Panel principal</span>
+            <h2>Organiza tu día con DanyBot</h2>
+            <p>
+              Gestiona tus tareas, recordatorios, calendario, gastos y hábitos desde un solo lugar.
+            </p>
+
+            <div class="quick-actions">
+              <a href="./gastos.html" class="quick-action primary-action">
+                <i class="fa-solid fa-wallet"></i>
+                Ver gastos
+              </a>
+
+              <button type="button" class="quick-action" id="quickTaskButton">
+                <i class="fa-solid fa-plus"></i>
+                Nueva tarea
+              </button>
+
+              <button type="button" class="quick-action" id="quickReminderButton">
+                <i class="fa-solid fa-bell"></i>
+                Crear recordatorio
+              </button>
+            </div>
+          </div>
+
+          <div class="welcome-visual">
+            <div class="bot-circle">
+              <i class="fa-solid fa-robot"></i>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   </div>
