@@ -3,80 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DanyBot | Dashboard</title>
+  <title>Agenda Personal Inteligente | Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="src/css/dashboard.css">
+  <link rel="stylesheet" href="./src/css/sidebar.css">
+  <link rel="stylesheet" href="./src/css/dashboard.css">
 </head>
 <body>
-  <div class="dashboard-grid">
+  <div class="app-layout">
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2 class="brand-title">
-        <span class="brand-icon">
-          <i class="fa-solid fa-robot"></i>
-        </span>
-        <span>DanyBot</span>
-      </h2>
-      <ul>
-      <li>
-        <a href="#" class="menu-link" onclick="showSection('tareas', this)">
-          <i class="fa-solid fa-list-check"></i>
-          <span>Tareas</span>
-        </a>
-      </li>
-
-      <li>
-        <a href="#" class="menu-link" onclick="showSection('recordatorios', this)">
-          <i class="fa-solid fa-bell"></i>
-          <span>Recordatorios</span>
-        </a>
-      </li>
-
-      <li>
-        <a href="#" class="menu-link" onclick="showSection('calendario', this)">
-        <i class="fa-solid fa-calendar-days"></i>
-        <span>Calendario</span>
-      </a>
-      </li>
-      <!--
-      <li>
-        <a href="#" class="menu-link" onclick="showSection('crecimiento', this)">
-          <i class="fa-solid fa-seedling"></i>
-          <span>Crecimiento Personal</span>
-        </a>
-      </li>
-      -->
-
-      <li>
-        <a href="./gastos.html">
-          <i class="fa-solid fa-wallet"></i>
-          <span>Gastos</span>
-        </a>
-      </li>
-      <!--
-      <li>
-        <a href="#" class="menu-link" onclick="showSection('chistes', this)">
-          <i class="fa-solid fa-face-laugh-squint"></i>
-          <span>Chistes</span>
-        </a>
-      </li>
-      -->
-      <!--
-      <li>
-        <a href="#" class="menu-link" onclick="showSection('motivacion', this)">
-        <i class="fa-solid fa-lightbulb"></i>
-        <span>Motivación</span>
-      </a>
-      </li>
-      --> 
-      <li>
-        <a href="#" onclick="logout()" class="logout-link">
-          <i class="fa-solid fa-right-from-bracket"></i>
-          <span>Cerrar sesión</span>
-        </a>
-      </li>
-    </ul>
-    </aside>
+   <aside id="appSidebar"></aside>
 
     <!-- Main content -->
     <main class="main">
@@ -107,7 +42,7 @@
 
           <div class="card-info">
             <h3>Eventos Hoy</h3>
-            <p>3</p>
+            <p id="todayEventsCount">0</p>
           </div>
         </div>
 
@@ -118,7 +53,7 @@
 
           <div class="card-info">
             <h3>Recordatorios Activos</h3>
-            <p>5</p>
+            <p id="activeRemindersCount">0</p>
           </div>
         </div>
 
@@ -138,7 +73,7 @@
         <div class="welcome-panel">
           <div class="welcome-text">
             <span class="welcome-badge">Panel principal</span>
-            <h2>Organiza tu día con DanyBot</h2>
+            <h2>Organiza tu día con Agenda Personal Inteligente</h2>
             <p>
               Gestiona tus tareas, recordatorios, calendario, gastos y hábitos desde un solo lugar.
             </p>
@@ -167,7 +102,8 @@
     </main>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="src/js/dashboard.js"></script>
+  <script src="./src/js/sidebar.js"></script>
+  <script src="./src/js/dashboard.js"></script>
 </body>
 </html>
 

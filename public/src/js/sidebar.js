@@ -5,14 +5,35 @@ function renderSidebar(activePage = "") {
     return;
   }
 
+  const userData = localStorage.getItem("userData");
+  const user = userData ? JSON.parse(userData) : null;
+
+  const userName = user?.name || user?.email || "Usuario";
+  const userPicture = user?.picture || null;
+  const userInitial = getUserInitials(userName);
+
   sidebar.className = "app-sidebar";
 
   sidebar.innerHTML = `
     <div class="sidebar-brand">
-      <span class="sidebar-brand-icon">
-        <i class="fa-solid fa-robot"></i>
-      </span>
-      <span>DanyBot</span>
+      ${
+        userPicture
+          ? `
+            <span class="sidebar-user-avatar">
+              <img src="${userPicture}" alt="${userName}">
+            </span>
+          `
+          : `
+            <span class="sidebar-user-initial">
+              ${userInitial}
+            </span>
+          `
+      }
+
+      <div class="sidebar-brand-text">
+        <strong>Agenda Personal</strong>
+        <small>Inteligente</small>
+      </div>
     </div>
 
     <nav class="sidebar-menu">
@@ -47,6 +68,29 @@ function renderSidebar(activePage = "") {
       <span>Cerrar sesión</span>
     </button>
   `;
+}
+
+function getUserInitials(name) {
+  if (!name) {
+    return "U";
+  }
+
+  const cleanName = name.trim();
+
+  if (!cleanName) {
+    return "U";
+  }
+
+  const nameParts = cleanName.split(" ").filter((part) => part.length > 0);
+
+  if (nameParts.length === 1) {
+    return nameParts[0].charAt(0).toUpperCase();
+  }
+
+  const firstInitial = nameParts[0].charAt(0).toUpperCase();
+  const secondInitial = nameParts[1].charAt(0).toUpperCase();
+
+  return `${firstInitial}${secondInitial}`;
 }
 
 function logoutFromSidebar() {

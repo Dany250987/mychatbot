@@ -479,12 +479,12 @@ function startVoiceExpense() {
 
   recognition.start();
 
-  recognition.onresult = (event) => {
+  recognition.onresult = async (event) => {
     const transcript = event.results[0][0].transcript.toLowerCase();
 
     voiceText.textContent = `Texto detectado: "${transcript}"`;
 
-    fillExpenseFromVoice(transcript);
+    await fillExpenseFromVoice(transcript);
   };
 
   recognition.onerror = () => {
@@ -502,64 +502,444 @@ function startVoiceExpense() {
   };
 }
 
-function fillExpenseFromVoice(text) {
+async function fillExpenseFromVoice(text) {
   const detectedAmount = extractAmount(text);
   const detectedCategory = extractCategory(text);
   const detectedDescription = extractDescription(text);
   const detectedDate = extractDate(text);
 
-  if (detectedAmount) {
-    amount.value = detectedAmount;
-  }
+  const detectedExpense = {
+    user_id: USER_ID,
+    expense_date: detectedDate || getLocalDate(),
+    category: detectedCategory || 'Otro',
+    description: detectedDescription || 'Gasto registrado por voz',
+    amount: Number(detectedAmount),
+    source: 'voice'
+  };
 
-  if (detectedCategory) {
-    category.value = detectedCategory;
-  }
-
-  if (detectedDescription) {
-    description.value = detectedDescription;
-  }
-
-  expenseDate.value = detectedDate || getLocalDate();
+  expenseDate.value = detectedExpense.expense_date;
+  category.value = detectedExpense.category;
+  description.value = detectedExpense.description;
+  amount.value = detectedExpense.amount || '';
   source.value = 'voice';
 
-  Swal.fire({
-    title: 'Gasto detectado',
-    text: 'Revisa la información antes de guardarla.',
-    icon: 'info',
-    confirmButtonColor: '#3c0000'
-  });
+  if (expenseId.value) {
+    Swal.fire({
+      title: 'Estás editando un gasto',
+      text: 'Termina o cancela la edición antes de guardar un gasto por voz automáticamente.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+
+    return;
+  }
+
+  if (!detectedExpense.amount || detectedExpense.amount <= 0) {
+    Swal.fire({
+      title: 'No detecté el valor',
+      text: 'No pude identificar el monto del gasto. Revisa el formulario y guárdalo manualmente.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+
+    return;
+  }
+
+  await saveVoiceExpenseAuto(detectedExpense);
+}
+
+async function saveVoiceExpenseAuto(expenseData) {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(expenseData)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      Swal.fire({
+        title: 'No se pudo guardar',
+        text: data.mensaje || 'No se pudo guardar el gasto por voz.',
+        icon: 'error',
+        confirmButtonColor: '#3c0000'
+      });
+
+      return;
+    }
+
+    const expenseMonth = expenseData.expense_date.slice(0, 7);
+
+    if (monthFilter.value !== expenseMonth) {
+      monthFilter.value = expenseMonth;
+      await loadMonthlyIncome();
+      await loadAdditionalIncomes();
+    }
+
+    await loadExpenses();
+
+    resetFormMode();
+
+    Swal.fire({
+      title: 'Gasto guardado automáticamente',
+      text: `${expenseData.description} por ${formatMoney(expenseData.amount)} fue registrado correctamente.`,
+      icon: 'success',
+      timer: 2600,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
+
+  } catch (error) {
+    console.error('Error al guardar gasto por voz:', error);
+
+    Swal.fire({
+      title: 'Error',
+      text: 'Ocurrió un error al guardar el gasto por voz.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
+  }
 }
 
 function extractAmount(text) {
-  let cleanedText = text.toLowerCase();
+  const cleanedText = normalizeMoneyText(text);
+  const normalizedDigitsText = normalizeSeparatedDigits(cleanedText);
 
-  // Caso 1: números separados por espacios, ejemplo: "272 000"
-  const spacedNumberMatch = cleanedText.match(/\b\d{1,3}(?:\s+\d{3})+\b/);
+  // Caso 1: número completo al final
+  // Ej: "almuerzo 252000", "pague internet 120000"
+  const finalFullNumberMatch = normalizedDigitsText.match(/\b\d{4,9}\b\s*$/);
 
-  if (spacedNumberMatch) {
-    return Number(spacedNumberMatch[0].replace(/\s+/g, ''));
+  if (finalFullNumberMatch) {
+    return Number(finalFullNumberMatch[0].trim());
   }
 
-  // Caso 2: números con punto o coma, ejemplo: "272.000" o "272,000"
-  cleanedText = cleanedText.replace(/\./g, '');
-  cleanedText = cleanedText.replace(/,/g, '');
+  // Caso 2: número agrupado al final
+  // Ej: "almuerzo 252 000", "almuerzo 252.000", "almuerzo 252,000"
+  const finalGroupedNumberMatch = normalizedDigitsText.match(/\b\d{1,3}(?:[\s.,]\d{3})+\b\s*$/);
 
-  // Caso 3: números con la palabra mil, ejemplo: "272 mil"
-  const milMatch = cleanedText.match(/\b(\d+)\s*mil\b/);
-
-  if (milMatch) {
-    return Number(milMatch[1]) * 1000;
+  if (finalGroupedNumberMatch) {
+    return Number(finalGroupedNumberMatch[0].replace(/[\s.,]/g, '').trim());
   }
 
-  // Caso 4: número normal, ejemplo: "12000"
-  const numberMatch = cleanedText.match(/\b\d+\b/);
+  // Caso 3: número + mil al final
+  // Ej: "almuerzo 252 mil", "internet 120 mil"
+  const finalMilMatch = normalizedDigitsText.match(/\b(\d+)\s*mil\b\s*$/);
 
-  if (numberMatch) {
-    return Number(numberMatch[0]);
+  if (finalMilMatch) {
+    return Number(finalMilMatch[1]) * 1000;
+  }
+
+  // Caso 4: número agrupado en cualquier parte
+  // Ej: "gasté 252.000 en mercado", "gasté 252 000 en mercado"
+  const groupedNumberMatch = normalizedDigitsText.match(/\b\d{1,3}(?:[\s.,]\d{3})+\b/);
+
+  if (groupedNumberMatch) {
+    return Number(groupedNumberMatch[0].replace(/[\s.,]/g, ''));
+  }
+
+  // Caso 5: número largo en cualquier parte
+  // Ej: "gasté 252000 en mercado"
+  const fullNumberMatch = normalizedDigitsText.match(/\b\d{4,9}\b/);
+
+  if (fullNumberMatch) {
+    return Number(fullNumberMatch[0]);
+  }
+
+  // Caso 6: número con mil
+  // Ej: "gasté 252 mil", "gasté 25 mil 500"
+  const numericMilMatch = normalizedDigitsText.match(/\b(\d+)\s*mil(?:\s+(\d{1,3}))?\b/);
+
+  if (numericMilMatch) {
+    const thousands = Number(numericMilMatch[1]) * 1000;
+    const extra = numericMilMatch[2] ? Number(numericMilMatch[2]) : 0;
+
+    return thousands + extra;
+  }
+
+  // Caso 7: millón / millones
+  const numericMillionMatch = normalizedDigitsText.match(/\b(\d+)\s*(millon|millones)\b/);
+
+  if (numericMillionMatch) {
+    return Number(numericMillionMatch[1]) * 1000000;
+  }
+
+  // Caso 8: valores dictados en palabras
+  // Ej: "doscientos cincuenta y dos mil"
+  const spokenAmount = extractSpokenAmount(normalizedDigitsText);
+
+  if (spokenAmount) {
+    return spokenAmount;
+  }
+
+  // Caso 9: último número disponible
+  // En gastos normalmente el valor suele decirse al final.
+  const numbers = normalizedDigitsText.match(/\b\d+\b/g);
+
+  if (numbers && numbers.length > 0) {
+    return Number(numbers[numbers.length - 1]);
   }
 
   return '';
+}
+
+function normalizeMoneyText(text) {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeSeparatedDigits(text) {
+  let normalizedText = text;
+
+  // Une números dictados como dígitos separados:
+  // "2 5 2 0 0 0" -> "252000"
+  normalizedText = normalizedText.replace(/\b(?:\d\s+){3,}\d\b/g, (match) => {
+    return match.replace(/\s+/g, '');
+  });
+
+  // Une casos mixtos:
+  // "2 52 000" -> "252000"
+  // "25 2 000" -> "252000"
+  normalizedText = normalizedText.replace(/\b\d{1,3}(?:\s+\d{1,3}){2,}\b/g, (match) => {
+    const onlyDigits = match.replace(/\s+/g, '');
+
+    if (onlyDigits.length >= 4) {
+      return onlyDigits;
+    }
+
+    return match;
+  });
+
+  return normalizedText;
+}
+
+function extractSpokenAmount(text) {
+  const tokens = text.split(' ').filter((token) => token.length > 0);
+
+  const millionIndex = tokens.findIndex((token) => {
+    return token === 'millon' || token === 'millones';
+  });
+
+  if (millionIndex !== -1) {
+    const beforeMillion = getNumberWordsBefore(tokens, millionIndex);
+    const afterMillion = getNumberWordsAfter(tokens, millionIndex);
+
+    const millionValue = beforeMillion.length > 0
+      ? parseSmallSpanishNumber(beforeMillion)
+      : 1;
+
+    const extraValue = afterMillion.length > 0
+      ? parseSmallSpanishNumber(afterMillion)
+      : 0;
+
+    return (millionValue * 1000000) + extraValue;
+  }
+
+  const thousandIndex = tokens.findIndex((token) => token === 'mil');
+
+  if (thousandIndex !== -1) {
+    const beforeMil = getNumberWordsBefore(tokens, thousandIndex);
+    const afterMil = getNumberWordsAfter(tokens, thousandIndex);
+
+    const thousandValue = beforeMil.length > 0
+      ? parseSmallSpanishNumber(beforeMil)
+      : 1;
+
+    const extraValue = afterMil.length > 0
+      ? parseSmallSpanishNumber(afterMil)
+      : 0;
+
+    return (thousandValue * 1000) + extraValue;
+  }
+
+  const currencyIndex = tokens.findIndex((token) => {
+    return token === 'peso' || token === 'pesos' || token === 'cop';
+  });
+
+  if (currencyIndex !== -1) {
+    const beforeCurrency = getNumberWordsBefore(tokens, currencyIndex);
+
+    if (beforeCurrency.length > 0) {
+      return parseSmallSpanishNumber(beforeCurrency);
+    }
+  }
+
+  const numberGroups = getNumberWordGroups(tokens);
+
+  if (numberGroups.length === 0) {
+    return 0;
+  }
+
+  const values = numberGroups.map((group) => parseSmallSpanishNumber(group));
+
+  return Math.max(...values);
+}
+
+function getNumberWordsBefore(tokens, index) {
+  const words = [];
+
+  for (let i = index - 1; i >= 0; i--) {
+    if (!isSpanishNumberToken(tokens[i])) {
+      break;
+    }
+
+    words.unshift(tokens[i]);
+  }
+
+  return words;
+}
+
+function getNumberWordsAfter(tokens, index) {
+  const words = [];
+
+  for (let i = index + 1; i < tokens.length; i++) {
+    if (!isSpanishNumberToken(tokens[i])) {
+      break;
+    }
+
+    words.push(tokens[i]);
+  }
+
+  return words;
+}
+
+function getNumberWordGroups(tokens) {
+  const groups = [];
+  let currentGroup = [];
+
+  tokens.forEach((token) => {
+    if (isSpanishNumberToken(token)) {
+      currentGroup.push(token);
+      return;
+    }
+
+    if (currentGroup.length > 0) {
+      groups.push(currentGroup);
+      currentGroup = [];
+    }
+  });
+
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+
+  return groups;
+}
+
+function isSpanishNumberToken(token) {
+  const numberTokens = [
+    'un', 'uno', 'una',
+    'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve',
+    'diez', 'once', 'doce', 'trece', 'catorce', 'quince',
+    'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve',
+    'veinte', 'veintiuno', 'veintidos', 'veintitres', 'veinticuatro',
+    'veinticinco', 'veintiseis', 'veintisiete', 'veintiocho', 'veintinueve',
+    'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa',
+    'cien', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos',
+    'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos',
+    'y'
+  ];
+
+  return numberTokens.includes(token);
+}
+
+function parseSmallSpanishNumber(words) {
+  const units = {
+    un: 1,
+    uno: 1,
+    una: 1,
+    dos: 2,
+    tres: 3,
+    cuatro: 4,
+    cinco: 5,
+    seis: 6,
+    siete: 7,
+    ocho: 8,
+    nueve: 9
+  };
+
+  const specialNumbers = {
+    diez: 10,
+    once: 11,
+    doce: 12,
+    trece: 13,
+    catorce: 14,
+    quince: 15,
+    dieciseis: 16,
+    diecisiete: 17,
+    dieciocho: 18,
+    diecinueve: 19,
+    veinte: 20,
+    veintiuno: 21,
+    veintidos: 22,
+    veintitres: 23,
+    veinticuatro: 24,
+    veinticinco: 25,
+    veintiseis: 26,
+    veintisiete: 27,
+    veintiocho: 28,
+    veintinueve: 29
+  };
+
+  const tens = {
+    treinta: 30,
+    cuarenta: 40,
+    cincuenta: 50,
+    sesenta: 60,
+    setenta: 70,
+    ochenta: 80,
+    noventa: 90
+  };
+
+  const hundreds = {
+    cien: 100,
+    ciento: 100,
+    doscientos: 200,
+    trescientos: 300,
+    cuatrocientos: 400,
+    quinientos: 500,
+    seiscientos: 600,
+    setecientos: 700,
+    ochocientos: 800,
+    novecientos: 900
+  };
+
+  let total = 0;
+
+  words.forEach((word) => {
+    if (word === 'y') {
+      return;
+    }
+
+    if (units[word]) {
+      total += units[word];
+      return;
+    }
+
+    if (specialNumbers[word]) {
+      total += specialNumbers[word];
+      return;
+    }
+
+    if (tens[word]) {
+      total += tens[word];
+      return;
+    }
+
+    if (hundreds[word]) {
+      total += hundreds[word];
+    }
+  });
+
+  return total;
 }
 
 
@@ -593,18 +973,30 @@ function extractCategory(text) {
 
 
 function extractDescription(text) {
-  let descriptionText = text;
+  let descriptionText = text.toLowerCase();
 
-  descriptionText = descriptionText.replace('agrega', '');
-  descriptionText = descriptionText.replace('añade', '');
-  descriptionText = descriptionText.replace('registra', '');
-  descriptionText = descriptionText.replace('un gasto', '');
-  descriptionText = descriptionText.replace('gasto', '');
-  descriptionText = descriptionText.replace('por valor de', '');
-  descriptionText = descriptionText.replace('por', '');
-  descriptionText = descriptionText.replace(/\d+/g, '');
+  descriptionText = descriptionText
+    .replace(/\b(agrega|añade|registra|guarda|anota)\b/g, '')
+    .replace(/\b(gasté|gaste|pagué|pague|compré|compre|comprar|pagar)\b/g, '')
+    .replace(/\bun gasto\b/g, '')
+    .replace(/\bgasto\b/g, '')
+    .replace(/\bpor valor de\b/g, '')
+    .replace(/\bpor un valor de\b/g, '')
+    .replace(/\bvalor de\b/g, '')
+    .replace(/\b\d{1,3}(?:[\s.,]\d{3})+\b/g, '')
+    .replace(/\b\d+\s*mil\b/g, '')
+    .replace(/\b\d+\b/g, '')
+    .replace(/\b(pesos|peso|cop)\b/g, '')
+    .replace(/\b(hoy|ayer)\b/g, '')
+    .replace(/\b(en|de|por|para)\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  return descriptionText.trim() || 'Gasto registrado por voz';
+  if (!descriptionText) {
+    return 'Gasto registrado por voz';
+  }
+
+  return descriptionText.charAt(0).toUpperCase() + descriptionText.slice(1);
 }
 
 

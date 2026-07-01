@@ -19,25 +19,9 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  font-size: 28px;
-  font-weight: 800;
-  padding: 0 10px;
+  padding: 4px 10px 10px;
 }
 
-.sidebar-brand-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #ff8478, #cb4c46);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebar-brand-icon i {
-  font-size: 24px;
-}
 
 .sidebar-menu {
   display: flex;
@@ -115,11 +99,184 @@
     padding: 18px 14px;
   }
 
-  .sidebar-brand {
-    font-size: 24px;
-  }
 
   .sidebar-menu {
     grid-template-columns: 1fr;
+  }
+}
+
+.sidebar-brand-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: #fff1ef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 12px 26px rgba(255, 132, 120, 0.18);
+}
+
+.sidebar-brand-logo img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+}
+
+.sidebar-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.sidebar-brand-text strong {
+  font-size: 19px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.sidebar-brand-text small {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffc7c1;
+}
+
+.sidebar-user-avatar,
+.sidebar-user-initial {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.sidebar-user-avatar {
+  background: #fff1ef;
+  border: 3px solid #ffc7c1;
+}
+
+.sidebar-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
+.sidebar-user-initial {
+  background: linear-gradient(135deg, #ff8478, #cb4c46);
+  border: 3px solid #ffc7c1;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* =========================
+   SIDEBAR MÓVIL MEJORADO
+   ========================= */
+
+@media (max-width: 768px) {
+  .app-layout {
+    display: block;
+    min-height: 100vh;
+  }
+
+  .app-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    padding: 16px;
+    border-radius: 0 0 22px 22px;
+    box-shadow: 0 10px 28px rgba(60, 0, 0, 0.18);
+  }
+
+  .sidebar-brand {
+    padding: 0;
+    margin-bottom: 16px;
+    gap: 10px;
+  }
+
+  .sidebar-user-avatar,
+  .sidebar-user-initial {
+    width: 48px;
+    height: 48px;
+    font-size: 17px;
+    border-width: 2px;
+  }
+
+  .sidebar-brand-text strong {
+    font-size: 16px;
+    line-height: 1.05;
+  }
+
+  .sidebar-brand-text small {
+    font-size: 11px;
+  }
+
+  .sidebar-menu {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .sidebar-link {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    padding: 11px 10px;
+    border-radius: 16px;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  .sidebar-link i {
+    font-size: 14px;
+  }
+
+  .sidebar-menu .sidebar-link[href="./gastos.html"] {
+    grid-column: 1 / -1;
+  }
+
+  .sidebar-logout {
+    width: 100%;
+    margin-top: 12px;
+    padding: 11px 13px;
+    border-radius: 16px;
+    font-size: 13px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-sidebar {
+    padding: 14px;
+  }
+
+  .sidebar-menu {
+    gap: 8px;
+  }
+
+  .sidebar-link {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .sidebar-logout {
+    padding: 10px 12px;
+    font-size: 12px;
   }
 }

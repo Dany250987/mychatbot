@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DanyBot | Iniciar sesión</title>
+  <title>Agenda Personal Inteligente | Iniciar sesión</title>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
@@ -12,83 +11,135 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="src/css/login_google.css">
   <script src="src/js/script.js" defer></script>
 </head>
 
 <body>
-  <div id="login-card" class="card">
-    <div class="card-header"> 
-      <div class="logo-container"><img src="src/img/danybot.png" alt="Logo" ></div>
-      <h1>¡Te damos la bienvenida a DanyBot!</h1>
-      <p>
-        <span class="linea-arriba">Qué bueno verte de nuevo 👋</span>
-        <span class="linea-abajo">Ingresa para continuar con tu cuenta</span>
-      </p>      
-    </div>
-    
+  <div class="login-background-decoration decoration-one"></div>
+  <div class="login-background-decoration decoration-two"></div>
 
-    <!-- Login de Google -->
-    <div id="g_id_onload"
-        data-client_id="625571352027-jgsi8eovhcd2b4or9uohaog1f8663d8i.apps.googleusercontent.com"
-        data-callback="handleCredentialResponse"
-        data-auto_prompt="false">
-    </div>
+  <main id="login-card" class="login-card">
 
-    <div class="g_id_signin"
-        data-type="standard"
-        data-size="large"
-        data-theme="outline"
-        data-text="sign_in_with"
-        data-shape="rectangular"
-        data-logo_alignment="left">
-    </div>
+    <section class="login-visual-panel">
+      <div class="visual-badge">Agenda Personal Inteligente</div>
 
-    <div class="login-divider">
-      <span>o ingresa con tu correo</span>
-    </div>
+      <div class="visual-content">
+        <div class="visual-agenda-card">
+        <div class="agenda-card-header">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
 
-    <form id="login-form" class="form">
-
-      <div>
-        <label for="email">Correo electrónico:</label>
-        <input 
-          type="email" 
-          id="email" 
-          name="email" 
-          placeholder="Ingresa tu correo electrónico"
-          autocomplete="email"
-          required
-        >
-        <label for="password">Contraseña:</label>
-        <input 
-          type="password" 
-          id="password" 
-          name="password" 
-          placeholder="Ingresa tu contraseña"
-          autocomplete="current-password"
-          required
-        >
+        <div class="agenda-card-line line-large"></div>
+        <div class="agenda-card-line"></div>
+        <div class="agenda-card-line line-small"></div>
       </div>
-      <button type="submit">Iniciar sesión</button>
-    </form>
 
-    <p class="signup-text">
-      ¿No tienes una cuenta?
-      <a class="register" href="signup.html">Crear cuenta gratis</a>
-    </p>
-    
+        <h2>Organiza tu día desde un solo lugar</h2>
 
-    <!-- Contenedor oculto del chatbot -->
-    <div id="chat-container">
-      <h3 id="user-name" style="margin-top: 10px;"></h3>
-      <img id="user-avatar" width="80" style="border-radius: 50%; margin-bottom: 10px;" />
-      <!-- <h3 id="user-name"></h3> -->
-      <p>✅ Acceso correcto. Aquí se cargará el chatbot...</p>
-    </div>
-  </div>
- 
+        <p>
+          Gestiona tareas, gastos, recordatorios y calendario con una experiencia simple, bonita y personal.
+        </p>
+
+        <div class="visual-mini-cards">
+          <div>
+            <strong>Tareas</strong>
+            <span>Prioriza tu día</span>
+          </div>
+
+          <div>
+            <strong>Gastos</strong>
+            <span>Controla tu mes</span>
+          </div>
+
+          <div>
+            <strong>Agenda</strong>
+            <span>No olvides nada</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="login-form-panel">
+      <div class="card-header"> 
+        <div class="logo-container">
+          <img src="src/img/danybot.png" alt="Logo Agenda Personal Inteligente">
+        </div>
+
+        <span class="login-kicker">Bienvenida de nuevo</span>
+
+        <h1>Tu agenda personal inteligente</h1>
+
+        <p>
+          <span class="linea-arriba">Inicia sesión para continuar</span>
+          <span class="linea-abajo">y organizar mejor tu día.</span>
+        </p>      
+      </div>
+
+      <!-- Login de Google -->
+      <div id="g_id_onload"
+          data-client_id="625571352027-jgsi8eovhcd2b4or9uohaog1f8663d8i.apps.googleusercontent.com"
+          data-callback="handleCredentialResponse"
+          data-auto_prompt="false">
+      </div>
+
+      <div class="g_id_signin"
+          data-type="standard"
+          data-size="large"
+          data-theme="outline"
+          data-text="sign_in_with"
+          data-shape="pill"
+          data-logo_alignment="left">
+      </div>
+
+      <div class="login-divider">
+        <span>o continúa con tu correo</span>
+      </div>
+
+      <form id="login-form" class="form">
+
+        <div class="form-fields">
+          <label for="email">Correo electrónico</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            placeholder="Ingresa tu correo electrónico"
+            autocomplete="email"
+            required
+          >
+
+          <label for="password">Contraseña</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="Ingresa tu contraseña"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <button type="submit">Iniciar sesión</button>
+      </form>
+
+      <p class="signup-text">
+        ¿No tienes una cuenta?
+        <a class="register" href="signup.html">Crear cuenta gratis</a>
+      </p>
+      
+      <!-- Contenedor oculto del chatbot -->
+      <div id="chat-container">
+        <h3 id="user-name" style="margin-top: 10px;"></h3>
+        <img id="user-avatar" width="80" style="border-radius: 50%; margin-bottom: 10px;" />
+        <p>✅ Acceso correcto. Aquí se cargará el chatbot...</p>
+      </div>
+    </section>
+
+  </main>
 </body>
 </html>
