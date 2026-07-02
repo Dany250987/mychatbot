@@ -1,3 +1,10 @@
+/* gastos.css depurado
+   Limpieza segura:
+   - Se eliminó el bloque duplicado de tabla móvil.
+   - Se eliminó la regla antigua que pintaba ahorro positivo y negativo del mismo color.
+   - Se conservaron ids, clases, colores, responsivo, gráficas y secciones desplegables.
+*/
+
 :root {
   --primary: #3c0000;
   --primary-dark: #670010;
@@ -308,11 +315,6 @@ body {
   color: var(--text);
   font-size: 22px;
   font-weight: 900;
-}
-
-#monthlySavings.positive-saving,
-#monthlySavings.negative-saving {
-  color: var(--secondary);
 }
 
 .income-forms-grid {
@@ -1014,145 +1016,6 @@ tbody tr:hover {
 }
 
 /* =========================
-   TABLA GASTOS COMO TARJETAS EN MÓVIL
-   ========================= */
-
-@media (max-width: 700px) {
-  .expenses-list {
-    overflow: visible;
-    padding: 20px;
-  }
-
-  .expenses-list table {
-    min-width: 0;
-    width: 100%;
-    border-spacing: 0;
-  }
-
-  .expenses-list thead {
-    display: none;
-  }
-
-  .expenses-list tbody {
-    display: grid;
-    gap: 14px;
-  }
-
-  .expenses-list tr {
-    display: grid;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 20px;
-    background: #ffffff;
-    border: 1px solid var(--border-light);
-    box-shadow: 0 10px 24px rgba(60, 0, 0, 0.08);
-  }
-
-  .expenses-list tbody tr:hover {
-    transform: none;
-    box-shadow: 0 10px 24px rgba(60, 0, 0, 0.08);
-  }
-
-  .expenses-list td {
-    display: grid;
-    grid-template-columns: 105px 1fr;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 0;
-    border: none;
-    background: transparent;
-    font-size: 14px;
-  }
-
-  .expenses-list td:first-child,
-  .expenses-list td:last-child {
-    border: none;
-    border-radius: 0;
-  }
-
-  .expenses-list td::before {
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 900;
-    text-transform: uppercase;
-  }
-
-  .expenses-list td:nth-child(1)::before {
-    content: "Fecha";
-  }
-
-  .expenses-list td:nth-child(2)::before {
-    content: "Categoría";
-  }
-
-  .expenses-list td:nth-child(3)::before {
-    content: "Descripción";
-  }
-
-  .expenses-list td:nth-child(4)::before {
-    content: "Valor";
-  }
-
-  .expenses-list td:nth-child(5)::before {
-    content: "Origen";
-  }
-
-  .expenses-list td:nth-child(6)::before {
-    content: "Acciones";
-  }
-
-  .date-pill,
-  .category-badge,
-  .source-badge {
-    width: fit-content;
-  }
-
-  .expense-description {
-    line-height: 1.4;
-  }
-
-  .amount-cell {
-    font-size: 16px;
-  }
-
-  .action-buttons {
-    justify-content: flex-start;
-  }
-
-  .action-btn {
-    width: fit-content;
-  }
-}
-
-@media (max-width: 420px) {
-  .expenses-list {
-    padding: 16px;
-  }
-
-  .expenses-list tr {
-    padding: 14px;
-    border-radius: 18px;
-  }
-
-  .expenses-list td {
-    grid-template-columns: 90px 1fr;
-    gap: 8px;
-  }
-
-  .action-buttons {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
-  }
-
-  .action-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-/* =========================
    PARCHE RESPONSIVE GENERAL GASTOS
    No modifica lógica ni ids
 ========================= */
@@ -1474,5 +1337,435 @@ tbody tr:hover {
   .action-btn {
     width: 100%;
     justify-content: center;
+  }
+}
+
+.expenses-charts-section {
+  margin-top: 28px;
+  padding: 24px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.charts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.charts-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #111827;
+  font-size: 1.35rem;
+}
+
+.charts-header h2 i {
+  color: #463cec;
+}
+
+.charts-header p {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.chart-card {
+  padding: 20px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.chart-card h3 {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.chart-box {
+  position: relative;
+  width: 100%;
+  height: 280px;
+}
+
+.large-chart-box {
+  height: 330px;
+}
+
+.full-chart-card {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-chart-card {
+    grid-column: auto;
+  }
+
+  .chart-box,
+  .large-chart-box {
+    height: 260px;
+  }
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.collapse-section-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: #f3f4ff;
+  color: #463cec;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.collapse-section-btn:hover {
+  background: #463cec;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.collapse-section-btn i {
+  font-size: 1rem;
+}
+
+.collapsible-content {
+  overflow: hidden;
+  max-height: 5000px;
+  opacity: 1;
+  margin-top: 20px;
+  transition: max-height 0.35s ease, opacity 0.25s ease, margin-top 0.25s ease;
+}
+
+.collapsible-content.is-collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .section-title-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .collapse-section-btn {
+    width: 100%;
+  }
+}
+
+.expenses-charts-section,
+.income-panel,
+.expenses-form-section,
+.expenses-toolbar,
+.expenses-list {
+  margin-top: 28px;
+}
+
+.expenses-charts-section {
+  margin-bottom: 0;
+}
+
+.income-panel {
+  margin-top: 28px;
+}
+
+/* ============================= */
+/* MEJORA VISUAL - INGRESOS      */
+/* ============================= */
+
+.income-panel {
+  padding: 32px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.income-panel-header {
+  margin-bottom: 26px;
+}
+
+.income-panel-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.55rem;
+  color: #020617;
+}
+
+.income-panel-header h2 i {
+  color: #7a0010;
+}
+
+.income-panel-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.98rem;
+}
+
+/* Tarjetas de resumen */
+.income-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 26px;
+}
+
+.income-summary-item {
+  position: relative;
+  padding: 22px 24px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.income-summary-item::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: linear-gradient(180deg, #7a0010, #b00020);
+  opacity: 0.85;
+}
+
+.income-summary-item span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.income-summary-item strong {
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: #020617;
+}
+
+/* Ahorro positivo / negativo */
+#monthlySavings.positive-saving {
+  color: #15803d;
+}
+
+#monthlySavings.negative-saving {
+  color: #b00020;
+}
+
+/* Formularios */
+.income-forms-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-bottom: 26px;
+}
+
+.income-form-box {
+  padding: 24px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+}
+
+.income-form-box h3 {
+  margin: 0 0 22px;
+  font-size: 1.25rem;
+  color: #020617;
+}
+
+.income-form-box label {
+  display: block;
+  margin: 14px 0 8px;
+  font-weight: 800;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.income-form-box input {
+  width: 100%;
+  height: 54px;
+  padding: 0 18px;
+  border-radius: 16px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  outline: none;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.income-form-box input:focus {
+  border-color: #7a0010;
+  box-shadow: 0 0 0 4px rgba(122, 0, 16, 0.10);
+}
+
+.income-form-box button {
+  width: 100%;
+  margin-top: 26px;
+  min-height: 56px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #620006, #b00020);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.income-form-box button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(122, 0, 16, 0.22);
+}
+
+/* Lista de ingresos adicionales */
+.additional-income-list {
+  margin-top: 8px;
+}
+
+.additional-income-list h3 {
+  margin: 0 0 16px;
+  font-size: 1.18rem;
+  color: #020617;
+}
+
+.additional-incomes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.additional-incomes-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.additional-incomes-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+
+.additional-income-card {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+.additional-income-card-info strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #020617;
+  font-size: 0.98rem;
+}
+
+.additional-income-card-info span {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.additional-income-card-amount {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #b00020;
+  white-space: nowrap;
+}
+
+.additional-income-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.additional-income-card-actions button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 14px;
+  background: #fff1f2;
+  color: #9f1239;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.additional-income-card-actions button:hover {
+  transform: translateY(-1px);
+  background: #ffe4e6;
+}
+
+/* Responsive */
+@media (max-width: 1000px) {
+  .income-summary-row,
+  .income-forms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .income-panel {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 650px) {
+  .income-panel {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .income-summary-item strong {
+    font-size: 1.45rem;
+  }
+
+  .income-form-box {
+    padding: 20px;
+  }
+
+  .additional-income-card {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
+  .additional-income-card-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }

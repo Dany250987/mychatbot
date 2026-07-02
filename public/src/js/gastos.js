@@ -61,6 +61,10 @@ let currentAdditionalIncomeTotal = 0;
 let currentAdditionalIncomes = [];
 let editingAdditionalIncomeId = null;
 
+let categoryExpensesChart = null;
+let financeSummaryChart = null;
+let dailyExpensesChart = null;
+
 
 // Esta función consulta los gastos desde el backend.
 async function loadExpenses() {
@@ -270,6 +274,7 @@ function calculateMonthlyTotal(expenses) {
   highestExpense.textContent = formatMoney(highest);
 
   updateSavings();
+  updateExpenseCharts();
 }
 
 // Esta función asigna una clase de color según la categoría del gasto.
@@ -1433,6 +1438,7 @@ function updateIncomePanel() {
   monthlyIncome.textContent = formatMoney(currentIncomeAmount);
   additionalIncomeTotal.textContent = formatMoney(currentAdditionalIncomeTotal);
   updateSavings();
+  updateExpenseCharts();
 }
 
 
@@ -1714,9 +1720,271 @@ function renderAdditionalIncomes() {
   });
 }
 
+function updateExpenseCharts() {
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js no está cargado.');
+    return;
+  }
+
+  renderCategoryExpensesChart();
+  renderFinanceSummaryChart();
+  renderDailyExpensesChart();
+}
+
+function renderCategoryExpensesChart() {
+  const canvas = document.getElementById('categoryExpensesChart');
+
+  if (!canvas) {
+    return;
+  }
+
+  const categoryTotals = {};
+
+  filteredExpenses.forEach((expense) => {
+    const expenseCategory = expense.category || 'Otro';
+    const expenseAmount = Number(expense.amount) || 0;
+
+    if (!categoryTotals[expenseCategory]) {
+      categoryTotals[expenseCategory] = 0;
+    }
+
+    categoryTotals[expenseCategory] += expenseAmount;
+  });
+
+  const labels = Object.keys(categoryTotals);
+  const values = Object.values(categoryTotals);
+
+  if (categoryExpensesChart) {
+    categoryExpensesChart.destroy();
+  }
+
+  categoryExpensesChart = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: labels.length ? labels : ['Sin gastos'],
+      datasets: [
+        {
+          data: values.length ? values : [1],
+          backgroundColor: [
+            '#463cec',
+            '#22c55e',
+            '#0ea5e9',
+            '#ec4899',
+            '#f97316',
+            '#ef4444',
+            '#14b8a6',
+            '#6b7280'
+          ],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+
+              if (!values.length) {
+                return 'Sin gastos registrados';
+              }
+
+              return `${label}: ${formatMoney(value)}`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderFinanceSummaryChart() {
+  const canvas = document.getElementById('financeSummaryChart');
+
+  if (!canvas) {
+    return;
+  }
+
+  const totalIncome = currentIncomeAmount + currentAdditionalIncomeTotal;
+  const totalExpenses = currentExpensesTotal;
+  const savings = totalIncome - totalExpenses;
+
+  if (financeSummaryChart) {
+    financeSummaryChart.destroy();
+  }
+
+  financeSummaryChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: ['Ingresos', 'Gastos', 'Ahorro'],
+      datasets: [
+        {
+          label: 'Resumen del mes',
+          data: [totalIncome, totalExpenses, savings],
+          backgroundColor: [
+            '#22c55e',
+            '#ef4444',
+            savings >= 0 ? '#463cec' : '#f97316'
+          ],
+          borderRadius: 12
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              return formatMoney(context.raw || 0);
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: function (value) {
+              return formatMoney(value);
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderDailyExpensesChart() {
+  const canvas = document.getElementById('dailyExpensesChart');
+
+  if (!canvas) {
+    return;
+  }
+
+  const selectedMonth = monthFilter.value || getLocalMonth();
+  const [year, month] = selectedMonth.split('-').map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate();
+
+  const dailyTotals = {};
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    dailyTotals[day] = 0;
+  }
+
+  filteredExpenses.forEach((expense) => {
+    const cleanDate = formatDateForInput(expense.expense_date);
+    const expenseDay = Number(cleanDate.split('-')[2]);
+
+    if (dailyTotals[expenseDay] !== undefined) {
+      dailyTotals[expenseDay] += Number(expense.amount) || 0;
+    }
+  });
+
+  const labels = Object.keys(dailyTotals).map((day) => `Día ${day}`);
+  const values = Object.values(dailyTotals);
+
+  if (dailyExpensesChart) {
+    dailyExpensesChart.destroy();
+  }
+
+  dailyExpensesChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Gastos diarios',
+          data: values,
+          borderColor: '#463cec',
+          backgroundColor: 'rgba(70, 60, 236, 0.14)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              return formatMoney(context.raw || 0);
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function (value) {
+              return formatMoney(value);
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function setupCollapsibleSections() {
+  const collapseButtons = document.querySelectorAll('.collapse-section-btn');
+
+  collapseButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const targetId = button.dataset.collapseTarget;
+      const content = document.getElementById(targetId);
+
+      if (!content) {
+        return;
+      }
+
+      const isCollapsed = content.classList.toggle('is-collapsed');
+
+      button.setAttribute('aria-expanded', String(!isCollapsed));
+
+      const icon = button.querySelector('i');
+      const text = button.querySelector('span');
+
+      if (isCollapsed) {
+        icon.className = 'bi bi-chevron-down';
+        text.textContent = 'Mostrar';
+      } else {
+        icon.className = 'bi bi-chevron-up';
+        text.textContent = 'Ocultar';
+
+        setTimeout(() => {
+          categoryExpensesChart?.resize();
+          financeSummaryChart?.resize();
+          dailyExpensesChart?.resize();
+        }, 250);
+      }
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   setTodayDate();
   setCurrentMonthFilter();
+  setupCollapsibleSections();
 
   loadExpenses();
   loadMonthlyIncome();
