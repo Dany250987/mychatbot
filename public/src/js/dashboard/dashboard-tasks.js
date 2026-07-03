@@ -190,21 +190,72 @@ function sortTasks(taskList) {
   });
 }
 
+function getTaskCompletedUntilDate(task) {
+  if (!task.completedAt) {
+    return null;
+  }
+
+  const completedDate = new Date(String(task.completedAt).replace(" ", "T"));
+  completedDate.setDate(completedDate.getDate() + 10);
+
+  return completedDate;
+}
+
+function shouldShowCompletedTask(task) {
+  if (task.status !== "completada") {
+    return true;
+  }
+
+  if (!task.completedAt) {
+    return true;
+  }
+
+  const visibleUntilDate = getTaskCompletedUntilDate(task);
+
+  if (!visibleUntilDate) {
+    return true;
+  }
+
+  const now = new Date();
+
+  return now <= visibleUntilDate;
+}
+
+function formatTaskCompletedUntil(task) {
+  const visibleUntilDate = getTaskCompletedUntilDate(task);
+
+  if (!visibleUntilDate) {
+    return "";
+  }
+
+  return visibleUntilDate.toLocaleDateString("es-CO", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+
 function getFilteredTasks() {
   const today = getTodayDate();
 
-  let filteredTasks = tasks;
+  let filteredTasks = tasks.filter((task) => {
+    return shouldShowCompletedTask(task);
+  });
 
   if (currentTaskFilter === "pendiente") {
-    filteredTasks = tasks.filter((task) => task.status === "pendiente");
+    filteredTasks = filteredTasks.filter((task) => {
+      return task.status === "pendiente";
+    });
   }
 
   if (currentTaskFilter === "completada") {
-    filteredTasks = tasks.filter((task) => task.status === "completada");
+    filteredTasks = filteredTasks.filter((task) => {
+      return task.status === "completada";
+    });
   }
 
   if (currentTaskFilter === "hoy") {
-    filteredTasks = tasks.filter((task) => {
+    filteredTasks = filteredTasks.filter((task) => {
       return task.dueDate === today && task.status === "pendiente";
     });
   }
@@ -240,7 +291,8 @@ async function loadTasks() {
         category: task.category,
         priority: task.priority,
         dueDate: task.due_date ? String(task.due_date).split("T")[0] : "",
-        status: task.status
+        status: task.status,
+        completedAt: task.completed_at || null
       };
     });
 
@@ -456,13 +508,21 @@ function renderTasksList() {
   filteredTasks.forEach((task) => {
     const taskCard = document.createElement("div");
 
+    const isCompleted = task.status === "completada";
+    const isOverdue = isTaskOverdue(task);
+    const priority = task.priority || "Media";
+    const category = task.category || "Sin categoría";
+    const dueDate = task.dueDate || "Sin fecha";
+    const description = task.description || "Sin descripción";
+    const completedUntilLabel = isCompleted ? formatTaskCompletedUntil(task) : "";
+
     taskCard.classList.add("task-card");
 
-    if (task.status === "completada") {
+    if (isCompleted) {
       taskCard.classList.add("task-completed");
     }
 
-    if (isTaskOverdue(task)) {
+    if (isOverdue) {
       taskCard.classList.add("task-overdue");
     }
 
@@ -470,55 +530,70 @@ function renderTasksList() {
       <div class="task-card-main">
         <div>
           <h3>${task.title}</h3>
-          <p>${task.description || "Sin descripción"}</p>
+          <p>${description}</p>
         </div>
 
-        <span class="task-priority priority-${task.priority.toLowerCase()}">
-          ${task.priority}
+        <span class="task-priority priority-${priority.toLowerCase()}">
+          ${priority}
         </span>
       </div>
 
       <div class="task-card-footer">
         <span>
           <i class="fa-solid fa-tag"></i>
-          ${task.category}
+          ${category}
         </span>
 
         <span>
           <i class="fa-solid fa-calendar-day"></i>
-          ${task.dueDate}
+          ${dueDate}
         </span>
 
         <span class="task-status ${
-          isTaskOverdue(task) 
+          isOverdue 
             ? "status-vencida" 
             : `status-${task.status}`
         }">
           <i class="fa-solid ${
-            task.status === "completada"
+            isCompleted
               ? "fa-circle-check"
-              : isTaskOverdue(task)
+              : isOverdue
                 ? "fa-triangle-exclamation"
                 : "fa-clock"
           }"></i>
           ${
-            task.status === "completada"
+            isCompleted
               ? "Completada"
-              : isTaskOverdue(task)
+              : isOverdue
                 ? "Vencida"
                 : "Pendiente"
           }
         </span>
       </div>
 
+      ${
+        isCompleted
+          ? `
+            <div class="task-completed-note">
+              <i class="fa-solid fa-circle-info"></i>
+              ${
+                completedUntilLabel
+                  ? `Esta tarea completada se eliminará el ${completedUntilLabel}.`
+                  : "Esta tarea completada se eliminará automáticamente después de 10 días."
+              }
+            </div>
+          `
+          : ""
+      }
+
       <div class="task-card-actions">
         <button 
           type="button" 
-          class="${task.status === "completada" ? "task-reopen-button" : "task-complete-button"}"
+          class="${isCompleted ? "task-reopen-button" : "task-complete-button"}"
           onclick="toggleTaskStatus(${task.id})"
         >
-          <i class="fa-solid ${task.status === "completada" ? "fa-rotate-left" : "fa-check"}"></i>
-          ${task.status === "completada" ? "Reabrir" : "Completar"}
+          <i class="fa-solid ${isCompleted ? "fa-rotate-left" : "fa-check"}"></i>
+          ${isCompleted ? "Reabrir" : "Completar"}
         </button>
 
         <button 

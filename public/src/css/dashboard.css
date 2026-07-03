@@ -1,3 +1,4 @@
+
 :root {
   --dark-red: #3c0000;
   --wine-red: #670010;
@@ -663,160 +664,6 @@ body {
   color: #991b1b;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .main {
-    padding: 20px;
-  }
-
-  .main-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
-  .date-time {
-    width: 100%;
-    text-align: center;
-  }
-
-  .welcome-panel {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 700px) {
-  .tasks-header {
-    flex-direction: column;
-  }
-
-  .task-main-button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .tasks-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .task-form {
-    grid-template-columns: 1fr;
-  }
-
-  .task-form-actions {
-    justify-content: stretch;
-  }
-
-  .task-save-button {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 600px) {
-  .main {
-    padding: 16px;
-  }
-
-  .main-header {
-    padding: 18px;
-    border-radius: 18px;
-  }
-
-  .user-info {
-    align-items: flex-start;
-  }
-
-  .avatar {
-    width: 44px;
-    height: 44px;
-  }
-
-  #section-title {
-    font-size: 22px;
-  }
-
-  .cards-overview {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .dashboard-card {
-    padding: 18px;
-  }
-
-  .card-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
-  }
-
-  .card-icon i {
-    font-size: 20px;
-  }
-
-  .card-info p {
-    font-size: 24px;
-  }
-
-  .section-content {
-    padding: 18px;
-    border-radius: 18px;
-  }
-
-  .welcome-text h2 {
-    font-size: 24px;
-  }
-
-  .welcome-text p {
-    font-size: 14px;
-  }
-
-  .quick-actions {
-    flex-direction: column;
-  }
-
-  .quick-action {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .section-placeholder {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .section-placeholder-icon {
-    width: 70px;
-    height: 70px;
-    border-radius: 22px;
-  }
-
-  .section-placeholder-icon i {
-    font-size: 28px;
-  }
-
-  .section-placeholder h2 {
-    font-size: 23px;
-  }
-
-  .task-card-main {
-    flex-direction: column;
-  }
-
-  .task-card-actions {
-    flex-direction: column;
-  }
-
-  .task-complete-button,
-  .task-delete-button,
-  .task-reopen-button,
-  .task-edit-button {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
 /* ===============================
    Recordatorios por voz
 ================================ */
@@ -1177,291 +1024,6 @@ body {
   .reminder-actions button {
     width: 100%;
     justify-content: center;
-  }
-}
-
-/* ===============================
-   Calendario interno
-================================ */
-
-.calendar-section {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.calendar-header h2 {
-  margin: 8px 0 10px;
-  color: #3c0000;
-  font-size: 28px;
-}
-
-.calendar-header p {
-  color: #8a4b4b;
-  margin: 0;
-  line-height: 1.6;
-  max-width: 720px;
-}
-
-.calendar-layout {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 22px;
-  align-items: flex-start;
-}
-
-.calendar-panel,
-.calendar-events-panel {
-  background: #ffffff;
-  border: 1px solid rgba(150, 0, 24, 0.12);
-  border-radius: 24px;
-  padding: 22px;
-}
-
-.calendar-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-.calendar-toolbar h3 {
-  margin: 0;
-  color: #3c0000;
-  font-size: 21px;
-  text-align: center;
-}
-
-.calendar-toolbar button {
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 14px;
-  background: #fff1ef;
-  color: #960018;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.calendar-toolbar button:hover {
-  background: #ffc7c1;
-}
-
-.calendar-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.calendar-weekdays span {
-  text-align: center;
-  font-size: 12px;
-  font-weight: 800;
-  color: #8a4b4b;
-}
-
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
-
-.calendar-day {
-  min-height: 74px;
-  border: 1px solid rgba(150, 0, 24, 0.10);
-  border-radius: 16px;
-  background: #fff1ef;
-  color: #3c0000;
-  cursor: pointer;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.calendar-day:hover {
-  transform: translateY(-2px);
-  background: #ffc7c1;
-}
-
-.calendar-day span {
-  font-weight: 900;
-  font-size: 15px;
-}
-
-.calendar-day small {
-  background: linear-gradient(135deg, #960018, #cb4c46);
-  color: #ffffff;
-  border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.calendar-day-empty {
-  background: transparent;
-  border: none;
-  cursor: default;
-}
-
-.calendar-day-empty:hover {
-  transform: none;
-  background: transparent;
-}
-
-.calendar-day-today {
-  border-color: #960018;
-  box-shadow: 0 0 0 3px rgba(150, 0, 24, 0.12);
-}
-
-.calendar-day-has-events {
-  background: #ffffff;
-  border-color: #cb4c46;
-}
-
-.calendar-events-panel h3 {
-  margin: 0 0 18px;
-  color: #3c0000;
-  font-size: 21px;
-}
-
-.calendar-events-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.empty-calendar-events {
-  text-align: center;
-  color: #8a4b4b;
-  background: #fff1ef;
-  border-radius: 18px;
-  padding: 24px;
-}
-
-.calendar-event-card {
-  display: grid;
-  grid-template-columns: 68px 1fr;
-  gap: 14px;
-  background: #fff1ef;
-  border: 1px solid rgba(150, 0, 24, 0.12);
-  border-radius: 18px;
-  padding: 16px;
-}
-
-.calendar-event-date {
-  width: 62px;
-  height: 62px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #960018, #cb4c46);
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.calendar-event-date strong {
-  font-size: 22px;
-  line-height: 1;
-}
-
-.calendar-event-date span {
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.calendar-event-info h4 {
-  margin: 0 0 6px;
-  color: #3c0000;
-  font-size: 16px;
-}
-
-.calendar-event-info p {
-  margin: 0;
-  color: #8a4b4b;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.calendar-event-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.calendar-event-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #ffffff;
-  color: #670010;
-  border: 1px solid rgba(150, 0, 24, 0.10);
-  padding: 6px 9px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-@media (max-width: 980px) {
-  .calendar-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 620px) {
-  .calendar-header h2 {
-    font-size: 24px;
-  }
-
-  .calendar-panel,
-  .calendar-events-panel {
-    padding: 18px;
-    border-radius: 20px;
-  }
-
-  .calendar-weekdays {
-    gap: 5px;
-  }
-
-  .calendar-weekdays span {
-    font-size: 11px;
-  }
-
-  .calendar-grid {
-    gap: 5px;
-  }
-
-  .calendar-day {
-    min-height: 58px;
-    border-radius: 13px;
-    padding: 8px;
-  }
-
-  .calendar-day span {
-    font-size: 13px;
-  }
-
-  .calendar-day small {
-    font-size: 10px;
-    padding: 3px 6px;
-  }
-
-  .calendar-event-card {
-    grid-template-columns: 1fr;
-  }
-
-  .calendar-event-date {
-    width: 56px;
-    height: 56px;
   }
 }
 
@@ -2780,5 +2342,457 @@ body {
   #monthlyIncomeAmount,
   #monthlySavingsAmount {
     font-size: 1.65rem;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE FINAL DASHBOARD
+   Capa final para versión móvil / futura app Android
+===================================================== */
+
+/* Evita desbordes horizontales generales */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.main,
+.section-content,
+.card,
+.dashboard-card,
+.tasks-section,
+.voice-reminders-section,
+.calendar-section,
+.reminders-list-panel,
+.calendar-panel,
+.calendar-events-panel {
+  max-width: 100%;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .main {
+    width: 100%;
+    padding: 18px;
+    overflow-x: hidden;
+  }
+
+  .main-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .user-info {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #section-title {
+    font-size: 22px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .date-time {
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .cards-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .dashboard-card {
+    min-width: 0;
+  }
+
+  .section-content {
+    padding: 20px;
+  }
+
+  .welcome-text h2,
+  .tasks-header h2,
+  .voice-reminders-header h2,
+  .calendar-header h2 {
+    font-size: 26px;
+    line-height: 1.2;
+  }
+
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .reminder-timeline-card {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+
+  .reminder-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+/* Celular */
+@media (max-width: 600px) {
+  .main {
+    padding: 14px;
+  }
+
+  .main-header {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .avatar {
+    width: 42px;
+    height: 42px;
+  }
+
+  #section-title {
+    font-size: 20px;
+  }
+
+  .cards-overview {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .dashboard-card {
+    min-height: auto;
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .card-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+  }
+
+  .dashboard-card .card-info p,
+  #monthlyExpensesAmount,
+  #monthlyIncomeAmount,
+  #monthlySavingsAmount {
+    font-size: 1.45rem;
+    line-height: 1.15;
+  }
+
+  .section-content {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .welcome-text h2,
+  .tasks-header h2,
+  .voice-reminders-header h2,
+  .calendar-header h2 {
+    font-size: 23px;
+  }
+
+  .welcome-text p,
+  .tasks-header p,
+  .voice-reminders-header p,
+  .calendar-header p {
+    font-size: 14px;
+  }
+
+  .quick-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .quick-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Tareas */
+  .tasks-header {
+    flex-direction: column;
+  }
+
+  .task-main-button,
+  .task-save-button {
+    width: 100%;
+    justify-content: center;
+    min-height: 46px;
+  }
+
+  .tasks-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .task-form {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .task-card {
+    padding: 16px;
+  }
+
+  .task-card-main {
+    flex-direction: column;
+  }
+
+  .task-card-actions {
+    flex-direction: column;
+  }
+
+  .task-complete-button,
+  .task-delete-button,
+  .task-reopen-button,
+  .task-edit-button {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  /* Recordatorios */
+  .voice-reminders-header {
+    flex-direction: column;
+  }
+
+  .enable-alerts-button {
+    width: 100%;
+    justify-content: center;
+    min-height: 46px;
+  }
+
+  .voice-reminder-panel {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .voice-reminder-button {
+    width: 82px;
+    height: 82px;
+  }
+
+  .detected-reminder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reminders-list-panel {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .reminder-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reminder-filter-button {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .reminder-timeline-card {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .reminder-date-badge {
+    width: 62px;
+    height: 66px;
+  }
+
+  .reminder-top-row {
+    flex-direction: column;
+  }
+
+  .reminder-actions {
+    grid-column: auto;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .reminder-actions button {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  /* Calendario */
+  .calendar-panel,
+  .calendar-events-panel {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .calendar-toolbar {
+    gap: 8px;
+  }
+
+  .calendar-toolbar h3 {
+    font-size: 18px;
+  }
+
+  .calendar-nav-button {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    flex-shrink: 0;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(34px, 1fr));
+    gap: 5px;
+  }
+
+  .calendar-weekdays {
+    gap: 5px;
+  }
+
+  .calendar-weekdays span {
+    font-size: 10px;
+  }
+
+  .calendar-day {
+    min-height: 58px;
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .calendar-day-number {
+    font-size: 13px;
+  }
+
+  .calendar-day-indicators {
+    align-items: flex-end;
+  }
+
+  .calendar-day-indicators strong {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
+
+  .calendar-day-dots {
+    display: none;
+  }
+
+  .calendar-events-heading {
+    flex-direction: column;
+  }
+
+  .show-month-events-button {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .calendar-event-card {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .calendar-event-date {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+/* Celular muy pequeño */
+@media (max-width: 390px) {
+  .main {
+    padding: 12px;
+  }
+
+  .section-content {
+    padding: 14px;
+  }
+
+  .dashboard-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .card-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .dashboard-card .card-info p,
+  #monthlyExpensesAmount,
+  #monthlyIncomeAmount,
+  #monthlySavingsAmount {
+    font-size: 1.3rem;
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(30px, 1fr));
+    gap: 4px;
+  }
+
+  .calendar-day {
+    min-height: 52px;
+    padding: 5px;
+  }
+
+  .calendar-day-number {
+    font-size: 12px;
+  }
+}
+
+/* ===============================
+   Tarjetas clickeables del Inicio
+================================ */
+
+.dashboard-card-clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card-clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 38px rgba(60, 0, 0, 0.12);
+}
+
+.dashboard-card-clickable:active {
+  transform: scale(0.98);
+}
+
+/* ===============================
+   Nota compacta tarea completada
+================================ */
+
+.task-completed-note {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 12px !important;
+  line-height: 1.2;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.task-completed-note i {
+  font-size: 12px;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .task-completed-note {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 12px;
+    font-size: 11.5px !important;
   }
 }

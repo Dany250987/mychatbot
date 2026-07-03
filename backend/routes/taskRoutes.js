@@ -29,35 +29,55 @@ router.get('/', (req, res) => {
     });
   }
 
-  const sql = `
-    SELECT 
-      id,
-      user_id,
-      title,
-      description,
-      category,
-      priority,
-      due_date,
-      status,
-      created_at,
-      updated_at
-    FROM tasks
+  // Primero eliminamos automáticamente las tareas completadas con más de 10 días
+  const deleteOldCompletedTasksSql = `
+    DELETE FROM tasks
     WHERE user_id = ?
-    ORDER BY due_date ASC, id DESC
+    AND status = 'completada'
+    AND completed_at IS NOT NULL
+    AND completed_at < DATE_SUB(NOW(), INTERVAL 10 DAY)
   `;
 
-  connection.query(sql, [userId], (err, results) => {
-    if (err) {
-      console.error('❌ Error al consultar tareas:', err);
+  connection.query(deleteOldCompletedTasksSql, [userId], (deleteErr) => {
+    if (deleteErr) {
+      console.error('❌ Error al eliminar tareas completadas antiguas:', deleteErr);
 
       return res.status(500).json({
-        mensaje: 'Error al consultar las tareas'
+        mensaje: 'Error al depurar tareas completadas antiguas'
       });
     }
 
-    res.json({
-      mensaje: 'Tareas consultadas correctamente',
-      tareas: results
+    const sql = `
+      SELECT 
+        id,
+        user_id,
+        title,
+        description,
+        category,
+        priority,
+        due_date,
+        status,
+        completed_at,
+        created_at,
+        updated_at
+      FROM tasks
+      WHERE user_id = ?
+      ORDER BY due_date ASC, id DESC
+    `;
+
+    connection.query(sql, [userId], (err, results) => {
+      if (err) {
+        console.error('❌ Error al consultar tareas:', err);
+
+        return res.status(500).json({
+          mensaje: 'Error al consultar las tareas'
+        });
+      }
+
+      res.json({
+        mensaje: 'Tareas consultadas correctamente',
+        tareas: results
+      });
     });
   });
 });
@@ -154,7 +174,12 @@ router.put('/:id', (req, res) => {
       category = ?,
       priority = ?,
       due_date = ?,
-      status = ?
+      status = ?,
+      completed_at = CASE
+        WHEN ? = 'completada' AND completed_at IS NULL THEN NOW()
+        WHEN ? = 'pendiente' THEN NULL
+        ELSE completed_at
+      END
     WHERE id = ? AND user_id = ?
   `;
 
@@ -164,6 +189,8 @@ router.put('/:id', (req, res) => {
     category,
     priority,
     due_date,
+    status,
+    status,
     status,
     taskId,
     user_id
@@ -189,7 +216,6 @@ router.put('/:id', (req, res) => {
     });
   });
 });
-
 
 // Ruta para eliminar una tarea
 // Ejemplo:

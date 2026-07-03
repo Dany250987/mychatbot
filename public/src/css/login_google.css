@@ -13,27 +13,40 @@
   --text-dark: #2b0b0b;
   --text-muted: #8a4b4b;
   --border-soft: rgba(150, 0, 24, 0.18);
+  --shadow-soft: 0 28px 70px rgba(60, 0, 0, 0.18);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
+  padding: 28px;
   font-family: "Montserrat", sans-serif;
+  color: var(--text-dark);
   background:
     radial-gradient(circle at 10% 15%, rgba(255, 132, 120, 0.38), transparent 28%),
     radial-gradient(circle at 85% 85%, rgba(203, 76, 70, 0.20), transparent 30%),
     linear-gradient(135deg, #fff1ef, #ffffff 45%, #fff1ef);
-  color: var(--text-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 28px;
-  overflow-x: hidden;
 }
+
+/* ===============================
+   Decoración de fondo
+================================ */
 
 .login-background-decoration {
   position: fixed;
@@ -46,98 +59,108 @@ body {
 .decoration-one {
   width: 280px;
   height: 280px;
-  background: rgba(255, 132, 120, 0.24);
   top: -90px;
   left: -80px;
+  background: rgba(255, 132, 120, 0.24);
 }
 
 .decoration-two {
   width: 340px;
   height: 340px;
-  background: rgba(150, 0, 24, 0.12);
   right: -120px;
   bottom: -110px;
+  background: rgba(150, 0, 24, 0.12);
 }
 
+/* ===============================
+   Tarjeta principal
+================================ */
+
 .login-card {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 980px;
   min-height: 620px;
   display: grid;
   grid-template-columns: 0.95fr 1.05fr;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 34px;
-  border: 1px solid var(--border-soft);
-  box-shadow: 0 28px 70px rgba(60, 0, 0, 0.18);
   overflow: hidden;
-  position: relative;
-  z-index: 1;
+  border-radius: 34px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
 }
+
+/* ===============================
+   Panel visual izquierdo
+================================ */
 
 .login-visual-panel {
   position: relative;
+  overflow: hidden;
   padding: 38px;
   color: #ffffff;
   background:
     radial-gradient(circle at top right, rgba(255, 176, 168, 0.55), transparent 34%),
     linear-gradient(160deg, var(--dark-red), var(--wine-red), var(--deep-red), var(--coral-red));
-  overflow: hidden;
 }
 
-.login-visual-panel::before {
-  content: "";
-  position: absolute;
-  width: 230px;
-  height: 230px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.13);
-  right: -85px;
-  top: -70px;
-}
-
+.login-visual-panel::before,
 .login-visual-panel::after {
   content: "";
   position: absolute;
+  border-radius: 50%;
+}
+
+.login-visual-panel::before {
+  width: 230px;
+  height: 230px;
+  top: -70px;
+  right: -85px;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.login-visual-panel::after {
   width: 260px;
   height: 260px;
-  border-radius: 50%;
-  background: rgba(255, 199, 193, 0.16);
   left: -90px;
   bottom: -90px;
+  background: rgba(255, 199, 193, 0.16);
 }
 
 .visual-badge {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  width: fit-content;
   padding: 10px 16px;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 800;
-  position: relative;
-  z-index: 1;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 .visual-content {
+  position: relative;
+  z-index: 1;
   min-height: 500px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  position: relative;
-  z-index: 1;
 }
 
 .visual-icon-card {
   width: 74px;
   height: 74px;
+  margin-bottom: 24px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.24);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   box-shadow: 0 18px 35px rgba(60, 0, 0, 0.20);
 }
 
@@ -155,47 +178,51 @@ body {
 }
 
 .visual-content h2 {
+  max-width: 390px;
+  margin: 0 0 18px;
   font-size: 42px;
   line-height: 1.08;
-  margin: 0 0 18px;
-  max-width: 390px;
 }
 
 .visual-content p {
+  max-width: 390px;
   margin: 0;
   color: rgba(255, 255, 255, 0.84);
   line-height: 1.7;
   font-size: 15px;
-  max-width: 390px;
 }
 
 .visual-mini-cards {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-  margin-top: 32px;
   max-width: 360px;
+  margin-top: 32px;
 }
 
 .visual-mini-cards div {
+  padding: 14px 16px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 18px;
-  padding: 14px 16px;
   backdrop-filter: blur(10px);
 }
 
 .visual-mini-cards strong {
   display: block;
-  font-size: 14px;
   margin-bottom: 4px;
+  font-size: 14px;
 }
 
 .visual-mini-cards span {
   display: block;
-  font-size: 12px;
   color: rgba(255, 255, 255, 0.76);
+  font-size: 12px;
 }
+
+/* ===============================
+   Panel formulario
+================================ */
 
 .login-form-panel {
   padding: 42px 46px;
@@ -214,12 +241,12 @@ body {
 .logo-container {
   width: 88px;
   height: 88px;
+  margin-bottom: 18px;
   border-radius: 28px;
   background: linear-gradient(135deg, #fff1ef, #ffc7c1);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 18px;
   box-shadow: 0 16px 34px rgba(150, 0, 24, 0.14);
 }
 
@@ -233,27 +260,28 @@ body {
 
 .login-kicker {
   display: inline-flex;
-  background: #fff1ef;
-  color: var(--deep-red);
+  width: fit-content;
+  margin-bottom: 14px;
   padding: 8px 14px;
   border-radius: 999px;
+  background: #fff1ef;
+  color: var(--deep-red);
   font-size: 12px;
   font-weight: 800;
-  margin-bottom: 14px;
 }
 
 .card-header h1 {
-  font-size: 31px;
-  line-height: 1.15;
+  max-width: 430px;
   margin: 0 0 14px;
   color: var(--dark-red);
-  max-width: 430px;
+  font-size: 31px;
+  line-height: 1.15;
 }
 
 .card-header p {
   margin: 0 0 26px;
-  font-size: 15px;
   color: var(--text-muted);
+  font-size: 15px;
   line-height: 1.5;
 }
 
@@ -262,10 +290,16 @@ body {
   display: block;
 }
 
+/* ===============================
+   Google / divisor
+================================ */
+
 .g_id_signin {
   display: flex;
   justify-content: center;
   margin-bottom: 22px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .login-divider {
@@ -273,7 +307,7 @@ body {
   align-items: center;
   gap: 12px;
   margin: 20px 0 22px;
-  color: #8a4b4b;
+  color: var(--text-muted);
   font-size: 13px;
   font-weight: 700;
 }
@@ -283,8 +317,12 @@ body {
   content: "";
   flex: 1;
   height: 1px;
-  background: #ffc7c1;
+  background: var(--pale-salmon);
 }
+
+/* ===============================
+   Formulario
+================================ */
 
 .form {
   width: 100%;
@@ -300,21 +338,21 @@ body {
 }
 
 label {
+  color: var(--wine-red);
   font-size: 14px;
   font-weight: 800;
-  color: var(--wine-red);
 }
 
 input[type="email"],
 input[type="password"] {
   width: 100%;
+  padding: 16px 17px;
   border: 1px solid var(--pale-salmon);
   border-radius: 18px;
-  padding: 16px 17px;
-  font-size: 15px;
-  font-family: inherit;
-  color: var(--dark-red);
   background: #ffffff;
+  color: var(--dark-red);
+  font-family: inherit;
+  font-size: 15px;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -326,32 +364,38 @@ input[type="password"]:focus {
   transform: translateY(-1px);
 }
 
+input:-webkit-autofill {
+  box-shadow: 0 0 0 1000px #fff1ef inset;
+  -webkit-text-fill-color: var(--dark-red);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 button[type="submit"] {
   width: 100%;
+  margin-top: 12px;
+  padding: 16px 24px;
   border: none;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--deep-red), var(--coral-red));
   color: #ffffff;
-  padding: 16px 24px;
+  font-family: inherit;
   font-size: 16px;
   font-weight: 900;
-  font-family: inherit;
   cursor: pointer;
-  margin-top: 12px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 button[type="submit"]:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 30px rgba(150, 0, 24, 0.24);
   background: linear-gradient(135deg, var(--wine-red), var(--deep-red));
+  box-shadow: 0 16px 30px rgba(150, 0, 24, 0.24);
 }
 
 .signup-text {
-  text-align: center;
-  font-size: 15px;
   margin: 24px 0 0;
+  text-align: center;
   color: var(--text-muted);
+  font-size: 15px;
 }
 
 .signup-text a,
@@ -371,20 +415,19 @@ button[type="submit"]:hover {
   margin-top: 20px;
 }
 
-input:-webkit-autofill {
-  box-shadow: 0 0 0 1000px #fff1ef inset;
-  -webkit-text-fill-color: var(--dark-red);
-  transition: background-color 5000s ease-in-out 0s;
-}
+/* ===============================
+   Responsive
+================================ */
 
-@media screen and (max-width: 880px) {
+@media (max-width: 880px) {
   body {
     align-items: flex-start;
   }
 
   .login-card {
-    grid-template-columns: 1fr;
     max-width: 560px;
+    min-height: auto;
+    grid-template-columns: 1fr;
   }
 
   .login-visual-panel {
@@ -401,7 +444,7 @@ input:-webkit-autofill {
   }
 
   .visual-mini-cards {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     max-width: none;
   }
 
@@ -410,9 +453,13 @@ input:-webkit-autofill {
   }
 }
 
-@media screen and (max-width: 560px) {
+@media (max-width: 560px) {
   body {
     padding: 16px;
+  }
+
+  .login-background-decoration {
+    opacity: 0.45;
   }
 
   .login-card {
@@ -434,8 +481,8 @@ input:-webkit-autofill {
   .visual-icon-card {
     width: 62px;
     height: 62px;
-    border-radius: 20px;
     margin-bottom: 18px;
+    border-radius: 20px;
   }
 
   .visual-icon-card span {
@@ -477,5 +524,41 @@ input:-webkit-autofill {
 
   .card-header p {
     font-size: 14px;
+  }
+
+  input[type="email"],
+  input[type="password"],
+  button[type="submit"] {
+    min-height: 50px;
+  }
+}
+
+@media (max-width: 390px) {
+  body {
+    padding: 12px;
+  }
+
+  .login-card {
+    border-radius: 22px;
+  }
+
+  .login-visual-panel {
+    padding: 20px;
+  }
+
+  .visual-content h2 {
+    font-size: 24px;
+  }
+
+  .visual-mini-cards {
+    display: none;
+  }
+
+  .login-form-panel {
+    padding: 26px 18px;
+  }
+
+  .card-header h1 {
+    font-size: 23px;
   }
 }

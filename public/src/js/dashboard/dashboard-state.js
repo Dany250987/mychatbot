@@ -2,7 +2,7 @@ let tasks = [];
 let currentUserId = null;
 let editingTaskId = null;
 
-let currentTaskFilter = "todas";
+let currentTaskFilter = "pendiente";
 let currentReminderFilter = "activos";
 
 let reminders = [];

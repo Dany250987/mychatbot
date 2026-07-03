@@ -1,18 +1,28 @@
-// Usuario temporal para pruebas.
-// Más adelante este valor debe salir del usuario que inició sesión.
-// Obtenemos los datos del usuario que inició sesión
+
+// ===============================
+// Sesión de usuario
+// ===============================
+
+// Obtenemos los datos del usuario que inició sesión.
+// Si no existe sesión válida, redirigimos al login.
 const userData = localStorage.getItem("userData");
 
-// Si no hay sesión activa, redirigimos al login
-if (!userData) {
-  alert("⚠️ Sesión no iniciada. Por favor, inicia sesión.");
-  window.location.href = "login_google.html";
+let user = null;
+
+try {
+  user = userData ? JSON.parse(userData) : null;
+} catch (error) {
+  console.error("Error al leer la sesión:", error);
+  user = null;
 }
 
-// Convertimos el texto guardado en localStorage a un objeto JavaScript
-const user = JSON.parse(userData);
+if (!user || !user.id) {
+  alert("⚠️ Sesión no iniciada. Por favor, inicia sesión.");
+  window.location.href = "login_google.html";
+  throw new Error("Sesión no iniciada");
+}
 
-// Tomamos el id real del usuario logueado
+// Tomamos el id real del usuario logueado.
 const USER_ID = user.id;
 
 // Ruta base del backend para gastos.
@@ -77,7 +87,7 @@ async function loadExpenses() {
       return;
     }
 
-    currentExpenses = data.gastos;
+    currentExpenses = data.gastos || [];
 
     applyMonthFilter();
 
@@ -107,7 +117,8 @@ async function saveExpense(event) {
     !newExpense.expense_date ||
     !newExpense.category ||
     !newExpense.description ||
-    !newExpense.amount
+    !newExpense.amount ||
+    newExpense.amount <= 0
   ) {
     expenseMessage.textContent = 'Por favor completa todos los campos.';
     return;
@@ -118,7 +129,7 @@ async function saveExpense(event) {
     const method = editingId ? 'PUT' : 'POST';
 
     const response = await fetch(url, {
-        method: method,
+      method: method,
       headers: {
         'Content-Type': 'application/json'
       },
@@ -133,17 +144,17 @@ async function saveExpense(event) {
     }
 
     await Swal.fire({
-        title: editingId ? 'Gasto actualizado' : 'Gasto registrado',
-        text: editingId
-            ? 'La información del gasto fue actualizada correctamente.'
-            : 'El gasto fue guardado correctamente.',
-        icon: 'success',
-        confirmButtonColor: '#3c0000'
-        });
+      title: editingId ? 'Gasto actualizado' : 'Gasto registrado',
+      text: editingId
+        ? 'La información del gasto fue actualizada correctamente.'
+        : 'El gasto fue guardado correctamente.',
+      icon: 'success',
+      confirmButtonColor: '#3c0000'
+    });
 
-        expenseMessage.textContent = '';
+    expenseMessage.textContent = '';
 
-        resetFormMode();
+    resetFormMode();
 
     // Volvemos a consultar para actualizar la tabla y el total.
     loadExpenses();
@@ -326,14 +337,27 @@ function formatMoney(value) {
 // Esta función muestra la fecha sin que el navegador la cambie por zona horaria.
 function formatDate(dateValue) {
   const cleanDate = formatDateForInput(dateValue);
+
+  if (!cleanDate) {
+    return '';
+  }
+
   const [year, month, day] = cleanDate.split('-');
+
+  if (!year || !month || !day) {
+    return cleanDate;
+  }
 
   return `${day}/${month}/${year}`;
 }
 
 // Esta función convierte la fecha al formato que necesita el input type="date".
 function formatDateForInput(dateValue) {
-  return dateValue.split('T')[0];
+  if (!dateValue) {
+    return '';
+  }
+
+  return String(dateValue).split('T')[0].split(' ')[0];
 }
 
 // Esta función obtiene la fecha local del sistema en formato YYYY-MM-DD.
@@ -421,7 +445,7 @@ async function deleteExpense(expenseId) {
         title: 'No se pudo eliminar',
         text: data.mensaje || 'Ocurrió un error.',
         icon: 'error',
-        confirmButtonColor: '#3c0000'
+      confirmButtonColor: '#3c0000'
       });
       return;
     }
@@ -570,7 +594,7 @@ async function saveVoiceExpenseAuto(expenseData) {
         title: 'No se pudo guardar',
         text: data.mensaje || 'No se pudo guardar el gasto por voz.',
         icon: 'error',
-        confirmButtonColor: '#3c0000'
+      confirmButtonColor: '#3c0000'
       });
 
       return;
@@ -1406,7 +1430,7 @@ async function saveMonthlyIncome() {
         title: 'No se pudo guardar',
         text: data.mensaje || 'Ocurrió un error al guardar el ingreso.',
         icon: 'error',
-        confirmButtonColor: '#3c0000'
+      confirmButtonColor: '#3c0000'
       });
       return;
     }
@@ -1501,7 +1525,8 @@ async function saveAdditionalIncome() {
   if (
     !additionalIncomeData.income_date ||
     !additionalIncomeData.description ||
-    !additionalIncomeData.amount
+    !additionalIncomeData.amount ||
+    additionalIncomeData.amount <= 0
   ) {
     Swal.fire({
       title: 'Datos incompletos',
@@ -1537,7 +1562,7 @@ async function saveAdditionalIncome() {
         title: isEditing ? 'No se pudo actualizar' : 'No se pudo guardar',
         text: data.mensaje || 'Ocurrió un error al procesar el ingreso adicional.',
         icon: 'error',
-        confirmButtonColor: '#3c0000'
+      confirmButtonColor: '#3c0000'
       });
       return;
     }
@@ -1603,7 +1628,7 @@ async function deleteAdditionalIncome(additionalIncomeId) {
         title: 'No se pudo eliminar',
         text: data.mensaje || 'Ocurrió un error al eliminar el ingreso adicional.',
         icon: 'error',
-        confirmButtonColor: '#3c0000'
+      confirmButtonColor: '#3c0000'
       });
       return;
     }
@@ -1709,7 +1734,7 @@ function renderAdditionalIncomes() {
             title: 'Editar ingreso adicional',
             text: 'Los datos se cargaron en el formulario. Modifica la información y presiona Actualizar ingreso.',
             confirmButtonText: 'Entendido'
-        });
+    });
     });
 
     deleteButton.addEventListener('click', () => {
@@ -1986,19 +2011,19 @@ document.addEventListener('DOMContentLoaded', () => {
   setCurrentMonthFilter();
   setupCollapsibleSections();
 
+  additionalIncomeDate.value = getLocalDate();
+
   loadExpenses();
   loadMonthlyIncome();
   loadAdditionalIncomes();
 
-  additionalIncomeDate.value = getLocalDate();
-
   expenseForm.addEventListener('submit', saveExpense);
   cancelEditButton.addEventListener('click', resetFormMode);
 
-  monthFilter.addEventListener('change', () => {
+  monthFilter.addEventListener('change', async () => {
     applyMonthFilter();
-    loadMonthlyIncome();
-    loadAdditionalIncomes();
+    await loadMonthlyIncome();
+    await loadAdditionalIncomes();
   });
 
   voiceButton.addEventListener('click', startVoiceExpense);

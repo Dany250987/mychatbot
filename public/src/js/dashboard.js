@@ -46,16 +46,17 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   if (quickTaskButton) {
     quickTaskButton.addEventListener("click", () => {
-      showSection("tareas");
-    });
+      window.location.hash = "tareas";
+  });
   }
 
   if (quickReminderButton) {
     quickReminderButton.addEventListener("click", () => {
-      showSection("recordatorios");
-    });
+    window.location.hash = "recordatorios";
+  });
   }
 
+  setupDashboardCardNavigation();
   /*
     Luego cargamos los datos.
     No usamos await aquí para no bloquear el sidebar.
@@ -96,11 +97,99 @@ function openSectionFromHash() {
   const activePage = getActiveDashboardPage();
 
   if (activePage === "dashboard") {
+    toggleDashboardHomeCards(true);
     updateSidebar("dashboard");
+
+    const title = document.getElementById("section-title");
+
+    if (title) {
+      const userData = localStorage.getItem("userData");
+      const user = userData ? JSON.parse(userData) : null;
+      title.textContent = user ? `Bienvenida, ${user.name}` : "Bienvenida 💫";
+    }
+
     return;
   }
 
   showSection(activePage);
+}
+
+function toggleDashboardHomeCards(showCards) {
+  const cardsOverview = document.querySelector(".cards-overview");
+
+  if (!cardsOverview) {
+    return;
+  }
+
+  cardsOverview.style.display = showCards ? "grid" : "none";
+}
+
+function setupDashboardCardNavigation() {
+  const cardRoutes = [
+    {
+      counterId: "totalTasksCount",
+      section: "tareas"
+    },
+    {
+      counterId: "pendingTasksCount",
+      section: "tareas"
+    },
+    {
+      counterId: "todayEventsCount",
+      section: "calendario"
+    },
+    {
+      counterId: "activeRemindersCount",
+      section: "recordatorios"
+    },
+    {
+      counterId: "monthlyExpensesAmount",
+      url: "./gastos.html"
+    },
+    {
+      counterId: "monthlyIncomeAmount",
+      url: "./gastos.html"
+    },
+    {
+      counterId: "monthlySavingsAmount",
+      url: "./gastos.html"
+    }
+  ];
+
+  cardRoutes.forEach((route) => {
+    const counter = document.getElementById(route.counterId);
+
+    if (!counter) {
+      return;
+    }
+
+    const card = counter.closest(".dashboard-card");
+
+    if (!card) {
+      return;
+    }
+
+    card.classList.add("dashboard-card-clickable");
+
+    card.addEventListener("click", () => {
+      if (route.url) {
+        window.location.href = route.url;
+        return;
+      }
+
+      window.location.hash = route.section;
+    });
+  });
+}
+
+function toggleDashboardHomeCards(showCards) {
+  const cardsOverview = document.querySelector(".cards-overview");
+
+  if (!cardsOverview) {
+    return;
+  }
+
+  cardsOverview.style.display = showCards ? "grid" : "none";
 }
 
 function showSection(section, selectedLink = null) {
@@ -108,6 +197,7 @@ function showSection(section, selectedLink = null) {
   const title = document.getElementById("section-title");
 
   updateSidebar(section);
+  toggleDashboardHomeCards(false);
 
   const sectionTitles = {
     tareas: "Tus tareas pendientes",
@@ -166,6 +256,69 @@ function showSection(section, selectedLink = null) {
       </div>
     </div>
   `;
+}
+
+function setupDashboardCardNavigation() {
+  const cardRoutes = [
+    {
+      counterId: "totalTasksCount",
+      section: "tareas"
+    },
+    {
+      counterId: "pendingTasksCount",
+      section: "tareas"
+    },
+    {
+      counterId: "todayEventsCount",
+      section: "calendario"
+    },
+    {
+      counterId: "activeRemindersCount",
+      section: "recordatorios"
+    },
+    {
+      counterId: "monthlyExpensesAmount",
+      url: "./gastos.html"
+    },
+    {
+      counterId: "monthlyIncomeAmount",
+      url: "./gastos.html"
+    },
+    {
+      counterId: "monthlySavingsAmount",
+      url: "./gastos.html"
+    }
+  ];
+
+  cardRoutes.forEach((route) => {
+    const counter = document.getElementById(route.counterId);
+
+    if (!counter) {
+      return;
+    }
+
+    const card = counter.closest(".dashboard-card");
+
+    if (!card) {
+      return;
+    }
+
+    card.classList.add("dashboard-card-clickable");
+
+    card.addEventListener("click", () => {
+      if (route.url) {
+        window.location.href = route.url;
+        return;
+      }
+
+      if (window.location.hash === `#${route.section}`) {
+        showSection(route.section);
+        return;
+      }
+
+      window.location.hash = route.section;
+    });
+  });
 }
 
 

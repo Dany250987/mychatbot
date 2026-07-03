@@ -1,43 +1,125 @@
-// ✅ Login con Google
-function handleCredentialResponse(response) {
-  const data = jwt_decode(response.credential);
-  console.log("✅ Datos recibidos de Google:", data);
+// ===============================
+// Autenticación de usuarios
+// Login con Google y login clásico
+// ===============================
 
-  const name = data.name;
-  const email = data.email;
-  const picture = data.picture;
-
-  fetch("/api/auth/google-login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ name, email, picture })
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("📥 Respuesta del backend:", data);
-      alert(data.message);
-
-      // Guardar y redirigir
-      localStorage.setItem("userData", JSON.stringify(data.user));
-      window.location.href = "dashboard.html";
-    })
-    .catch((err) => {
-      console.error("❌ Error al enviar a la API:", err);
+function showAuthMessage({ title, text, icon }) {
+  if (typeof Swal !== "undefined") {
+    return Swal.fire({
+      title,
+      text,
+      icon,
+      confirmButtonColor: "#3c0000"
     });
+  }
+
+  alert(text || title);
+  return Promise.resolve();
 }
 
-// ✅ Login clásico con email y contraseña
+function saveUserSession(user) {
+  localStorage.setItem("userData", JSON.stringify(user));
+}
+
+function redirectToDashboard() {
+  window.location.href = "dashboard.html";
+}
+
+// ===============================
+// Login con Google
+// Esta función debe quedar global porque Google la llama desde el HTML
+// ===============================
+
+async function handleCredentialResponse(response) {
+  try {
+    if (!response || !response.credential) {
+      await showAuthMessage({
+        title: "No se pudo iniciar sesión",
+        text: "Google no devolvió una credencial válida.",
+        icon: "error"
+      });
+      return;
+    }
+
+    const googleUser = jwt_decode(response.credential);
+
+    const userData = {
+      name: googleUser.name,
+      email: googleUser.email,
+      picture: googleUser.picture
+    };
+
+    const apiResponse = await fetch("/api/auth/google-login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(userData)
+    });
+
+    const data = await apiResponse.json();
+
+    if (!apiResponse.ok || !data.user) {
+      await showAuthMessage({
+        title: "No se pudo iniciar sesión",
+        text: data.message || data.error || "Ocurrió un error al validar tu cuenta de Google.",
+        icon: "error"
+      });
+      return;
+    }
+
+    saveUserSession(data.user);
+
+    await showAuthMessage({
+      title: "Bienvenida",
+      text: data.message || `Hola ${data.user.name}, ingresaste correctamente.`,
+      icon: "success"
+    });
+
+    redirectToDashboard();
+
+  } catch (error) {
+    console.error("Error en login con Google:", error);
+
+    await showAuthMessage({
+      title: "Error",
+      text: "Hubo un problema al iniciar sesión con Google.",
+      icon: "error"
+    });
+  }
+}
+
+// Google necesita encontrar esta función en window
+window.handleCredentialResponse = handleCredentialResponse;
+
+// ===============================
+// Login clásico con correo y contraseña
+// ===============================
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("login-form");
-  if (!form) return; // Protección extra
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  if (!form) {
+    return;
+  }
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+      await showAuthMessage({
+        title: "Datos incompletos",
+        text: "Ingresa tu correo y contraseña.",
+        icon: "warning"
+      });
+      return;
+    }
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -50,17 +132,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        alert("✅ Bienvenido " + data.user.name);
-        localStorage.setItem("userData", JSON.stringify(data.user));
-        window.location.href = "dashboard.html";
-      } else {
-        alert(data.error || "Correo o contraseña incorrectos");
+      if (!response.ok || !data.user) {
+        await showAuthMessage({
+          title: "No se pudo iniciar sesión",
+          text: data.error || data.message || "Correo o contraseña incorrectos.",
+          icon: "error"
+        });
+        return;
       }
 
+      saveUserSession(data.user);
+
+      await showAuthMessage({
+        title: "Bienvenida",
+        text: `Hola ${data.user.name}, ingresaste correctamente.`,
+        icon: "success"
+      });
+
+      redirectToDashboard();
+
     } catch (error) {
-      console.error("❌ Error en login clásico:", error);
-      alert("Hubo un problema al intentar iniciar sesión.");
+      console.error("Error en login clásico:", error);
+
+      await showAuthMessage({
+        title: "Error",
+        text: "Hubo un problema al intentar iniciar sesión.",
+        icon: "error"
+      });
     }
   });
 });

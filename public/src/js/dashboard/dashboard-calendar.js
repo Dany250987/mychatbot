@@ -366,6 +366,12 @@ function showBrowserReminderNotification(reminder) {
 });
 }
 
+function shouldShowReminderInCalendar(reminder) {
+  const status = String(reminder.status || "").toLowerCase();
+
+  return status === "activo";
+}
+
 function renderCalendarSection() {
   const contentEl = document.getElementById("section-content");
 
@@ -607,6 +613,10 @@ function renderCalendarEventsList() {
   const month = currentCalendarDate.getMonth();
 
   let filteredReminders = reminders.filter((reminder) => {
+    if (!shouldShowReminderInCalendar(reminder)) {
+      return false;
+    }
+
     const reminderDate = getReminderDateValue(reminder.reminder_date);
     const date = new Date(`${reminderDate}T00:00:00`);
 
@@ -758,7 +768,8 @@ function getCalendarEventCategoryClass(category) {
 
 function getRemindersByDate(dateKey) {
   return reminders.filter((reminder) => {
-    return getReminderDateValue(reminder.reminder_date) === dateKey;
+    return shouldShowReminderInCalendar(reminder)
+      && getReminderDateValue(reminder.reminder_date) === dateKey;
   });
 }
 

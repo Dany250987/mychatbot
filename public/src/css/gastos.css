@@ -1,9 +1,3 @@
-/* gastos.css depurado
-   Limpieza segura:
-   - Se eliminó el bloque duplicado de tabla móvil.
-   - Se eliminó la regla antigua que pintaba ahorro positivo y negativo del mismo color.
-   - Se conservaron ids, clases, colores, responsivo, gráficas y secciones desplegables.
-*/
 
 :root {
   --primary: #3c0000;
@@ -260,146 +254,201 @@ body {
 .income-panel {
   display: grid;
   gap: 22px;
+  margin-top: 18px;
   margin-bottom: 22px;
-  padding: 26px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid var(--border);
-  box-shadow: 0 14px 35px rgba(31, 41, 55, 0.08);
+  padding: 24px 28px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(203, 76, 70, 0.14);
+  box-shadow: 0 16px 38px rgba(60, 0, 0, 0.07);
+}
+
+.income-panel-header {
+  margin: 0;
 }
 
 .income-panel-header h2 {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0 0 6px;
-  font-size: 22px;
+  margin: 0;
+  color: #111827;
+  font-size: 1.15rem;
+  line-height: 1.2;
   font-weight: 900;
-  color: var(--text);
+  letter-spacing: -0.3px;
 }
 
 .income-panel-header h2 i {
-  color: var(--primary);
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #fff1ef;
+  color: #960018;
+  font-size: 0.9rem;
 }
 
 .income-panel-header p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.35;
 }
 
 .income-summary-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
 }
 
 .income-summary-item {
-  padding: 16px 18px;
-  border-radius: 20px;
-  background: #f8faff;
-  border: 1px solid var(--border-light);
+  position: relative;
+  padding: 22px 24px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.income-summary-item::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: linear-gradient(180deg, #7a0010, #b00020);
+  opacity: 0.85;
 }
 
 .income-summary-item span {
   display: block;
-  margin-bottom: 6px;
-  color: var(--muted);
-  font-size: 12px;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.78rem;
   font-weight: 800;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .income-summary-item strong {
   display: block;
-  color: var(--text);
-  font-size: 22px;
+  color: #020617;
+  font-size: 1.7rem;
   font-weight: 900;
+}
+
+#monthlySavings.positive-saving {
+  color: #15803d;
+}
+
+#monthlySavings.negative-saving {
+  color: #b00020;
 }
 
 .income-forms-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
 }
 
 .income-form-box {
   display: grid;
   gap: 12px;
-  padding: 20px;
-  border-radius: 22px;
+  padding: 24px;
+  border-radius: 24px;
   background: #ffffff;
-  border: 1px solid var(--border-light);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
 }
 
 .income-form-box h3 {
-  margin: 0 0 4px;
-  font-size: 17px;
+  margin: 0 0 10px;
+  color: #020617;
+  font-size: 1.2rem;
   font-weight: 900;
-  color: var(--text);
 }
 
 .income-form-box label {
-  color: #374151;
-  font-size: 13px;
+  display: block;
+  margin: 10px 0 2px;
+  color: #1e293b;
+  font-size: 0.9rem;
   font-weight: 800;
 }
 
 .income-form-box input {
-  height: 46px;
-  padding: 0 14px;
-  border: 1px solid #dbe0f0;
-  border-radius: 15px;
+  width: 100%;
+  height: 54px;
+  padding: 0 18px;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
   background: #ffffff;
   color: var(--text);
-  font-size: 14px;
+  font-size: 1rem;
   outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .income-form-box input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(150, 0, 24, 0.12);
+  border-color: #7a0010;
+  box-shadow: 0 0 0 4px rgba(122, 0, 16, 0.10);
 }
 
 .income-form-box button {
-  height: 46px;
+  width: 100%;
+  min-height: 54px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #620006, #b00020);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: none;
-  border-radius: 999px;
-  color: #ffffff;
-  font-weight: 900;
-  cursor: pointer;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  transition: 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .income-form-box button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 22px rgba(150, 0, 24, 0.18);
-}
-
-.additional-income-list,
-.additional-incomes-list,
-.additional-income-card-info {
-  display: grid;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(122, 0, 16, 0.22);
 }
 
 .additional-income-list {
+  display: grid;
   gap: 12px;
+  margin-top: 8px;
 }
 
 .additional-income-list h3 {
-  margin: 0;
-  font-size: 17px;
+  margin: 0 0 6px;
+  color: #020617;
+  font-size: 1.18rem;
   font-weight: 900;
-  color: var(--text);
 }
 
 .additional-incomes-list {
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.additional-incomes-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.additional-incomes-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
 }
 
 .empty-additional-income {
@@ -412,82 +461,66 @@ body {
 }
 
 .additional-income-card {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 16px;
-  border-radius: 18px;
+  gap: 18px;
+  padding: 16px 18px;
+  border-radius: 20px;
   background: #ffffff;
-  border: 1px solid var(--border-light);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
 }
 
 .additional-income-card-info {
+  display: grid;
   gap: 4px;
 }
 
 .additional-income-card-info strong {
-  font-size: 15px;
-  color: var(--text);
+  color: #020617;
+  font-size: 0.98rem;
 }
 
 .additional-income-card-info span {
-  font-size: 13px;
-  color: var(--muted);
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
 .additional-income-card-amount {
-  color: var(--secondary);
-  font-size: 16px;
+  color: #b00020;
+  font-size: 1.05rem;
   font-weight: 900;
   white-space: nowrap;
 }
 
 .additional-income-card-actions {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
 }
 
+.additional-income-card-actions button,
 .edit-additional-income-btn,
 .delete-additional-income-btn {
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   border: none;
-  border-radius: 10px;
-  display: flex;
+  border-radius: 14px;
+  background: #fff1f2;
+  color: #9f1239;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
-.edit-additional-income-btn {
-  background-color: #fff1ef;
-  color: var(--primary);
-}
-
-.delete-additional-income-btn {
-  background-color: #fee2e2;
-  color: var(--secondary);
-}
-
+.additional-income-card-actions button:hover,
 .edit-additional-income-btn:hover,
 .delete-additional-income-btn:hover {
-  transform: scale(1.05);
-}
-
-.edit-additional-income-btn:hover {
-  background-color: #ffc7c1;
-}
-
-.delete-additional-income-btn:hover {
-  background-color: #fecaca;
-}
-
-.edit-additional-income-btn i,
-.delete-additional-income-btn i {
-  font-size: 16px;
+  transform: translateY(-1px);
+  background: #ffe4e6;
 }
 
 /* =========================
@@ -496,12 +529,13 @@ body {
 
 .expenses-form-section {
   position: relative;
+  margin-top: 18px;
   margin-bottom: 22px;
-  padding: 30px;
-  border-radius: 26px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: 0 14px 35px rgba(31, 41, 55, 0.08);
+  padding: 24px 28px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #ffffff, #fff7f5);
+  border: 1px solid rgba(203, 76, 70, 0.14);
+  box-shadow: 0 16px 38px rgba(60, 0, 0, 0.07);
 }
 
 .expenses-form-section::before {
@@ -509,18 +543,20 @@ body {
   position: absolute;
   top: 0;
   left: 24px;
-  right: 24px;
+  width: 56px;
   height: 4px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+  background: linear-gradient(90deg, #670010, #cb4c46);
+  opacity: 0.85;
 }
 
 .expenses-form-section h2,
 .expenses-list h2 {
-  margin-bottom: 24px;
-  font-size: 20px;
+  margin: 0;
+  color: #111827;
+  font-size: 1.15rem;
+  line-height: 1.2;
   font-weight: 900;
-  color: var(--text);
 }
 
 #expenseForm,
@@ -549,9 +585,9 @@ body {
   align-items: center;
   gap: 8px;
   margin-bottom: 0;
+  color: #1f2937;
   font-size: 14px;
   font-weight: 800;
-  color: #1f2937;
 }
 
 .form-field label i {
@@ -568,9 +604,9 @@ body {
 .input-shell > i {
   position: absolute;
   left: 15px;
+  z-index: 1;
   color: #8b8fa7;
   font-size: 17px;
-  z-index: 1;
 }
 
 .input-shell input,
@@ -599,8 +635,8 @@ body {
 
 #expenseMessage {
   margin-top: 16px;
-  font-weight: 700;
   color: var(--primary);
+  font-weight: 700;
 }
 
 /* Voz */
@@ -711,7 +747,7 @@ body {
 }
 
 /* =========================
-   TOOLBAR
+   GASTOS DEL MES / FILTRO
 ========================= */
 
 .expenses-toolbar {
@@ -719,12 +755,13 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 22px;
-  padding: 22px 26px;
+  margin-top: 18px;
   margin-bottom: 22px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid var(--border);
-  box-shadow: 0 14px 35px rgba(31, 41, 55, 0.08);
+  padding: 20px 28px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #ffffff, #fffafa);
+  border: 1px solid rgba(203, 76, 70, 0.14);
+  box-shadow: 0 16px 38px rgba(60, 0, 0, 0.07);
 }
 
 .toolbar-info {
@@ -734,27 +771,28 @@ body {
 }
 
 .toolbar-icon {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
-  border-radius: 18px;
-  color: var(--primary);
+  border-radius: 16px;
+  color: #960018;
   background: #fff1ef;
   font-size: 22px;
 }
 
 .toolbar-info h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 900;
+  margin: 0 0 4px;
   color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 900;
 }
 
 .toolbar-info p {
   margin-top: 4px;
-  font-size: 14px;
   color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.35;
 }
 
 .toolbar-actions {
@@ -770,9 +808,9 @@ body {
 }
 
 .month-control label {
+  color: #374151;
   font-size: 13px;
   font-weight: 800;
-  color: #374151;
 }
 
 .month-control input {
@@ -802,30 +840,31 @@ body {
   border: none;
   border-radius: 999px;
   padding: 0 18px;
-  color: var(--secondary);
+  color: #7a0010;
   font-weight: 900;
   cursor: pointer;
-  background: #ffc7c1;
+  background: linear-gradient(135deg, #ffc7c1, #ffb0a8);
   transition: 0.25s ease;
 }
 
 .download-excel-button:hover {
   transform: translateY(-2px);
-  background: #ffb0a8;
+  background: linear-gradient(135deg, #ffb0a8, #ff9a90);
   box-shadow: 0 12px 24px rgba(150, 0, 24, 0.16);
 }
 
 /* =========================
-   TABLA DE GASTOS
+   LISTA / TABLA DE GASTOS
 ========================= */
 
 .expenses-list {
+  margin-top: 18px;
   margin-bottom: 22px;
-  padding: 28px;
-  border-radius: 26px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: 0 14px 35px rgba(31, 41, 55, 0.08);
+  padding: 24px 28px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #ffffff, #fff7f5);
+  border: 1px solid rgba(203, 76, 70, 0.14);
+  box-shadow: 0 16px 38px rgba(60, 0, 0, 0.07);
   overflow: hidden;
 }
 
@@ -842,8 +881,8 @@ thead {
 th {
   padding: 10px 14px;
   text-align: left;
-  font-size: 12px;
   color: var(--muted);
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -1011,17 +1050,255 @@ tbody tr:hover {
 }
 
 .empty-state p {
-  font-size: 14px;
   max-width: 360px;
+  font-size: 14px;
 }
 
 /* =========================
-   PARCHE RESPONSIVE GENERAL GASTOS
-   No modifica lógica ni ids
+   GRÁFICAS
 ========================= */
 
+.expenses-charts-section {
+  margin-top: 18px;
+  margin-bottom: 0;
+  padding: 24px 28px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(203, 76, 70, 0.14);
+  box-shadow: 0 16px 38px rgba(60, 0, 0, 0.07);
+}
+
+.charts-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+}
+
+.charts-header > div {
+  min-width: 0;
+}
+
+.charts-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #111827;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+}
+
+.charts-header h2 i {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #fff1ef;
+  color: #960018;
+  font-size: 0.9rem;
+}
+
+.charts-header p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.chart-card {
+  min-width: 0;
+  padding: 20px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.chart-card h3 {
+  margin: 0 0 16px;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.chart-box {
+  position: relative;
+  width: 100%;
+  height: 280px;
+}
+
+.large-chart-box {
+  height: 330px;
+}
+
+.full-chart-card {
+  grid-column: 1 / -1;
+}
+
+/* =========================
+   SECCIONES DESPLEGABLES
+========================= */
+
+.section-title-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+}
+
+.section-title-row > div {
+  min-width: 0;
+}
+
+.section-title-row h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #111827;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+}
+
+.section-title-row h2 i {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #fff1ef;
+  color: #960018;
+  font-size: 0.9rem;
+}
+
+.section-title-row p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.collapse-section-btn {
+  min-width: 112px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 999px;
+  background: #f3f1ff;
+  color: #463cec;
+  font-size: 0.88rem;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.collapse-section-btn:hover {
+  background: #463cec;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.collapse-section-btn i {
+  font-size: 0.95rem;
+}
+
+.collapsible-content {
+  overflow: hidden;
+  max-height: 5000px;
+  opacity: 1;
+  margin-top: 24px;
+  transition: max-height 0.35s ease, opacity 0.25s ease, margin-top 0.25s ease;
+}
+
+.collapsible-content.is-collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  pointer-events: none;
+}
+
+/* Cerrada: solo título + botón */
+.expenses-charts-section:has(.collapsible-content.is-collapsed),
+.income-panel:has(.collapsible-content.is-collapsed),
+.expenses-form-section:has(.collapsible-content.is-collapsed),
+.expenses-list:has(.collapsible-content.is-collapsed) {
+  padding: 16px 24px;
+  min-height: auto;
+}
+
+.expenses-charts-section:has(.collapsible-content.is-collapsed) .charts-header p,
+.income-panel:has(.collapsible-content.is-collapsed) .income-panel-header p,
+.expenses-form-section:has(.collapsible-content.is-collapsed) .section-title-row p,
+.expenses-list:has(.collapsible-content.is-collapsed) .section-title-row p {
+  display: none;
+}
+
+.expenses-charts-section:has(.collapsible-content.is-collapsed) h2,
+.income-panel:has(.collapsible-content.is-collapsed) h2,
+.expenses-form-section:has(.collapsible-content.is-collapsed) h2,
+.expenses-list:has(.collapsible-content.is-collapsed) h2 {
+  font-size: 1.12rem;
+}
+
+.expenses-charts-section:has(.collapsible-content.is-collapsed) .collapse-section-btn,
+.income-panel:has(.collapsible-content.is-collapsed) .collapse-section-btn,
+.expenses-form-section:has(.collapsible-content.is-collapsed) .collapse-section-btn,
+.expenses-list:has(.collapsible-content.is-collapsed) .collapse-section-btn {
+  min-height: 38px;
+  padding: 8px 14px;
+  font-size: 0.86rem;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.expenses-container,
+.expenses-header,
+.expenses-summary-grid,
+.expenses-charts-section,
+.income-panel,
+.expenses-form-section,
+.expenses-toolbar,
+.expenses-list {
+  max-width: 100%;
+}
+
 @media (max-width: 1100px) {
-  .expenses-summary-grid {
+  .expenses-summary-grid,
+  .income-summary-row,
+  .income-forms-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1034,13 +1311,14 @@ tbody tr:hover {
   .expenses-container {
     width: 100%;
     margin: 0;
-    padding: 18px;
+    padding: 16px;
     overflow-x: hidden;
   }
 
   .expenses-header {
     grid-template-columns: 1fr;
-    padding: 28px 24px;
+    min-height: auto;
+    padding: 24px;
     border-radius: 24px;
   }
 
@@ -1062,21 +1340,30 @@ tbody tr:hover {
     flex-wrap: wrap;
   }
 
-  .income-summary-row,
-  .income-forms-grid,
+  .summary-card p,
+  .main-summary p,
+  .income-summary-item strong {
+    overflow-wrap: anywhere;
+  }
+
   #expenseForm,
-  .modern-expense-form {
+  .modern-expense-form,
+  .charts-grid {
     grid-template-columns: 1fr;
   }
 
-  .income-panel {
-    padding: 22px;
-    border-radius: 24px;
+  .full-chart-card {
+    grid-column: auto;
+  }
+
+  .chart-box,
+  .large-chart-box {
+    height: 250px;
   }
 
   .additional-income-card {
+    grid-template-columns: 1fr;
     align-items: flex-start;
-    flex-direction: column;
   }
 
   .voice-box {
@@ -1121,7 +1408,6 @@ tbody tr:hover {
 @media (max-width: 700px) {
   .expenses-list {
     overflow: visible;
-    padding: 20px;
   }
 
   .expenses-list table {
@@ -1220,30 +1506,63 @@ tbody tr:hover {
   .action-buttons {
     justify-content: flex-start;
   }
+
+  .charts-header,
+  .section-title-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .expenses-charts-section:has(.collapsible-content.is-collapsed) .charts-header,
+  .income-panel:has(.collapsible-content.is-collapsed) .income-panel-header,
+  .expenses-form-section:has(.collapsible-content.is-collapsed) .section-title-row,
+  .expenses-list:has(.collapsible-content.is-collapsed) .section-title-row {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .collapse-section-btn {
+    width: 100%;
+    min-height: 38px;
+    font-size: 0.84rem;
+  }
+
+  .expenses-charts-section:has(.collapsible-content.is-collapsed) .collapse-section-btn,
+  .income-panel:has(.collapsible-content.is-collapsed) .collapse-section-btn,
+  .expenses-form-section:has(.collapsible-content.is-collapsed) .collapse-section-btn,
+  .expenses-list:has(.collapsible-content.is-collapsed) .collapse-section-btn {
+    width: auto;
+    min-width: 96px;
+    flex-shrink: 0;
+  }
+
+  .expenses-form-section::before {
+    left: 18px;
+    width: 54px;
+  }
 }
 
 @media (max-width: 600px) {
   .expenses-container {
-    padding: 14px;
+    padding: 12px;
   }
 
   .expenses-header {
-    padding: 24px 18px;
+    padding: 22px 16px;
     border-radius: 22px;
   }
 
-  .header-badge {
-    font-size: 12px;
-    padding: 8px 12px;
+  .expenses-header h1 {
+    font-size: 25px;
   }
 
-  .expenses-header h1 {
-    font-size: 27px;
+  .expenses-header p {
+    font-size: 14px;
   }
 
   .header-actions {
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .back-link,
@@ -1252,80 +1571,161 @@ tbody tr:hover {
   }
 
   .summary-card {
-    padding: 18px;
+    padding: 16px;
     border-radius: 20px;
   }
 
-  .main-summary p,
-  .summary-card p {
-    font-size: 26px;
+  .summary-icon {
+    width: 42px;
+    height: 42px;
   }
 
-  .income-panel {
-    padding: 18px;
-  }
-
-  .income-panel-header h2 {
-    font-size: 24px;
-  }
-
-  .income-summary-item,
-  .income-form-box {
-    padding: 18px;
-  }
-
-  .form-field,
-  .full-field,
-  .form-actions.full-field,
-  .voice-box.full-field {
-    grid-column: 1 / -1;
-  }
-
-  .form-actions button,
-  .voice-button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .toolbar-info h2 {
+  .summary-card p,
+  .main-summary p {
     font-size: 22px;
   }
-}
 
-@media (max-width: 420px) {
-  .expenses-header h1 {
-    font-size: 24px;
-  }
-
-  .expenses-header p {
-    font-size: 14px;
-  }
-
-  .income-panel-header h2 {
-    font-size: 21px;
-  }
-
-  .main-summary p,
-  .summary-card p {
-    font-size: 23px;
-  }
-
-  .income-summary-item strong {
-    font-size: 24px;
-  }
-
+  .expenses-charts-section,
+  .income-panel,
+  .expenses-form-section,
+  .expenses-toolbar,
   .expenses-list {
     padding: 16px;
+    border-radius: 20px;
   }
 
-  .expenses-list tbody tr {
+  .expenses-charts-section:has(.collapsible-content.is-collapsed),
+  .income-panel:has(.collapsible-content.is-collapsed),
+  .expenses-form-section:has(.collapsible-content.is-collapsed),
+  .expenses-list:has(.collapsible-content.is-collapsed) {
+    padding: 14px 16px;
+  }
+
+  .charts-header h2,
+  .section-title-row h2,
+  .income-panel-header h2 {
+    font-size: 1rem;
+  }
+
+  .charts-header p,
+  .section-title-row p,
+  .income-panel-header p {
+    font-size: 0.84rem;
+  }
+
+  .chart-card {
     padding: 14px;
     border-radius: 18px;
   }
 
+  .chart-card h3 {
+    font-size: 0.95rem;
+  }
+
+  .chart-box,
+  .large-chart-box {
+    height: 220px;
+  }
+
+  .income-summary-item,
+  .income-form-box {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .income-summary-item strong {
+    font-size: 1.35rem;
+  }
+
+  .income-form-box input,
+  .input-shell input,
+  .input-shell select {
+    height: 50px;
+    font-size: 14px;
+  }
+
+  .income-form-box button,
+  .voice-button,
+  .month-control input,
+  .download-excel-button {
+    min-height: 48px;
+  }
+
+  .additional-income-card {
+    gap: 10px;
+  }
+
+  .additional-income-card-amount {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .additional-income-card-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .additional-income-card-actions button,
+  .edit-additional-income-btn,
+  .delete-additional-income-btn {
+    width: 100%;
+    height: 42px;
+  }
+
+  .expenses-form-section {
+    padding-top: 22px;
+  }
+
+  .voice-box {
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .voice-button {
+    width: 100%;
+  }
+
+  .form-actions button,
+  #submitExpenseButton,
+  #cancelEditButton {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .toolbar-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbar-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .toolbar-info h2 {
+    font-size: 20px;
+  }
+
+  .toolbar-info p {
+    font-size: 13px;
+  }
+
+  .expenses-list h2 {
+    font-size: 20px;
+  }
+
   .expenses-list td {
-    grid-template-columns: 90px 1fr;
-    gap: 8px;
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .date-pill,
+  .category-badge,
+  .source-badge,
+  .amount-cell,
+  .expense-description {
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
 
   .action-buttons {
@@ -1336,436 +1736,40 @@ tbody tr:hover {
 
   .action-btn {
     width: 100%;
+    min-height: 42px;
     justify-content: center;
   }
 }
 
-.expenses-charts-section {
-  margin-top: 28px;
-  padding: 24px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-}
-
-.charts-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 22px;
-}
-
-.charts-header h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  color: #111827;
-  font-size: 1.35rem;
-}
-
-.charts-header h2 i {
-  color: #463cec;
-}
-
-.charts-header p {
-  margin: 6px 0 0;
-  color: #6b7280;
-  font-size: 0.95rem;
-}
-
-.charts-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
-}
-
-.chart-card {
-  padding: 20px;
-  border-radius: 24px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
-}
-
-.chart-card h3 {
-  margin: 0 0 16px;
-  font-size: 1rem;
-  color: #111827;
-}
-
-.chart-box {
-  position: relative;
-  width: 100%;
-  height: 280px;
-}
-
-.large-chart-box {
-  height: 330px;
-}
-
-.full-chart-card {
-  grid-column: 1 / -1;
-}
-
-@media (max-width: 900px) {
-  .charts-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 390px) {
+  .expenses-container {
+    padding: 10px;
   }
 
-  .full-chart-card {
-    grid-column: auto;
+  .expenses-header h1 {
+    font-size: 23px;
+  }
+
+  .summary-card {
+    gap: 10px;
+  }
+
+  .summary-card p,
+  .main-summary p {
+    font-size: 20px;
   }
 
   .chart-box,
   .large-chart-box {
-    height: 260px;
-  }
-}
-
-.section-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-
-.collapse-section-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: none;
-  border-radius: 999px;
-  padding: 10px 16px;
-  background: #f3f4ff;
-  color: #463cec;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  white-space: nowrap;
-}
-
-.collapse-section-btn:hover {
-  background: #463cec;
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-.collapse-section-btn i {
-  font-size: 1rem;
-}
-
-.collapsible-content {
-  overflow: hidden;
-  max-height: 5000px;
-  opacity: 1;
-  margin-top: 20px;
-  transition: max-height 0.35s ease, opacity 0.25s ease, margin-top 0.25s ease;
-}
-
-.collapsible-content.is-collapsed {
-  max-height: 0;
-  opacity: 0;
-  margin-top: 0;
-  pointer-events: none;
-}
-
-@media (max-width: 700px) {
-  .section-title-row {
-    align-items: flex-start;
-    flex-direction: column;
+    height: 200px;
   }
 
-  .collapse-section-btn {
-    width: 100%;
-  }
-}
-
-.expenses-charts-section,
-.income-panel,
-.expenses-form-section,
-.expenses-toolbar,
-.expenses-list {
-  margin-top: 28px;
-}
-
-.expenses-charts-section {
-  margin-bottom: 0;
-}
-
-.income-panel {
-  margin-top: 28px;
-}
-
-/* ============================= */
-/* MEJORA VISUAL - INGRESOS      */
-/* ============================= */
-
-.income-panel {
-  padding: 32px;
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-}
-
-.income-panel-header {
-  margin-bottom: 26px;
-}
-
-.income-panel-header h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: 1.55rem;
-  color: #020617;
-}
-
-.income-panel-header h2 i {
-  color: #7a0010;
-}
-
-.income-panel-header p {
-  margin: 6px 0 0;
-  color: #64748b;
-  font-size: 0.98rem;
-}
-
-/* Tarjetas de resumen */
-.income-summary-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin-bottom: 26px;
-}
-
-.income-summary-item {
-  position: relative;
-  padding: 22px 24px;
-  border-radius: 22px;
-  background: linear-gradient(135deg, #f8fafc, #ffffff);
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
-}
-
-.income-summary-item::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 5px;
-  background: linear-gradient(180deg, #7a0010, #b00020);
-  opacity: 0.85;
-}
-
-.income-summary-item span {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.income-summary-item strong {
-  font-size: 1.7rem;
-  font-weight: 900;
-  color: #020617;
-}
-
-/* Ahorro positivo / negativo */
-#monthlySavings.positive-saving {
-  color: #15803d;
-}
-
-#monthlySavings.negative-saving {
-  color: #b00020;
-}
-
-/* Formularios */
-.income-forms-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
-  margin-bottom: 26px;
-}
-
-.income-form-box {
-  padding: 24px;
-  border-radius: 24px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
-}
-
-.income-form-box h3 {
-  margin: 0 0 22px;
-  font-size: 1.25rem;
-  color: #020617;
-}
-
-.income-form-box label {
-  display: block;
-  margin: 14px 0 8px;
-  font-weight: 800;
-  color: #1e293b;
-  font-size: 0.9rem;
-}
-
-.income-form-box input {
-  width: 100%;
-  height: 54px;
-  padding: 0 18px;
-  border-radius: 16px;
-  border: 1px solid #cbd5e1;
-  font-size: 1rem;
-  outline: none;
-  background: #ffffff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.income-form-box input:focus {
-  border-color: #7a0010;
-  box-shadow: 0 0 0 4px rgba(122, 0, 16, 0.10);
-}
-
-.income-form-box button {
-  width: 100%;
-  margin-top: 26px;
-  min-height: 56px;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #620006, #b00020);
-  color: #ffffff;
-  font-weight: 900;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.income-form-box button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(122, 0, 16, 0.22);
-}
-
-/* Lista de ingresos adicionales */
-.additional-income-list {
-  margin-top: 8px;
-}
-
-.additional-income-list h3 {
-  margin: 0 0 16px;
-  font-size: 1.18rem;
-  color: #020617;
-}
-
-.additional-incomes-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: 260px;
-  overflow-y: auto;
-  padding-right: 6px;
-}
-
-.additional-incomes-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.additional-incomes-list::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 999px;
-}
-
-.additional-income-card {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 18px;
-  padding: 16px 18px;
-  border-radius: 20px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
-}
-
-.additional-income-card-info strong {
-  display: block;
-  margin-bottom: 4px;
-  color: #020617;
-  font-size: 0.98rem;
-}
-
-.additional-income-card-info span {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.additional-income-card-amount {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: #b00020;
-  white-space: nowrap;
-}
-
-.additional-income-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.additional-income-card-actions button {
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 14px;
-  background: #fff1f2;
-  color: #9f1239;
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.additional-income-card-actions button:hover {
-  transform: translateY(-1px);
-  background: #ffe4e6;
-}
-
-/* Responsive */
-@media (max-width: 1000px) {
-  .income-summary-row,
-  .income-forms-grid {
+  .expenses-list td {
     grid-template-columns: 1fr;
+    gap: 6px;
   }
 
-  .income-panel {
-    padding: 24px;
-  }
-}
-
-@media (max-width: 650px) {
-  .income-panel {
-    padding: 20px;
-    border-radius: 24px;
-  }
-
-  .income-summary-item strong {
-    font-size: 1.45rem;
-  }
-
-  .income-form-box {
-    padding: 20px;
-  }
-
-  .additional-income-card {
-    grid-template-columns: 1fr;
-    align-items: flex-start;
-  }
-
-  .additional-income-card-actions {
-    width: 100%;
-    justify-content: flex-end;
+  .expenses-list td::before {
+    font-size: 11px;
   }
 }

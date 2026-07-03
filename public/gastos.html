@@ -11,7 +11,10 @@
   <!-- Fuente moderna -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" 
+    rel="stylesheet"
+  >
 
   <!-- Íconos -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -127,54 +130,202 @@
 
       </section>
 
-      <!-- Gráficas de gastos -->
-      <section class="expenses-charts-section">
+      <!-- Filtro por mes -->
+      <section class="expenses-toolbar">
 
-        <div class="charts-header section-title-row">
+        <div class="toolbar-info">
+          <span class="toolbar-icon">
+            <i class="bi bi-calendar3"></i>
+          </span>
+
+          <div>
+            <h2>Mes de trabajo</h2>
+            <p>Selecciona el mes que quieres consultar antes de registrar, revisar o analizar tus movimientos.</p>
+          </div>
+        </div>
+
+        <div class="toolbar-actions">
+          <div class="month-control">
+            <label for="monthFilter">Mes</label>
+            <input type="month" id="monthFilter">
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Formulario para registrar gastos -->
+      <section class="expenses-form-section">
+
+        <div class="section-title-row">
           <div>
             <h2>
-              <i class="bi bi-bar-chart-line"></i>
-              Gráficas financieras
+              <i class="bi bi-plus-circle"></i>
+              Registrar gasto
             </h2>
-            <p>Visualiza cómo se distribuyen tus gastos durante el mes seleccionado.</p>
+            <p>Agrega gastos manualmente o usa el dictado por voz.</p>
           </div>
 
           <button 
             type="button" 
             class="collapse-section-btn" 
-            data-collapse-target="chartsContent"
-            aria-expanded="false"
+            data-collapse-target="expenseFormContent"
+            aria-expanded="true"
           >
-            <i class="bi bi-chevron-down"></i>
-            <span>Mostrar</span>
+            <i class="bi bi-chevron-up"></i>
+            <span>Ocultar</span>
           </button>
         </div>
 
-        <div id="chartsContent" class="collapsible-content is-collapsed">
-          <div class="charts-grid">
+        <div id="expenseFormContent" class="collapsible-content">
 
-            <article class="chart-card">
-              <h3>Gastos por categoría</h3>
-              <div class="chart-box">
-                <canvas id="categoryExpensesChart"></canvas>
+          <form id="expenseForm" class="modern-expense-form">
+
+            <div class="form-field">
+              <label for="expenseDate">
+                <i class="bi bi-calendar-check"></i>
+                Fecha del gasto
+              </label>
+
+              <div class="input-shell">
+                <i class="bi bi-calendar3"></i>
+                <input type="date" id="expenseDate" required>
               </div>
-            </article>
+            </div>
 
-            <article class="chart-card">
-              <h3>Ingresos vs gastos vs ahorro</h3>
-              <div class="chart-box">
-                <canvas id="financeSummaryChart"></canvas>
+            <div class="form-field">
+              <label for="category">
+                <i class="bi bi-tags"></i>
+                Categoría
+              </label>
+
+              <div class="input-shell">
+                <i class="bi bi-grid"></i>
+                <select id="category" required>
+                  <option value="">Selecciona una categoría</option>
+                  <option value="Factura">Factura</option>
+                  <option value="Alimentación">Alimentación</option>
+                  <option value="Transporte">Transporte</option>
+                  <option value="Pasajes">Pasajes</option>
+                  <option value="Salud">Salud</option>
+                  <option value="Entretenimiento">Entretenimiento</option>
+                  <option value="Prestamos">Prestamos</option>
+                  <option value="Otro">Otro</option>
+                </select>
               </div>
-            </article>
+            </div>
 
-            <article class="chart-card full-chart-card">
-              <h3>Gastos por día del mes</h3>
-              <div class="chart-box large-chart-box">
-                <canvas id="dailyExpensesChart"></canvas>
+            <div class="form-field full-field">
+              <label for="description">
+                <i class="bi bi-card-text"></i>
+                Descripción
+              </label>
+
+              <div class="input-shell">
+                <i class="bi bi-pencil"></i>
+                <input 
+                  type="text" 
+                  id="description" 
+                  placeholder="Ej: Pago de servicio público, compra de alimentos, transporte diario..." 
+                  required
+                >
               </div>
-            </article>
+            </div>
 
+            <div class="form-field">
+              <label for="amount">
+                <i class="bi bi-currency-dollar"></i>
+                Valor
+              </label>
+
+              <div class="input-shell">
+                <i class="bi bi-cash-stack"></i>
+                <input 
+                  type="number" 
+                  id="amount" 
+                  placeholder="Ej: 51000" 
+                  min="1" 
+                  required
+                >
+              </div>
+            </div>
+
+            <input type="hidden" id="source" value="manual">
+            <input type="hidden" id="expenseId">
+
+            <div class="voice-box full-field">
+              <button type="button" id="voiceButton" class="voice-button">
+                <i class="bi bi-mic-fill"></i>
+                Dictar gasto por voz
+              </button>
+
+              <p id="voiceText" class="voice-text">
+                Puedes decir algo como: “Agrega un gasto de 12000 en pasajes por recarga de tarjeta tu llave”.
+              </p>
+            </div>
+
+            <div class="form-actions full-field">
+              <button type="submit" id="submitExpenseButton">
+                <i class="bi bi-save2"></i>
+                Guardar gasto
+              </button>
+
+              <button type="button" id="cancelEditButton" style="display: none;">
+                <i class="bi bi-x-circle"></i>
+                Cancelar edición
+              </button>
+            </div>
+
+          </form>
+
+          <!-- Aquí mostraremos mensajes como: gasto guardado o error -->
+          <p id="expenseMessage"></p>
+
+        </div>
+
+      </section>
+
+      <!-- Lista de gastos -->
+      <section class="expenses-list">
+
+        <div class="section-title-row">
+          <div>
+            <h2>
+              <i class="bi bi-receipt"></i>
+              Gastos registrados
+            </h2>
+            <p>Consulta, edita o elimina los gastos del mes seleccionado.</p>
           </div>
+
+          <button 
+            type="button" 
+            class="collapse-section-btn" 
+            data-collapse-target="expensesListContent"
+            aria-expanded="true"
+          >
+            <i class="bi bi-chevron-up"></i>
+            <span>Ocultar</span>
+          </button>
+        </div>
+
+        <div id="expensesListContent" class="collapsible-content">
+
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Categoría</th>
+                <th>Descripción</th>
+                <th>Valor</th>
+                <th>Origen</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody id="expensesTableBody">
+              <!-- Los gastos se cargarán aquí desde gastos.js -->
+            </tbody>
+          </table>
+
         </div>
 
       </section>
@@ -293,19 +444,22 @@
 
       </section>
 
-      <!-- Formulario para registrar gastos -->
-      <section class="expenses-form-section">
+      <!-- Gráficas de gastos -->
+      <section class="expenses-charts-section">
 
-        <div class="section-title-row">
-          <h2>
-            <i class="bi bi-plus-circle"></i>
-            Registrar gasto
-          </h2>
+        <div class="charts-header section-title-row">
+          <div>
+            <h2>
+              <i class="bi bi-bar-chart-line"></i>
+              Gráficas financieras
+            </h2>
+            <p>Visualiza cómo se distribuyen tus gastos durante el mes seleccionado.</p>
+          </div>
 
           <button 
             type="button" 
             class="collapse-section-btn" 
-            data-collapse-target="expenseFormContent"
+            data-collapse-target="chartsContent"
             aria-expanded="false"
           >
             <i class="bi bi-chevron-down"></i>
@@ -313,181 +467,54 @@
           </button>
         </div>
 
-        <div id="expenseFormContent" class="collapsible-content is-collapsed">
+        <div id="chartsContent" class="collapsible-content is-collapsed">
+          <div class="charts-grid">
 
-          <form id="expenseForm" class="modern-expense-form">
-
-            <div class="form-field">
-              <label for="expenseDate">
-                <i class="bi bi-calendar-check"></i>
-                Fecha del gasto
-              </label>
-
-              <div class="input-shell">
-                <i class="bi bi-calendar3"></i>
-                <input type="date" id="expenseDate" required>
+            <article class="chart-card">
+              <h3>Gastos por categoría</h3>
+              <div class="chart-box">
+                <canvas id="categoryExpensesChart"></canvas>
               </div>
-            </div>
+            </article>
 
-            <div class="form-field">
-              <label for="category">
-                <i class="bi bi-tags"></i>
-                Categoría
-              </label>
-
-              <div class="input-shell">
-                <i class="bi bi-grid"></i>
-                <select id="category" required>
-                  <option value="">Selecciona una categoría</option>
-                  <option value="Factura">Factura</option>
-                  <option value="Alimentación">Alimentación</option>
-                  <option value="Transporte">Transporte</option>
-                  <option value="Pasajes">Pasajes</option>
-                  <option value="Salud">Salud</option>
-                  <option value="Entretenimiento">Entretenimiento</option>
-                  <option value="Prestamos">Prestamos</option>
-                  <option value="Otro">Otro</option>
-                </select>
+            <article class="chart-card">
+              <h3>Ingresos vs gastos vs ahorro</h3>
+              <div class="chart-box">
+                <canvas id="financeSummaryChart"></canvas>
               </div>
-            </div>
+            </article>
 
-            <div class="form-field full-field">
-              <label for="description">
-                <i class="bi bi-card-text"></i>
-                Descripción
-              </label>
-
-              <div class="input-shell">
-                <i class="bi bi-pencil"></i>
-                <input 
-                  type="text" 
-                  id="description" 
-                  placeholder="Ej: Pago de servicio público, compra de alimentos, transporte diario..." 
-                  required
-                >
+            <article class="chart-card full-chart-card">
+              <h3>Gastos por día del mes</h3>
+              <div class="chart-box large-chart-box">
+                <canvas id="dailyExpensesChart"></canvas>
               </div>
-            </div>
+            </article>
 
-            <div class="form-field">
-              <label for="amount">
-                <i class="bi bi-currency-dollar"></i>
-                Valor
-              </label>
-
-              <div class="input-shell">
-                <i class="bi bi-cash-stack"></i>
-                <input 
-                  type="number" 
-                  id="amount" 
-                  placeholder="Ej: 51000" 
-                  min="1" 
-                  required
-                >
-              </div>
-            </div>
-
-            <input type="hidden" id="source" value="manual">
-            <input type="hidden" id="expenseId">
-
-            <div class="voice-box full-field">
-              <button type="button" id="voiceButton" class="voice-button">
-                <i class="bi bi-mic-fill"></i>
-                Dictar gasto por voz
-              </button>
-
-              <p id="voiceText" class="voice-text">
-                Puedes decir algo como: “Agrega un gasto de 12000 en pasajes por recarga de tarjeta tu llave”.
-              </p>
-            </div>
-
-            <div class="form-actions full-field">
-              <button type="submit" id="submitExpenseButton">
-                <i class="bi bi-save2"></i>
-                Guardar gasto
-              </button>
-
-              <button type="button" id="cancelEditButton" style="display: none;">
-                <i class="bi bi-x-circle"></i>
-                Cancelar edición
-              </button>
-            </div>
-
-          </form>
-
-          <!-- Aquí mostraremos mensajes como: gasto guardado o error -->
-          <p id="expenseMessage"></p>
-
+          </div>
         </div>
 
       </section>
 
-      <!-- Filtro por mes -->
-      <section class="expenses-toolbar">
+      <!-- Exportar reporte -->
+      <section class="expenses-toolbar expenses-export-toolbar">
 
         <div class="toolbar-info">
           <span class="toolbar-icon">
-            <i class="bi bi-calendar3"></i>
+            <i class="bi bi-file-earmark-excel"></i>
           </span>
 
           <div>
-            <h2>Gastos del mes</h2>
-            <p>Filtra tus movimientos y descarga el reporte mensual.</p>
+            <h2>Exportar reporte</h2>
+            <p>Descarga el Excel cuando ya hayas revisado ingresos, gastos y gráficas del mes.</p>
           </div>
         </div>
 
         <div class="toolbar-actions">
-          <div class="month-control">
-            <label for="monthFilter">Mes</label>
-            <input type="month" id="monthFilter">
-          </div>
-
           <button type="button" id="downloadExcelButton" class="download-excel-button">
             <i class="bi bi-file-earmark-excel"></i>
             Descargar Excel
           </button>
-        </div>
-
-      </section>
-
-      <!-- Lista de gastos -->
-      <section class="expenses-list">
-
-        <div class="section-title-row">
-          <h2>
-            <i class="bi bi-receipt"></i>
-            Gastos registrados
-          </h2>
-
-          <button 
-            type="button" 
-            class="collapse-section-btn" 
-            data-collapse-target="expensesListContent"
-            aria-expanded="false"
-          >
-            <i class="bi bi-chevron-down"></i>
-            <span>Mostrar</span>
-          </button>
-        </div>
-
-        <div id="expensesListContent" class="collapsible-content is-collapsed">
-
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Categoría</th>
-                <th>Descripción</th>
-                <th>Valor</th>
-                <th>Origen</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-
-            <tbody id="expensesTableBody">
-              <!-- Los gastos se cargarán aquí desde gastos.js -->
-            </tbody>
-          </table>
-
         </div>
 
       </section>
