@@ -127,7 +127,7 @@ function updateSidebar(activePage = "dashboard") {
 function getActiveDashboardPage() {
   const hash = window.location.hash.replace("#", "");
 
-  const validSections = ["tareas", "recordatorios", "calendario"];
+  const validSections = ["tareas", "recordatorios", "calendario", "cuenta"];
 
   if (validSections.includes(hash)) {
     return hash;
@@ -194,6 +194,7 @@ function showSection(section, selectedLink = null) {
     motivacion: "Motivación",
     recordatorios: "Tus recordatorios",
     calendario: "Tu calendario",
+    cuenta: "Mi cuenta",
     crecimiento: "Crecimiento personal",
     gastos: "Control de gastos",
     chistes: "Chistes del día"
@@ -204,6 +205,7 @@ function showSection(section, selectedLink = null) {
     motivacion: "fa-lightbulb",
     recordatorios: "fa-bell",
     calendario: "fa-calendar-days",
+    cuenta: "fa-user-gear",
     crecimiento: "fa-seedling",
     gastos: "fa-wallet",
     chistes: "fa-face-laugh-squint"
@@ -228,6 +230,11 @@ function showSection(section, selectedLink = null) {
 
   if (section === "calendario") {
     renderCalendarSection();
+    return;
+  }
+
+  if (section === "cuenta") {
+    renderAccountSection();
     return;
   }
 
@@ -314,4 +321,238 @@ function setupDashboardCardNavigation() {
       window.location.hash = route.section;
     });
   });
+}
+
+function getCurrentSessionUser() {
+  const userData = localStorage.getItem("userData");
+
+  try {
+    return userData ? JSON.parse(userData) : null;
+  } catch (error) {
+    console.error("Error al leer usuario:", error);
+    return null;
+  }
+}
+
+function getAccountAuthHeaders(includeJsonContent = false) {
+  const token = localStorage.getItem("authToken");
+
+  const headers = {
+    Authorization: `Bearer ${token}`
+  };
+
+  if (includeJsonContent) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  return headers;
+}
+
+function renderAccountSection() {
+  const contentEl = document.getElementById("section-content");
+
+  if (!contentEl) {
+    return;
+  }
+
+  const user = getCurrentSessionUser();
+
+  if (!user) {
+    contentEl.innerHTML = `
+      <div class="section-placeholder">
+        <div class="section-placeholder-icon">
+          <i class="fa-solid fa-user-xmark"></i>
+        </div>
+
+        <div>
+          <span class="welcome-badge">Sesión no encontrada</span>
+          <h2>No se encontró información del usuario</h2>
+          <p>Inicia sesión nuevamente para ver la información de tu cuenta.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  contentEl.innerHTML = `
+    <div class="account-section">
+      <div class="account-card">
+        <div class="account-header">
+          ${
+            user.picture
+              ? `<img src="${user.picture}" alt="${user.name || user.email}" class="account-avatar">`
+              : `<div class="account-avatar-placeholder">
+                  <i class="fa-solid fa-user"></i>
+                </div>`
+          }
+
+          <div>
+            <span class="welcome-badge">Información de cuenta</span>
+            <h2>${user.name || "Usuario"}</h2>
+            <p>${user.email || "Sin correo registrado"}</p>
+          </div>
+        </div>
+
+        <div class="account-info-grid">
+          <div>
+            <span>Nombre</span>
+            <strong>${user.name || "No registrado"}</strong>
+          </div>
+
+          <div>
+            <span>Correo</span>
+            <strong>${user.email || "No registrado"}</strong>
+          </div>
+
+          <div>
+            <span>ID de usuario</span>
+            <strong>${user.id || "No disponible"}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="danger-zone-card">
+        <div>
+          <span class="welcome-badge danger-badge">Zona de peligro</span>
+          <h2>Eliminar cuenta</h2>
+          <p>
+            Esta acción eliminará permanentemente tu cuenta y todos los datos asociados:
+            tareas, recordatorios, gastos, ingresos y evidencias.
+          </p>
+        </div>
+
+        <button type="button" class="delete-account-button" onclick="confirmDeleteAccount()">
+          <i class="fa-solid fa-trash-can"></i>
+          Eliminar cuenta
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function confirmDeleteAccount() {
+  const user = getCurrentSessionUser();
+
+  if (!user) {
+    await Swal.fire({
+      title: "Sesión no encontrada",
+      text: "No se pudo identificar el usuario actual.",
+      icon: "warning",
+      confirmButtonColor: "#960018"
+    });
+    return;
+  }
+
+  const result = await Swal.fire({
+    title: "Eliminar cuenta",
+    html: `
+      <div class="delete-account-modal">
+        <p>
+          Esta acción eliminará permanentemente tu cuenta y todos tus datos.
+        </p>
+
+        <p>
+          Para confirmar, escribe:
+          <strong>ELIMINAR</strong>
+        </p>
+
+        <input 
+          id="deleteAccountConfirmation" 
+          class="swal2-input" 
+          placeholder="Escribe ELIMINAR"
+        >
+
+        <p style="margin-top: 12px;">
+          Si tu cuenta fue creada con contraseña, ingrésala también.
+          Si fue creada con Google, puedes dejar este campo vacío.
+        </p>
+
+        <input 
+          id="deleteAccountPassword" 
+          type="password" 
+          class="swal2-input" 
+          placeholder="Contraseña"
+        >
+      </div>
+    `,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Eliminar definitivamente",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#960018",
+    cancelButtonColor: "#6b7280",
+    focusConfirm: false,
+    preConfirm: () => {
+      const confirmation = document.getElementById("deleteAccountConfirmation").value.trim();
+      const password = document.getElementById("deleteAccountPassword").value;
+
+      if (confirmation !== "ELIMINAR") {
+        Swal.showValidationMessage("Debes escribir ELIMINAR para continuar.");
+        return false;
+      }
+
+      return {
+        confirmation,
+        password
+      };
+    }
+  });
+
+  if (!result.isConfirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/auth/account", {
+      method: "DELETE",
+      headers: getAccountAuthHeaders(true),
+      body: JSON.stringify({
+        confirmation: result.value.confirmation,
+        password: result.value.password
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      await Swal.fire({
+        title: "No se pudo eliminar",
+        text: data.mensaje || data.error || "Ocurrió un error al eliminar la cuenta.",
+        icon: "error",
+        confirmButtonColor: "#960018"
+      });
+      return;
+    }
+
+    try {
+      if (user && user.id) {
+        localStorage.removeItem(`alertedReminderKeys_${user.id}`);
+      }
+    } catch (error) {
+      console.error("Error al limpiar alertas:", error);
+    }
+
+    localStorage.removeItem("userData");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userEmail");
+
+    await Swal.fire({
+      title: "Cuenta eliminada",
+      text: data.mensaje || "Tu cuenta fue eliminada correctamente.",
+      icon: "success",
+      confirmButtonColor: "#960018"
+    });
+
+    window.location.href = "login_google.html";
+
+  } catch (error) {
+    console.error("Error al eliminar cuenta:", error);
+
+    await Swal.fire({
+      title: "Error",
+      text: "No fue posible eliminar la cuenta.",
+      icon: "error",
+      confirmButtonColor: "#960018"
+    });
+  }
 }

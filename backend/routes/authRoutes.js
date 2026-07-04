@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
+const dns = require('dns').promises;
+const nodemailer = require('nodemailer');
 
 const router = express.Router();
 
@@ -70,6 +73,56 @@ async function isDeletedAccountEmail(email) {
   return results.length > 0;
 }
 
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+function isValidEmailFormat(email) {
+  const cleanEmail = String(email || '').trim().toLowerCase();
+
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail);
+}
+
+async function hasValidEmailDomain(email) {
+  const cleanEmail = String(email || '').trim().toLowerCase();
+  const domain = cleanEmail.split('@')[1];
+
+  if (!domain) {
+    return false;
+  }
+
+  try {
+    const records = await dns.resolveMx(domain);
+    return records && records.length > 0;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function verifyGoogleCredential(credential) {
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    throw new Error('GOOGLE_CLIENT_ID no está configurado en el archivo .env');
+  }
+
+  const ticket = await googleClient.verifyIdToken({
+    idToken: credential,
+    audience: process.env.GOOGLE_CLIENT_ID
+  });
+
+  const payload = ticket.getPayload();
+
+  if (!payload || !payload.email) {
+    throw new Error('No se pudo obtener el correo desde Google.');
+  }
+
+  if (!payload.email_verified) {
+    throw new Error('El correo de Google no está verificado.');
+  }
+
+  return {
+    name: payload.name || payload.email,
+    email: payload.email,
+    picture: payload.picture || null
+  };
+}
 // ===============================
 // Helpers para consultas con promesas
 // ===============================
@@ -166,32 +219,105 @@ function queryAsync(sql, params = []) {
   });
 }
 
+function createVerificationCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
 
-router.post('/register', async (req, res) => {
+function formatDateTimeForMySQL(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+function createEmailTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
+  });
+}
+
+async function sendVerificationEmail(email, code) {
+  const transporter = createEmailTransporter();
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM,
+    to: email,
+    subject: 'Código de verificación - DanyBot',
+    text: `Tu código de verificación es: ${code}. Este código vence en 10 minutos.`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #2b0b0b;">
+        <h2>Código de verificación</h2>
+        <p>Usa este código para completar tu registro en DanyBot:</p>
+
+        <div style="
+          display: inline-block;
+          padding: 14px 22px;
+          background: #f8eaea;
+          color: #960018;
+          border-radius: 12px;
+          font-size: 28px;
+          font-weight: bold;
+          letter-spacing: 4px;
+        ">
+          ${code}
+        </div>
+
+        <p style="margin-top: 18px;">
+          Este código vence en 10 minutos.
+        </p>
+      </div>
+    `
+  });
+}
+
+// ===============================
+// Enviar código de verificación
+// ===============================
+
+router.post('/send-verification-code', async (req, res) => {
   const { name, email, password, date_of_birth, phone_number } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({
-      error: 'Faltan campos obligatorios'
+      error: 'Nombre, correo y contraseña son obligatorios.'
     });
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!isValidEmailFormat(normalizedEmail)) {
+      return res.status(400).json({
+        error: 'Ingresa un correo electrónico válido.'
+      });
+    }
+
+  const hasEmailDomain = await hasValidEmailDomain(normalizedEmail);
+
+  if (!hasEmailDomain) {
+      return res.status(400).json({
+        error: 'El dominio del correo no parece válido. Revisa el correo e intenta nuevamente.'
+      });
+    }
+
   try {
-    const normalizedEmail = email.trim().toLowerCase();
+    const existingUsers = await queryAsync(
+      'SELECT id FROM users WHERE email = ?',
+      [normalizedEmail]
+    );
 
-    try {
-      const isDeletedAccount = await isDeletedAccountEmail(normalizedEmail);
-
-      if (isDeletedAccount) {
-        return res.status(403).json({
-          error: 'Esta cuenta fue eliminada anteriormente. No se puede iniciar sesión nuevamente con este correo.'
-        });
-      }
-    } catch (error) {
-      console.error('❌ Error al validar cuenta eliminada:', error);
-
-      return res.status(500).json({
-        error: 'Error al validar el estado de la cuenta'
+    if (existingUsers.length > 0) {
+      return res.status(409).json({
+        error: 'Ya existe una cuenta registrada con este correo.'
       });
     }
 
@@ -199,72 +325,155 @@ router.post('/register', async (req, res) => {
 
     if (isDeletedAccount) {
       return res.status(403).json({
-        error: 'Esta cuenta fue eliminada anteriormente y no puede registrarse de nuevo automáticamente.'
+        error: 'Esta cuenta fue eliminada anteriormente y no puede registrarse de nuevo.'
       });
     }
 
-    const checkQuery = 'SELECT id FROM users WHERE email = ?';
+    const verificationCode = createVerificationCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const expiresAtMySQL = formatDateTimeForMySQL(expiresAt);
 
-    connection.query(checkQuery, [normalizedEmail], async (checkErr, existingUsers) => {
-      if (checkErr) {
-        console.error('❌ Error al validar usuario existente:', checkErr);
+    const passwordHash = await bcrypt.hash(password, 10);
 
-        return res.status(500).json({
-          error: 'Error al validar el usuario'
-        });
-      }
-
-      if (existingUsers.length > 0) {
-        return res.status(409).json({
-          error: 'Ya existe una cuenta registrada con este correo'
-        });
-      }
-
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-      const query = `
-        INSERT INTO users 
-          (name, email, password, date_of_birth, phone_number)
-        VALUES (?, ?, ?, ?, ?)
-      `;
-
-      const values = [
+    await queryAsync(
+      `
+        INSERT INTO email_verifications
+          (name, email, password_hash, date_of_birth, phone_number, verification_code, expires_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          name = VALUES(name),
+          password_hash = VALUES(password_hash),
+          date_of_birth = VALUES(date_of_birth),
+          phone_number = VALUES(phone_number),
+          verification_code = VALUES(verification_code),
+          expires_at = VALUES(expires_at),
+          created_at = CURRENT_TIMESTAMP
+      `,
+      [
         name.trim(),
         normalizedEmail,
-        hashedPassword,
+        passwordHash,
         date_of_birth || null,
-        phone_number || null
-      ];
+        phone_number || null,
+        verificationCode,
+        expiresAtMySQL
+      ]
+    );
 
-      connection.query(query, values, (err) => {
-        if (err) {
-          console.error('❌ Error al registrar usuario:', err);
+    await sendVerificationEmail(normalizedEmail, verificationCode);
 
-          return res.status(500).json({
-            error: 'Error al registrar el usuario'
-          });
-        }
-
-        return res.status(201).json({
-          message: '✅ Usuario registrado exitosamente'
-        });
-      });
+    return res.json({
+      mensaje: 'Código de verificación enviado al correo.'
     });
 
   } catch (error) {
-    console.error('❌ Error al registrar usuario:', error);
+    console.error('❌ Error al enviar código de verificación:', error);
 
     return res.status(500).json({
-      error: 'Error interno del servidor'
+      error: 'No se pudo enviar el código de verificación.'
     });
   }
 });
 
 // ===============================
-// Registro/Login con Google
+// Verificar código y crear cuenta
 // ===============================
 
+router.post('/verify-email-code', async (req, res) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    return res.status(400).json({
+      error: 'Correo y código son obligatorios.'
+    });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  try {
+    const verificationRows = await queryAsync(
+      `
+        SELECT *
+        FROM email_verifications
+        WHERE email = ?
+          AND verification_code = ?
+          AND expires_at > NOW()
+        LIMIT 1
+      `,
+      [
+        normalizedEmail,
+        String(code).trim()
+      ]
+    );
+
+    if (verificationRows.length === 0) {
+      return res.status(400).json({
+        error: 'El código es incorrecto o ya venció.'
+      });
+    }
+
+    const verification = verificationRows[0];
+
+    const existingUsers = await queryAsync(
+      'SELECT id FROM users WHERE email = ?',
+      [normalizedEmail]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({
+        error: 'Ya existe una cuenta registrada con este correo.'
+      });
+    }
+
+    await queryAsync(
+      `
+        INSERT INTO users
+          (name, email, password, date_of_birth, phone_number)
+        VALUES (?, ?, ?, ?, ?)
+      `,
+      [
+        verification.name,
+        verification.email,
+        verification.password_hash,
+        verification.date_of_birth || null,
+        verification.phone_number || null
+      ]
+    );
+
+    await queryAsync(
+      'DELETE FROM email_verifications WHERE email = ?',
+      [normalizedEmail]
+    );
+
+    return res.status(201).json({
+      mensaje: 'Cuenta creada y correo verificado correctamente.'
+    });
+
+  } catch (error) {
+    console.error('❌ Error al verificar código:', error);
+
+    return res.status(500).json({
+      error: 'No se pudo verificar el código.'
+    });
+  }
+});
+
+// ===============================
+// Registro clásico bloqueado
+// Ahora el registro debe hacerse con código de verificación
+// ===============================
+
+router.post('/register', (req, res) => {
+  return res.status(410).json({
+    error: 'El registro directo ya no está disponible. Debes verificar el correo con código antes de crear la cuenta.'
+  });
+});
+
+// ===============================
+// Login con Google
+// Google solo inicia sesión si la cuenta ya existe.
+// La creación de cuentas nuevas debe hacerse con código de verificación.
+// ===============================
 
 router.post('/google-login', async (req, res) => {
   const jwtConfigError = validateJwtConfig(res);
@@ -273,17 +482,18 @@ router.post('/google-login', async (req, res) => {
     return;
   }
 
-  const { name, email, picture } = req.body;
+  const { credential } = req.body;
 
-  if (!name || !email) {
+  if (!credential) {
     return res.status(400).json({
-      error: 'Faltan datos del usuario de Google'
+      error: 'Token de Google no enviado.'
     });
   }
 
-  const normalizedEmail = email.trim().toLowerCase();
-
   try {
+    const googleUser = await verifyGoogleCredential(credential);
+    const normalizedEmail = googleUser.email.trim().toLowerCase();
+
     const isDeletedAccount = await isDeletedAccountEmail(normalizedEmail);
 
     if (isDeletedAccount) {
@@ -297,56 +507,31 @@ router.post('/google-login', async (req, res) => {
       [normalizedEmail]
     );
 
-    if (users.length > 0) {
-      const user = users[0];
-      const userResponse = buildUserResponse(user, picture);
-      const token = createAuthToken(userResponse);
-
-      return res.status(200).json({
-        message: 'Bienvenido de nuevo',
-        user: userResponse,
-        token
+    if (users.length === 0) {
+      return res.status(404).json({
+        error: 'No existe una cuenta registrada con este correo. Primero crea tu cuenta con verificación por código.'
       });
     }
 
-    const result = await queryAsync(
-      `
-        INSERT INTO users (name, email, picture)
-        VALUES (?, ?, ?)
-      `,
-      [
-        name.trim(),
-        normalizedEmail,
-        picture || null
-      ]
-    );
+    const user = users[0];
+    const userResponse = buildUserResponse(user, googleUser.picture);
+    const token = createAuthToken(userResponse);
 
-    const newUser = {
-      id: result.insertId,
-      name: name.trim(),
-      email: normalizedEmail,
-      picture: picture || null
-    };
-
-    const token = createAuthToken(newUser);
-
-    return res.status(201).json({
-      message: 'Usuario creado con Google',
-      user: newUser,
+    return res.status(200).json({
+      message: 'Bienvenida de nuevo',
+      user: userResponse,
       token
     });
 
   } catch (error) {
     console.error('❌ Error en login con Google:', error);
 
-    return res.status(500).json({
-      error: 'Error al procesar el login con Google'
+    return res.status(401).json({
+      error: error.message || 'No se pudo validar la cuenta de Google.'
     });
   }
 });
-// ===============================
-// Login clásico con email y contraseña
-// ===============================
+
 
 router.post('/login', (req, res) => {
   const jwtConfigError = validateJwtConfig(res);

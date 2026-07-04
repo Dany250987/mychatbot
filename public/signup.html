@@ -6,8 +6,6 @@
 
   <title>Agenda Personal Inteligente | Crear cuenta</title>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,8 +28,6 @@
   <link rel="stylesheet" href="src/css/signup.css">
 
   <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
-  
-  <script src="src/js/script.js" defer></script>
   <script src="src/js/signup.js" defer></script>
 </head>
 
@@ -92,6 +88,7 @@
 
         <p>
           Ingresa tus datos para comenzar a organizar tu día de forma simple y práctica.
+          Validaremos tu correo con un código antes de crear la cuenta.
         </p>
       </div>
 
@@ -197,7 +194,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn-cancel" id="btn-cancel">
+          <button type="button" class="btn-cancel" id="btn-cancel" onclick="window.location.href='login_google.html'">
             Cancelar
           </button>
 
@@ -206,26 +203,6 @@
           </button>
         </div>
       </form>
-
-      <div class="login-divider">
-        <span>o regístrate con Google</span>
-      </div>
-
-      <!-- Google Sign-In -->
-      <div id="g_id_onload"
-        data-client_id="625571352027-jgsi8eovhcd2b4or9uohaog1f8663d8i.apps.googleusercontent.com"
-        data-callback="handleCredentialResponse"
-        data-auto_prompt="false">
-      </div>
-
-      <div class="g_id_signin"
-        data-type="standard"
-        data-size="large"
-        data-theme="outline"
-        data-text="sign_up_with"
-        data-shape="pill"
-        data-logo_alignment="left">
-      </div>
 
       <p class="signin-text">
         ¿Ya tienes una cuenta?

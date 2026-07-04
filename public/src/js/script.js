@@ -42,20 +42,14 @@ async function handleCredentialResponse(response) {
       return;
     }
 
-    const googleUser = jwt_decode(response.credential);
-
-    const userData = {
-      name: googleUser.name,
-      email: googleUser.email,
-      picture: googleUser.picture
-    };
-
     const apiResponse = await fetch("/api/auth/google-login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(userData)
+      body: JSON.stringify({
+        credential: response.credential
+      })
     });
 
     const data = await apiResponse.json();

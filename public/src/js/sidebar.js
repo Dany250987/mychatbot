@@ -61,6 +61,11 @@ function renderSidebar(activePage = "") {
         <i class="fa-solid fa-wallet"></i>
         <span>Gastos</span>
       </a>
+
+      <a href="./dashboard.html#cuenta" class="sidebar-link ${activePage === "cuenta" ? "active" : ""}">
+        <i class="fa-solid fa-user-gear"></i>
+        <span>Mi cuenta</span>
+      </a>
     </nav>
 
     <button type="button" class="sidebar-logout" onclick="logoutFromSidebar()">
@@ -108,6 +113,7 @@ function logoutFromSidebar() {
 
   localStorage.removeItem("userData");
   localStorage.removeItem("authToken");
+  localStorage.removeItem("userEmail");
 
   window.location.href = "login_google.html";
 }
