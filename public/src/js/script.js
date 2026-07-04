@@ -17,8 +17,9 @@ function showAuthMessage({ title, text, icon }) {
   return Promise.resolve();
 }
 
-function saveUserSession(user) {
+function saveUserSession(user, token) {
   localStorage.setItem("userData", JSON.stringify(user));
+  localStorage.setItem("authToken", token);
 }
 
 function redirectToDashboard() {
@@ -59,7 +60,7 @@ async function handleCredentialResponse(response) {
 
     const data = await apiResponse.json();
 
-    if (!apiResponse.ok || !data.user) {
+    if (!apiResponse.ok || !data.user || !data.token) {
       await showAuthMessage({
         title: "No se pudo iniciar sesión",
         text: data.message || data.error || "Ocurrió un error al validar tu cuenta de Google.",
@@ -68,7 +69,7 @@ async function handleCredentialResponse(response) {
       return;
     }
 
-    saveUserSession(data.user);
+    saveUserSession(data.user, data.token);
 
     await showAuthMessage({
       title: "Bienvenida",
@@ -132,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await response.json();
 
-      if (!response.ok || !data.user) {
+      if (!response.ok || !data.user || !data.token) {
         await showAuthMessage({
           title: "No se pudo iniciar sesión",
           text: data.error || data.message || "Correo o contraseña incorrectos.",
@@ -141,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      saveUserSession(data.user);
+      saveUserSession(data.user, data.token);
 
       await showAuthMessage({
         title: "Bienvenida",

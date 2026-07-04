@@ -1,6 +1,57 @@
+// ===============================
+// Sesión y seguridad para recordatorios/calendario
+// ===============================
+
 function logout() {
   localStorage.removeItem("userData");
+  localStorage.removeItem("authToken");
   window.location.href = "login_google.html";
+}
+
+function getDashboardReminderAuthToken() {
+  return localStorage.getItem("authToken");
+}
+
+function getDashboardReminderAuthHeaders(includeJsonContent = false) {
+  const token = getDashboardReminderAuthToken();
+
+  const headers = {
+    Authorization: `Bearer ${token}`
+  };
+
+  if (includeJsonContent) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  return headers;
+}
+
+async function handleDashboardReminderUnauthorizedSession(data) {
+  localStorage.removeItem("userData");
+  localStorage.removeItem("authToken");
+
+  const message = data?.error || data?.mensaje || "Tu sesión venció o no es válida. Inicia sesión nuevamente.";
+
+  if (typeof Swal !== "undefined") {
+    await Swal.fire({
+      title: "Sesión vencida",
+      text: message,
+      icon: "warning",
+      confirmButtonColor: "#960018"
+    });
+  } else {
+    alert(message);
+  }
+
+  window.location.href = "login_google.html";
+}
+
+async function parseJsonResponse(response) {
+  try {
+    return await response.json();
+  } catch (error) {
+    return {};
+  }
 }
 
 function loadAlertedReminderKeys() {
@@ -92,13 +143,26 @@ function startReminderAlertChecker() {
 }
 
 async function refreshRemindersForAlerts() {
-  if (!currentUserId) {
+  const token = getDashboardReminderAuthToken();
+
+  if (!token) {
+    await handleDashboardReminderUnauthorizedSession({
+      mensaje: "No se encontró token de sesión."
+    });
     return;
   }
 
   try {
-    const response = await fetch(`${REMINDERS_API_URL}?user_id=${currentUserId}`);
-    const data = await response.json();
+    const response = await fetch(REMINDERS_API_URL, {
+      headers: getDashboardReminderAuthHeaders()
+    });
+
+    const data = await parseJsonResponse(response);
+
+    if (response.status === 401) {
+      await handleDashboardReminderUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       console.error("No se pudieron actualizar los recordatorios para alertas:", data);
@@ -492,13 +556,26 @@ function renderCalendarSection() {
 }
 
 async function loadCalendarReminders() {
-  if (!currentUserId) {
+  const token = getDashboardReminderAuthToken();
+
+  if (!token) {
+    await handleDashboardReminderUnauthorizedSession({
+      mensaje: "No se encontró token de sesión."
+    });
     return;
   }
 
   try {
-    const response = await fetch(`${REMINDERS_API_URL}?user_id=${currentUserId}`);
-    const data = await response.json();
+    const response = await fetch(REMINDERS_API_URL, {
+      headers: getDashboardReminderAuthHeaders()
+    });
+
+    const data = await parseJsonResponse(response);
+
+    if (response.status === 401) {
+      await handleDashboardReminderUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({

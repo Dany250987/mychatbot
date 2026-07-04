@@ -1,31 +1,44 @@
 const express = require('express');
 const path = require('path');
-const authRoutes = require('./routes/authRoutes'); // ← también debe ir después de express
-const expenseRoutes = require('./routes/expenseRoutes'); 
+
+// Cargamos las variables del archivo .env que está en la raíz del proyecto
+require('dotenv').config({
+  path: path.join(__dirname, '../.env'),
+  quiet: true
+});
+
+const authRoutes = require('./routes/authRoutes');
+const expenseRoutes = require('./routes/expenseRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
-const taskRoutes = require('./routes/taskRoutes'); // ← también debe ir después de express
+const taskRoutes = require('./routes/taskRoutes');
 const reminderRoutes = require('./routes/reminderRoutes');
-const app = express(); // ← PRIMERO crear la app
+const searchRoutes = require('./routes/searchRoutes');
+
+const app = express();
 
 // Middleware
-app.use(express.json()); // Para leer JSON en el body
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../public'))); // si public está fuera de backend
+
+// Archivos estáticos del frontend
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Rutas API
 app.use('/api/auth', authRoutes);
-app.use('/api/expenses', expenseRoutes); // Rutas para gastos
+app.use('/api/expenses', expenseRoutes);
 app.use('/api/incomes', incomeRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/reminders', reminderRoutes);
+app.use('/api/search', searchRoutes);
 
-// Ruta para cargar el HTML principal (opcional)
+// Ruta principal
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/signup.html')); // o el archivo que prefieras como home
+  res.sendFile(path.join(__dirname, '../public/signup.html'));
 });
 
 // Escuchar puerto
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
 });

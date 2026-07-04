@@ -1,21 +1,28 @@
 const express = require('express');
 const connection = require('../db/connection');
+const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
 
 // Limpia automáticamente recordatorios en papelera con más de 30 días
-function cleanOldTrashReminders() {
+// Solo limpia la papelera del usuario autenticado
+function cleanOldTrashReminders(userId, callback) {
   const sql = `
     DELETE FROM reminders
-    WHERE status = 'papelera'
+    WHERE user_id = ?
+    AND status = 'papelera'
     AND deleted_at IS NOT NULL
     AND deleted_at < DATE_SUB(NOW(), INTERVAL 30 DAY)
   `;
 
-  connection.query(sql, (error) => {
+  connection.query(sql, [userId], (error) => {
     if (error) {
       console.error('Error al limpiar papelera de recordatorios:', error);
+    }
+
+    if (typeof callback === 'function') {
+      callback(error);
     }
   });
 }
@@ -23,6 +30,7 @@ function cleanOldTrashReminders() {
 
 // Ruta de prueba
 // GET http://localhost:3000/api/reminders/test
+// Esta ruta queda pública porque solo confirma que el módulo responde
 router.get('/test', (req, res) => {
   res.json({
     mensaje: 'Ruta de recordatorios funcionando correctamente'
@@ -30,60 +38,65 @@ router.get('/test', (req, res) => {
 });
 
 
-// Consultar recordatorios de un usuario
-// GET http://localhost:3000/api/reminders?user_id=4
+// A partir de aquí, todas las rutas de recordatorios requieren token
+router.use(authMiddleware);
+
+
+// Consultar recordatorios del usuario autenticado
+// GET http://localhost:3000/api/reminders
 router.get('/', (req, res) => {
-  const userId = req.query.user_id;
+  const userId = req.user.id;
 
-  if (!userId) {
-    return res.status(400).json({
-      mensaje: 'El user_id es obligatorio'
-    });
-  }
-
-  cleanOldTrashReminders();
-
-  const sql = `
-    SELECT
-      id,
-      user_id,
-      title,
-      original_text,
-      reminder_date,
-      TIME_FORMAT(reminder_time, '%H:%i:%s') AS reminder_time,
-      category,
-      repeat_type,
-      status,
-      deleted_at,
-      created_at,
-      updated_at
-    FROM reminders
-    WHERE user_id = ?
-    ORDER BY reminder_date ASC, reminder_time ASC, created_at DESC
-  `;
-
-  connection.query(sql, [userId], (error, results) => {
-    if (error) {
-      console.error('Error al consultar recordatorios:', error);
-
+  cleanOldTrashReminders(userId, (cleanError) => {
+    if (cleanError) {
       return res.status(500).json({
-        mensaje: 'Error al consultar los recordatorios'
+        mensaje: 'Error al limpiar la papelera de recordatorios'
       });
     }
 
-    res.json({
-      mensaje: 'Recordatorios consultados correctamente',
-      reminders: results
+    const sql = `
+      SELECT
+        id,
+        user_id,
+        title,
+        original_text,
+        reminder_date,
+        TIME_FORMAT(reminder_time, '%H:%i:%s') AS reminder_time,
+        category,
+        repeat_type,
+        status,
+        deleted_at,
+        created_at,
+        updated_at
+      FROM reminders
+      WHERE user_id = ?
+      ORDER BY reminder_date ASC, reminder_time ASC, created_at DESC
+    `;
+
+    connection.query(sql, [userId], (error, results) => {
+      if (error) {
+        console.error('Error al consultar recordatorios:', error);
+
+        return res.status(500).json({
+          mensaje: 'Error al consultar los recordatorios'
+        });
+      }
+
+      res.json({
+        mensaje: 'Recordatorios consultados correctamente',
+        reminders: results
+      });
     });
   });
 });
 
 
-// Crear recordatorio
+// Crear recordatorio del usuario autenticado
 // POST http://localhost:3000/api/reminders
 router.post('/', (req, res) => {
+  const userId = req.user.id;
+
   const {
-    user_id,
     title,
     original_text,
     reminder_date,
@@ -93,9 +106,9 @@ router.post('/', (req, res) => {
     status
   } = req.body;
 
-  if (!user_id || !title || !original_text || !reminder_date) {
+  if (!title || !original_text || !reminder_date) {
     return res.status(400).json({
-      mensaje: 'El user_id, título, texto original y fecha son obligatorios'
+      mensaje: 'El título, texto original y fecha son obligatorios'
     });
   }
 
@@ -117,7 +130,7 @@ router.post('/', (req, res) => {
   `;
 
   const values = [
-    user_id,
+    userId,
     title,
     original_text,
     reminder_date,
@@ -145,13 +158,13 @@ router.post('/', (req, res) => {
 });
 
 
-// Editar recordatorio
+// Editar recordatorio del usuario autenticado
 // PUT http://localhost:3000/api/reminders/1
 router.put('/:id', (req, res) => {
+  const userId = req.user.id;
   const reminderId = req.params.id;
 
   const {
-    user_id,
     title,
     original_text,
     reminder_date,
@@ -161,9 +174,9 @@ router.put('/:id', (req, res) => {
     status
   } = req.body;
 
-  if (!user_id || !title || !original_text || !reminder_date) {
+  if (!title || !original_text || !reminder_date) {
     return res.status(400).json({
-      mensaje: 'El user_id, título, texto original y fecha son obligatorios'
+      mensaje: 'El título, texto original y fecha son obligatorios'
     });
   }
 
@@ -199,7 +212,7 @@ router.put('/:id', (req, res) => {
     reminderStatus,
     reminderStatus,
     reminderId,
-    user_id
+    userId
   ];
 
   connection.query(sql, values, (error, result) => {
@@ -224,17 +237,11 @@ router.put('/:id', (req, res) => {
 });
 
 
-// Enviar recordatorio a papelera
-// DELETE http://localhost:3000/api/reminders/1?user_id=4
+// Enviar recordatorio a papelera del usuario autenticado
+// DELETE http://localhost:3000/api/reminders/1
 router.delete('/:id', (req, res) => {
+  const userId = req.user.id;
   const reminderId = req.params.id;
-  const userId = req.query.user_id;
-
-  if (!userId) {
-    return res.status(400).json({
-      mensaje: 'El user_id es obligatorio'
-    });
-  }
 
   const sql = `
     UPDATE reminders
@@ -267,17 +274,11 @@ router.delete('/:id', (req, res) => {
 });
 
 
-// Eliminar definitivamente recordatorio
-// DELETE http://localhost:3000/api/reminders/1/permanent?user_id=4
+// Eliminar definitivamente recordatorio del usuario autenticado
+// DELETE http://localhost:3000/api/reminders/1/permanent
 router.delete('/:id/permanent', (req, res) => {
+  const userId = req.user.id;
   const reminderId = req.params.id;
-  const userId = req.query.user_id;
-
-  if (!userId) {
-    return res.status(400).json({
-      mensaje: 'El user_id es obligatorio'
-    });
-  }
 
   const sql = `
     DELETE FROM reminders

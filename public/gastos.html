@@ -249,6 +249,37 @@
               </div>
             </div>
 
+            <div class="form-col evidence-field">
+              <label for="expenseEvidence" class="evidence-label">
+                <i class="fa-solid fa-paperclip"></i>
+                Evidencia opcional
+              </label>
+
+              <div class="custom-file-upload">
+                <input
+                  type="file"
+                  id="expenseEvidence"
+                  name="expenseEvidence"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                >
+
+                <label for="expenseEvidence" class="custom-file-label">
+                  <span class="file-button">
+                    <i class="fa-solid fa-upload"></i>
+                    Seleccionar archivo
+                  </span>
+
+                  <span class="file-name" id="expenseEvidenceName">
+                    Ningún archivo seleccionado
+                  </span>
+                </label>
+            </div>
+
+  <p class="field-help">
+    Puedes adjuntar PDF, JPG, PNG o WEBP. Máximo 5 MB. No es obligatorio.
+  </p>
+</div>
+
             <input type="hidden" id="source" value="manual">
             <input type="hidden" id="expenseId">
 
@@ -316,6 +347,7 @@
                 <th>Categoría</th>
                 <th>Descripción</th>
                 <th>Valor</th>
+                <th>Evidencia</th>
                 <th>Origen</th>
                 <th>Acciones</th>
               </tr>

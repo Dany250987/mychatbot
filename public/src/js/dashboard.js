@@ -1,7 +1,11 @@
 window.addEventListener("DOMContentLoaded", async () => {
   const userData = localStorage.getItem("userData");
+  const authToken = localStorage.getItem("authToken");
 
-  if (!userData) {
+  if (!userData || !authToken) {
+    localStorage.removeItem("userData");
+    localStorage.removeItem("authToken");
+
     await Swal.fire({
       title: "Sesión no iniciada",
       text: "Por favor, inicia sesión para continuar.",
@@ -14,7 +18,44 @@ window.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const user = JSON.parse(userData);
+  let user = null;
+
+  try {
+    user = JSON.parse(userData);
+  } catch (error) {
+    console.error("Error al leer la sesión:", error);
+
+    localStorage.removeItem("userData");
+    localStorage.removeItem("authToken");
+
+    await Swal.fire({
+      title: "Sesión inválida",
+      text: "No se pudo leer tu sesión. Por favor, inicia sesión nuevamente.",
+      icon: "warning",
+      confirmButtonText: "Ir al login",
+      confirmButtonColor: "#960018"
+    });
+
+    window.location.href = "login_google.html";
+    return;
+  }
+
+  if (!user || !user.id) {
+    localStorage.removeItem("userData");
+    localStorage.removeItem("authToken");
+
+    await Swal.fire({
+      title: "Sesión inválida",
+      text: "No se encontró la información del usuario. Por favor, inicia sesión nuevamente.",
+      icon: "warning",
+      confirmButtonText: "Ir al login",
+      confirmButtonColor: "#960018"
+    });
+
+    window.location.href = "login_google.html";
+    return;
+  }
+
   currentUserId = user.id;
 
   const title = document.getElementById("section-title");
@@ -23,7 +64,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const quickReminderButton = document.getElementById("quickReminderButton");
 
   if (title) {
-    title.textContent = `Bienvenida, ${user.name}`;
+    title.textContent = `Bienvenida, ${user.name || user.email || "Usuario"}`;
   }
 
   if (user.picture && avatar) {
@@ -47,16 +88,17 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (quickTaskButton) {
     quickTaskButton.addEventListener("click", () => {
       window.location.hash = "tareas";
-  });
+    });
   }
 
   if (quickReminderButton) {
     quickReminderButton.addEventListener("click", () => {
-    window.location.hash = "recordatorios";
-  });
+      window.location.hash = "recordatorios";
+    });
   }
 
   setupDashboardCardNavigation();
+
   /*
     Luego cargamos los datos.
     No usamos await aquí para no bloquear el sidebar.
@@ -72,7 +114,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (typeof startReminderAlertChecker === "function") {
     startReminderAlertChecker();
   }
-  });
+});
 
 
 function updateSidebar(activePage = "dashboard") {
@@ -80,6 +122,7 @@ function updateSidebar(activePage = "dashboard") {
     renderSidebar(activePage);
   }
 }
+
 
 function getActiveDashboardPage() {
   const hash = window.location.hash.replace("#", "");
@@ -93,6 +136,7 @@ function getActiveDashboardPage() {
   return "dashboard";
 }
 
+
 function openSectionFromHash() {
   const activePage = getActiveDashboardPage();
 
@@ -104,8 +148,17 @@ function openSectionFromHash() {
 
     if (title) {
       const userData = localStorage.getItem("userData");
-      const user = userData ? JSON.parse(userData) : null;
-      title.textContent = user ? `Bienvenida, ${user.name}` : "Bienvenida 💫";
+      let user = null;
+
+      try {
+        user = userData ? JSON.parse(userData) : null;
+      } catch (error) {
+        user = null;
+      }
+
+      title.textContent = user
+        ? `Bienvenida, ${user.name || user.email || "Usuario"}`
+        : "Bienvenida 💫";
     }
 
     return;
@@ -114,83 +167,20 @@ function openSectionFromHash() {
   showSection(activePage);
 }
 
-function toggleDashboardHomeCards(showCards) {
-  const cardsOverview = document.querySelector(".cards-overview");
-
-  if (!cardsOverview) {
-    return;
-  }
-
-  cardsOverview.style.display = showCards ? "grid" : "none";
-}
-
-function setupDashboardCardNavigation() {
-  const cardRoutes = [
-    {
-      counterId: "totalTasksCount",
-      section: "tareas"
-    },
-    {
-      counterId: "pendingTasksCount",
-      section: "tareas"
-    },
-    {
-      counterId: "todayEventsCount",
-      section: "calendario"
-    },
-    {
-      counterId: "activeRemindersCount",
-      section: "recordatorios"
-    },
-    {
-      counterId: "monthlyExpensesAmount",
-      url: "./gastos.html"
-    },
-    {
-      counterId: "monthlyIncomeAmount",
-      url: "./gastos.html"
-    },
-    {
-      counterId: "monthlySavingsAmount",
-      url: "./gastos.html"
-    }
-  ];
-
-  cardRoutes.forEach((route) => {
-    const counter = document.getElementById(route.counterId);
-
-    if (!counter) {
-      return;
-    }
-
-    const card = counter.closest(".dashboard-card");
-
-    if (!card) {
-      return;
-    }
-
-    card.classList.add("dashboard-card-clickable");
-
-    card.addEventListener("click", () => {
-      if (route.url) {
-        window.location.href = route.url;
-        return;
-      }
-
-      window.location.hash = route.section;
-    });
-  });
-}
 
 function toggleDashboardHomeCards(showCards) {
   const cardsOverview = document.querySelector(".cards-overview");
+  const globalSearchPanel = document.getElementById("globalSearchPanel");
 
-  if (!cardsOverview) {
-    return;
+  if (cardsOverview) {
+    cardsOverview.style.display = showCards ? "grid" : "none";
   }
 
-  cardsOverview.style.display = showCards ? "grid" : "none";
+  if (globalSearchPanel) {
+    globalSearchPanel.style.display = showCards ? "block" : "none";
+  }
 }
+
 
 function showSection(section, selectedLink = null) {
   const contentEl = document.getElementById("section-content");
@@ -241,6 +231,10 @@ function showSection(section, selectedLink = null) {
     return;
   }
 
+  if (!contentEl) {
+    return;
+  }
+
   contentEl.innerHTML = `
     <div class="section-placeholder">
       <div class="section-placeholder-icon">
@@ -257,6 +251,7 @@ function showSection(section, selectedLink = null) {
     </div>
   `;
 }
+
 
 function setupDashboardCardNavigation() {
   const cardRoutes = [
@@ -320,57 +315,3 @@ function setupDashboardCardNavigation() {
     });
   });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

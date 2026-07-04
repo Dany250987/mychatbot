@@ -31,6 +31,37 @@
         <div class="date-time" id="datetime"></div>
       </header>
 
+            <!-- Buscador global -->
+      <section id="globalSearchPanel" class="global-search-panel">
+        <div class="global-search-header">
+          <div>
+            <span class="welcome-badge">Buscador global</span>
+            <h2>Busca en toda tu agenda</h2>
+            <p>Encuentra tareas, recordatorios, gastos e ingresos desde un solo lugar.</p>
+          </div>
+        </div>
+
+        <div class="global-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+
+          <input 
+            type="text" 
+            id="globalSearchInput" 
+            placeholder="Buscar por ejemplo: internet, salud, pasajes, arriendo..."
+            autocomplete="off"
+          >
+
+          <button type="button" id="globalSearchButton">
+            Buscar
+          </button>
+
+          <button type="button" id="clearGlobalSearchButton" class="clear-global-search-button" style="display: none;">
+            Limpiar
+          </button>
+        </div>
+
+        <div id="globalSearchResults" class="global-search-results" style="display: none;"></div>
+      </section>
       <!-- Resumen principal -->
       <section class="cards-overview">
 
@@ -166,6 +197,7 @@
   <script src="./src/js/dashboard/dashboard-reminders-voice.js"></script>
   <script src="./src/js/dashboard/dashboard-reminders.js"></script>
   <script src="./src/js/dashboard/dashboard-calendar.js"></script>
+  <script src="./src/js/dashboard/dashboard-search.js"></script>
   <script src="./src/js/dashboard.js"></script>
 </body>
 </html>

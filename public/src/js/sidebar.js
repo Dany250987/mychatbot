@@ -94,6 +94,20 @@ function getUserInitials(name) {
 }
 
 function logoutFromSidebar() {
+  const userData = localStorage.getItem("userData");
+
+  try {
+    const user = userData ? JSON.parse(userData) : null;
+
+    if (user && user.id) {
+      localStorage.removeItem(`alertedReminderKeys_${user.id}`);
+    }
+  } catch (error) {
+    console.error("Error al limpiar datos de sesión:", error);
+  }
+
   localStorage.removeItem("userData");
+  localStorage.removeItem("authToken");
+
   window.location.href = "login_google.html";
 }

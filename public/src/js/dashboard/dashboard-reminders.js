@@ -1,11 +1,106 @@
+// ===============================
+// Seguridad con token para recordatorios
+// ===============================
+
+function getReminderAuthToken() {
+  return localStorage.getItem("authToken");
+}
+
+function getReminderAuthHeaders(includeJsonContent = false) {
+  const token = getReminderAuthToken();
+
+  const headers = {
+    Authorization: `Bearer ${token}`
+  };
+
+  if (includeJsonContent) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  return headers;
+}
+
+let hasHighlightedReminderSearchResult = false;
+
+function getReminderSearchTarget() {
+  const urlParams = new URLSearchParams(window.location.search);
+
+  return {
+    type: urlParams.get("type"),
+    id: Number(urlParams.get("id")),
+    status: urlParams.get("status"),
+    date: urlParams.get("date")
+  };
+}
+
+function isReminderSearchTarget(reminderId) {
+  const target = getReminderSearchTarget();
+
+  return target.type === "reminder" && target.id === Number(reminderId);
+}
+
+function highlightReminderSearchTargetElement(element) {
+  if (!element || hasHighlightedReminderSearchResult) {
+    return;
+  }
+
+  hasHighlightedReminderSearchResult = true;
+
+  setTimeout(() => {
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    element.classList.add("dashboard-search-highlight");
+
+    setTimeout(() => {
+      element.classList.remove("dashboard-search-highlight");
+    }, 5000);
+  }, 500);
+}
+
+async function handleReminderUnauthorizedSession(data) {
+  localStorage.removeItem("userData");
+  localStorage.removeItem("authToken");
+
+  const message = data?.error || data?.mensaje || "Tu sesión venció o no es válida. Inicia sesión nuevamente.";
+
+  if (typeof Swal !== "undefined") {
+    await Swal.fire({
+      title: "Sesión vencida",
+      text: message,
+      icon: "warning",
+      confirmButtonColor: "#960018"
+    });
+  } else {
+    alert(message);
+  }
+
+  window.location.href = "login_google.html";
+}
+
 async function loadReminders() {
-  if (!currentUserId) {
+  const token = getReminderAuthToken();
+
+  if (!token) {
+    await handleReminderUnauthorizedSession({
+      mensaje: "No se encontró token de sesión."
+    });
     return;
   }
 
   try {
-    const response = await fetch(`${REMINDERS_API_URL}?user_id=${currentUserId}`);
+    const response = await fetch(REMINDERS_API_URL, {
+      headers: getReminderAuthHeaders()
+    });
+
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleReminderUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       console.error("No se pudieron consultar los recordatorios:", data);
@@ -139,6 +234,11 @@ function renderRemindersList() {
 
     card.classList.add("reminder-timeline-card", categoryClass);
     card.classList.add(`reminder-status-${getReminderStatusClass(reminder)}`);
+    card.dataset.reminderId = reminder.id;
+
+    if (isReminderSearchTarget(reminder.id)) {
+      card.classList.add("dashboard-search-target-card");
+    }
 
     card.innerHTML = `
       <div class="reminder-date-badge">
@@ -186,6 +286,10 @@ function renderRemindersList() {
     `;
 
     list.appendChild(card);
+
+    if (isReminderSearchTarget(reminder.id)) {
+      highlightReminderSearchTargetElement(card);
+    }
   });
 }
 
@@ -386,6 +490,7 @@ async function editReminder(reminderId) {
           <option value="diario" ${reminder.repeat_type === "diario" ? "selected" : ""}>Diario</option>
           <option value="semanal" ${reminder.repeat_type === "semanal" ? "selected" : ""}>Semanal</option>
           <option value="mensual" ${reminder.repeat_type === "mensual" ? "selected" : ""}>Mensual</option>
+          <option value="anual" ${reminder.repeat_type === "anual" ? "selected" : ""}>Anual</option>
         </select>
 
         <label for="editReminderStatus">Estado</label>
@@ -414,16 +519,15 @@ async function editReminder(reminderId) {
         return false;
       }
 
-      return {
-        user_id: currentUserId,
-        title,
-        original_text: reminder.original_text || title,
-        reminder_date: reminderDate,
-        reminder_time: reminderTime ? `${reminderTime}:00` : null,
-        category,
-        repeat_type: repeatType,
-        status
-      };
+     return {
+      title,
+      original_text: reminder.original_text || title,
+      reminder_date: reminderDate,
+      reminder_time: reminderTime ? `${reminderTime}:00` : null,
+      category,
+      repeat_type: repeatType,
+      status
+    };
     }
   });
 
@@ -434,13 +538,15 @@ async function editReminder(reminderId) {
   try {
     const response = await fetch(`${REMINDERS_API_URL}/${reminderId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: getReminderAuthHeaders(true),
       body: JSON.stringify(result.value)
     });
 
     const data = await response.json();
+    if (response.status === 401) {
+      await handleReminderUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -490,11 +596,17 @@ async function deleteReminder(reminderId) {
   }
 
   try {
-    const response = await fetch(`${REMINDERS_API_URL}/${reminderId}?user_id=${currentUserId}`, {
-      method: "DELETE"
+    const response = await fetch(`${REMINDERS_API_URL}/${reminderId}`, {
+      method: "DELETE",
+      headers: getReminderAuthHeaders()
     });
 
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleReminderUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -541,7 +653,6 @@ async function restoreReminder(reminderId) {
   }
 
   const updatedReminder = {
-    user_id: currentUserId,
     title: reminder.title,
     original_text: reminder.original_text,
     reminder_date: getReminderDateValue(reminder.reminder_date),
@@ -554,13 +665,17 @@ async function restoreReminder(reminderId) {
   try {
     const response = await fetch(`${REMINDERS_API_URL}/${reminderId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: getReminderAuthHeaders(true),
       body: JSON.stringify(updatedReminder)
     });
 
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleReminderUnauthorizedSession(data);
+      return;
+    }
+    
 
     if (!response.ok) {
       Swal.fire({
@@ -610,11 +725,16 @@ async function deleteReminderPermanently(reminderId) {
   }
 
   try {
-    const response = await fetch(`${REMINDERS_API_URL}/${reminderId}/permanent?user_id=${currentUserId}`, {
-      method: "DELETE"
+    const response = await fetch(`${REMINDERS_API_URL}/${reminderId}/permanent`, {
+      method: "DELETE",
+      headers: getReminderAuthHeaders()
     });
-
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleReminderUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -650,7 +770,8 @@ async function deleteReminderPermanently(reminderId) {
 function isRecurringReminder(reminder) {
   return reminder.repeat_type === "diario" ||
     reminder.repeat_type === "semanal" ||
-    reminder.repeat_type === "mensual";
+    reminder.repeat_type === "mensual" ||
+    reminder.repeat_type === "anual";
 }
 
 function getNextReminderDate(reminderDate, repeatType) {
@@ -681,6 +802,12 @@ function getNextReminderDate(reminderDate, repeatType) {
     } while (nextDate <= todayStart);
   }
 
+  if (repeatType === "anual") {
+    do {
+      nextDate = addOneYearSafely(nextDate);
+    } while (nextDate <= todayStart);
+  }
+
   return formatDateForDatabase(nextDate);
 }
 
@@ -697,6 +824,29 @@ function addOneMonthSafely(date) {
     0
   ).getDate();
 
+  nextDate.setDate(Math.min(originalDay, lastDayOfMonth));
+
+  return nextDate;
+}
+
+function addOneYearSafely(date) {
+  const originalMonth = date.getMonth();
+  const originalDay = date.getDate();
+
+  const nextDate = new Date(date);
+  nextDate.setFullYear(nextDate.getFullYear() + 1);
+
+  if (nextDate.getMonth() !== originalMonth) {
+    nextDate.setMonth(originalMonth + 1, 0);
+  }
+
+  const lastDayOfMonth = new Date(
+    nextDate.getFullYear(),
+    originalMonth + 1,
+    0
+  ).getDate();
+
+  nextDate.setMonth(originalMonth);
   nextDate.setDate(Math.min(originalDay, lastDayOfMonth));
 
   return nextDate;
@@ -722,7 +872,6 @@ async function completeReminder(reminder, showSuccessMessage = true) {
   const isRecurring = isRecurringReminder(reminder);
 
   const updatedReminder = {
-    user_id: currentUserId,
     title: reminder.title,
     original_text: reminder.original_text,
     reminder_date: isRecurring
@@ -737,13 +886,15 @@ async function completeReminder(reminder, showSuccessMessage = true) {
   try {
     const response = await fetch(`${REMINDERS_API_URL}/${reminder.id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: getReminderAuthHeaders(true),
       body: JSON.stringify(updatedReminder)
     });
 
     const data = await response.json();
+    if (response.status === 401) {
+      await handleReminderUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -859,6 +1010,19 @@ function renderRemindersSection() {
 
   if (enableAlertsButton) {
     enableAlertsButton.addEventListener("click", enableReminderAlerts);
+  }
+
+  const reminderSearchTarget = getReminderSearchTarget();
+
+  if (reminderSearchTarget.type === "reminder") {
+    if (
+      reminderSearchTarget.status === "papelera" ||
+      reminderSearchTarget.status === "completado"
+    ) {
+      currentReminderFilter = "papelera";
+    } else {
+      currentReminderFilter = "todos";
+    }
   }
 
   setupReminderFilters();

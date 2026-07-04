@@ -4,20 +4,26 @@ const express = require('express');
 // Importamos la conexión a MySQL
 const connection = require('../db/connection');
 
+// Importamos el middleware de autenticación
+const authMiddleware = require('../middlewares/authMiddleware');
+
 // Creamos el router
 const router = express.Router();
 
 
-// Ruta para consultar el ingreso mensual principal de un usuario
-// Ejemplo:
-// GET http://localhost:3000/api/incomes?user_id=4&month=2026-06
+// Todas las rutas de ingresos requieren token
+router.use(authMiddleware);
+
+
+// Ruta para consultar el ingreso mensual principal del usuario autenticado
+// GET http://localhost:3000/api/incomes?month=2026-06
 router.get('/', (req, res) => {
-  const userId = req.query.user_id;
+  const userId = req.user.id;
   const month = req.query.month;
 
-  if (!userId || !month) {
+  if (!month) {
     return res.status(400).json({
-      mensaje: 'El user_id y el mes son obligatorios'
+      mensaje: 'El mes es obligatorio para consultar el ingreso mensual'
     });
   }
 
@@ -63,16 +69,17 @@ router.get('/', (req, res) => {
 // Si no existe, lo crea.
 // POST http://localhost:3000/api/incomes
 router.post('/', (req, res) => {
+  const userId = req.user.id;
+
   const {
-    user_id,
     month_key,
     amount,
     description
   } = req.body;
 
-  if (!user_id || !month_key || !amount) {
+  if (!month_key || !amount) {
     return res.status(400).json({
-      mensaje: 'El user_id, el mes y el valor del ingreso son obligatorios'
+      mensaje: 'El mes y el valor del ingreso son obligatorios'
     });
   }
 
@@ -91,7 +98,7 @@ router.post('/', (req, res) => {
   `;
 
   const values = [
-    user_id,
+    userId,
     month_key,
     amount,
     description || 'Ingreso mensual principal'
@@ -114,15 +121,14 @@ router.post('/', (req, res) => {
 
 
 // Ruta para consultar ingresos adicionales del mes
-// Ejemplo:
-// GET http://localhost:3000/api/incomes/additional?user_id=4&month=2026-06
+// GET http://localhost:3000/api/incomes/additional?month=2026-06
 router.get('/additional', (req, res) => {
-  const userId = req.query.user_id;
+  const userId = req.user.id;
   const month = req.query.month;
 
-  if (!userId || !month) {
+  if (!month) {
     return res.status(400).json({
-      mensaje: 'El user_id y el mes son obligatorios para consultar ingresos adicionales'
+      mensaje: 'El mes es obligatorio para consultar ingresos adicionales'
     });
   }
 
@@ -162,8 +168,9 @@ router.get('/additional', (req, res) => {
 // Ruta para guardar un ingreso adicional
 // POST http://localhost:3000/api/incomes/additional
 router.post('/additional', (req, res) => {
+  const userId = req.user.id;
+
   const {
-    user_id,
     month_key,
     income_date,
     description,
@@ -171,7 +178,7 @@ router.post('/additional', (req, res) => {
     source
   } = req.body;
 
-  if (!user_id || !month_key || !income_date || !description || !amount) {
+  if (!month_key || !income_date || !description || !amount) {
     return res.status(400).json({
       mensaje: 'Faltan datos obligatorios para registrar el ingreso adicional'
     });
@@ -190,7 +197,7 @@ router.post('/additional', (req, res) => {
   `;
 
   const values = [
-    user_id,
+    userId,
     month_key,
     income_date,
     description,
@@ -215,13 +222,13 @@ router.post('/additional', (req, res) => {
 });
 
 
-// Ruta para editar un ingreso adicional
+// Ruta para editar un ingreso adicional del usuario autenticado
 // PUT http://localhost:3000/api/incomes/additional/1
 router.put('/additional/:id', (req, res) => {
+  const userId = req.user.id;
   const additionalIncomeId = req.params.id;
 
   const {
-    user_id,
     month_key,
     income_date,
     description,
@@ -229,7 +236,7 @@ router.put('/additional/:id', (req, res) => {
     source
   } = req.body;
 
-  if (!user_id || !month_key || !income_date || !description || !amount) {
+  if (!month_key || !income_date || !description || !amount) {
     return res.status(400).json({
       mensaje: 'Faltan datos obligatorios para actualizar el ingreso adicional'
     });
@@ -253,7 +260,7 @@ router.put('/additional/:id', (req, res) => {
     amount,
     source || 'manual',
     additionalIncomeId,
-    user_id
+    userId
   ];
 
   connection.query(sql, values, (err, result) => {
@@ -278,17 +285,11 @@ router.put('/additional/:id', (req, res) => {
 });
 
 
-// Ruta para eliminar un ingreso adicional
-// DELETE http://localhost:3000/api/incomes/additional/1?user_id=4
+// Ruta para eliminar un ingreso adicional del usuario autenticado
+// DELETE http://localhost:3000/api/incomes/additional/1
 router.delete('/additional/:id', (req, res) => {
+  const userId = req.user.id;
   const additionalIncomeId = req.params.id;
-  const userId = req.query.user_id;
-
-  if (!userId) {
-    return res.status(400).json({
-      mensaje: 'El user_id es obligatorio para eliminar el ingreso adicional'
-    });
-  }
 
   const sql = `
     DELETE FROM additional_incomes

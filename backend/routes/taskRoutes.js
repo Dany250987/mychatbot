@@ -4,12 +4,16 @@ const express = require('express');
 // Importamos la conexión a MySQL
 const connection = require('../db/connection');
 
+// Importamos el middleware de autenticación
+const authMiddleware = require('../middlewares/authMiddleware');
+
 // Creamos el router de Express
 const router = express.Router();
 
 
 // Ruta de prueba
 // Sirve para validar que las rutas de tareas están conectadas con server.js
+// Esta ruta queda pública porque solo confirma que el módulo responde
 router.get('/test', (req, res) => {
   res.json({
     mensaje: '✅ Ruta de tareas funcionando correctamente'
@@ -17,17 +21,14 @@ router.get('/test', (req, res) => {
 });
 
 
-// Ruta para consultar las tareas de un usuario
-// Ejemplo:
-// GET http://localhost:3000/api/tasks?user_id=4
-router.get('/', (req, res) => {
-  const userId = req.query.user_id;
+// A partir de aquí, todas las rutas de tareas requieren token
+router.use(authMiddleware);
 
-  if (!userId) {
-    return res.status(400).json({
-      mensaje: 'El user_id es obligatorio para consultar las tareas'
-    });
-  }
+
+// Ruta para consultar las tareas del usuario autenticado
+// GET http://localhost:3000/api/tasks
+router.get('/', (req, res) => {
+  const userId = req.user.id;
 
   // Primero eliminamos automáticamente las tareas completadas con más de 10 días
   const deleteOldCompletedTasksSql = `
@@ -83,12 +84,12 @@ router.get('/', (req, res) => {
 });
 
 
-// Ruta para crear una tarea
-// Ejemplo:
+// Ruta para crear una tarea del usuario autenticado
 // POST http://localhost:3000/api/tasks
 router.post('/', (req, res) => {
+  const userId = req.user.id;
+
   const {
-    user_id,
     title,
     description,
     category,
@@ -97,7 +98,7 @@ router.post('/', (req, res) => {
     status
   } = req.body;
 
-  if (!user_id || !title || !category || !priority || !due_date) {
+  if (!title || !category || !priority || !due_date) {
     return res.status(400).json({
       mensaje: 'Faltan datos obligatorios para registrar la tarea'
     });
@@ -117,7 +118,7 @@ router.post('/', (req, res) => {
   `;
 
   const values = [
-    user_id,
+    userId,
     title,
     description || null,
     category,
@@ -143,15 +144,14 @@ router.post('/', (req, res) => {
 });
 
 
-// Ruta para editar una tarea existente
+// Ruta para editar una tarea existente del usuario autenticado
 // También sirve para cambiar el estado a completada o pendiente
-// Ejemplo:
 // PUT http://localhost:3000/api/tasks/3
 router.put('/:id', (req, res) => {
+  const userId = req.user.id;
   const taskId = req.params.id;
 
   const {
-    user_id,
     title,
     description,
     category,
@@ -160,7 +160,7 @@ router.put('/:id', (req, res) => {
     status
   } = req.body;
 
-  if (!user_id || !title || !category || !priority || !due_date || !status) {
+  if (!title || !category || !priority || !due_date || !status) {
     return res.status(400).json({
       mensaje: 'Faltan datos obligatorios para actualizar la tarea'
     });
@@ -193,7 +193,7 @@ router.put('/:id', (req, res) => {
     status,
     status,
     taskId,
-    user_id
+    userId
   ];
 
   connection.query(sql, values, (err, result) => {
@@ -217,18 +217,12 @@ router.put('/:id', (req, res) => {
   });
 });
 
-// Ruta para eliminar una tarea
-// Ejemplo:
-// DELETE http://localhost:3000/api/tasks/3?user_id=4
-router.delete('/:id', (req, res) => {
-  const taskId = req.params.id;
-  const userId = req.query.user_id;
 
-  if (!userId) {
-    return res.status(400).json({
-      mensaje: 'El user_id es obligatorio para eliminar la tarea'
-    });
-  }
+// Ruta para eliminar una tarea del usuario autenticado
+// DELETE http://localhost:3000/api/tasks/3
+router.delete('/:id', (req, res) => {
+  const userId = req.user.id;
+  const taskId = req.params.id;
 
   const sql = `
     DELETE FROM tasks

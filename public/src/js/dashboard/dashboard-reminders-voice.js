@@ -1,3 +1,54 @@
+// ===============================
+// Seguridad con token para recordatorios por voz
+// ===============================
+
+function getVoiceReminderAuthToken() {
+  return localStorage.getItem("authToken");
+}
+
+function getVoiceReminderAuthHeaders(includeJsonContent = false) {
+  const token = getVoiceReminderAuthToken();
+
+  const headers = {
+    Authorization: `Bearer ${token}`
+  };
+
+  if (includeJsonContent) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  return headers;
+}
+
+async function parseVoiceReminderJsonResponse(response) {
+  try {
+    return await response.json();
+  } catch (error) {
+    return {};
+  }
+}
+
+async function handleVoiceReminderUnauthorizedSession(data) {
+  localStorage.removeItem("userData");
+  localStorage.removeItem("authToken");
+
+  const message = data?.error || data?.mensaje || "Tu sesión venció o no es válida. Inicia sesión nuevamente.";
+
+  if (typeof Swal !== "undefined") {
+    await Swal.fire({
+      title: "Sesión vencida",
+      text: message,
+      icon: "warning",
+      confirmButtonColor: "#960018"
+    });
+  } else {
+    alert(message);
+  }
+
+  window.location.href = "login_google.html";
+}
+
+
 function getDateForTimeOnly(reminderTime) {
   const today = new Date();
 
@@ -72,6 +123,16 @@ function detectReminderTitle(text) {
     .replace(/\bcada un mes\b/g, "")
     .replace(/\buna vez al mes\b/g, "")
     .replace(/\buna vez por mes\b/g, "")
+    .replace(/\btodos los anos\b/g, "")
+    .replace(/\btodas los anos\b/g, "")
+    .replace(/\bcada ano\b/g, "")
+    .replace(/\banualmente\b/g, "")
+    .replace(/\banual\b/g, "")
+    .replace(/\bcada 1 ano\b/g, "")
+    .replace(/\bcada un ano\b/g, "")
+    .replace(/\buna vez al ano\b/g, "")
+    .replace(/\buna vez por ano\b/g, "")
+    .replace(/\bcada aniversario\b/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -454,6 +515,20 @@ function detectRepeatType(text) {
     "mes a mes"
   ];
 
+  const yearlyPatterns = [
+    "cada ano",
+    "anualmente",
+    "anual",
+    "todos los anos",
+    "todas los anos",
+    "cada 1 ano",
+    "cada un ano",
+    "una vez al ano",
+    "una vez por ano",
+    "ano a ano",
+    "cada aniversario"
+  ];
+
   if (dailyPatterns.some((pattern) => cleanText.includes(pattern))) {
     return "diario";
   }
@@ -464,6 +539,10 @@ function detectRepeatType(text) {
 
   if (monthlyPatterns.some((pattern) => cleanText.includes(pattern))) {
     return "mensual";
+  }
+
+  if (yearlyPatterns.some((pattern) => cleanText.includes(pattern))) {
+    return "anual";
   }
 
   return "una_vez";
@@ -486,16 +565,28 @@ function getNextWeekdayDate(targetDay) {
 
 
 async function saveVoiceReminder(reminderData) {
+  const token = getVoiceReminderAuthToken();
+
+  if (!token) {
+    await handleVoiceReminderUnauthorizedSession({
+      mensaje: "No se encontró token de sesión."
+    });
+    return;
+  }
+
   try {
     const response = await fetch(REMINDERS_API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: getVoiceReminderAuthHeaders(true),
       body: JSON.stringify(reminderData)
     });
 
-    const data = await response.json();
+    const data = await parseVoiceReminderJsonResponse(response);
+
+    if (response.status === 401) {
+      await handleVoiceReminderUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -720,7 +811,6 @@ function parseReminderFromVoice(text) {
   const title = detectReminderTitle(normalizedText);
 
   return {
-    user_id: currentUserId,
     title,
     original_text: originalText,
     reminder_date: reminderDate,

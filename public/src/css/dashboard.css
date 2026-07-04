@@ -2796,3 +2796,423 @@ body {
     font-size: 11.5px !important;
   }
 }
+
+/* ===============================
+   Buscador global
+================================ */
+
+.global-search-panel {
+  margin-bottom: 26px;
+  padding: 24px;
+  border: 1px solid rgba(150, 0, 24, 0.12);
+  border-radius: 26px;
+  background: linear-gradient(135deg, #ffffff, #fff7f7);
+  box-shadow: 0 18px 45px rgba(60, 0, 0, 0.06);
+}
+
+.global-search-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.global-search-header h2 {
+  margin: 8px 0 6px;
+  color: #2b0b0b;
+  font-size: 1.35rem;
+}
+
+.global-search-header p {
+  margin: 0;
+  color: #7a5a5a;
+}
+
+.global-search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #f0d0d0;
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.global-search-box > i {
+  color: #960018;
+  font-size: 1.05rem;
+  padding-left: 8px;
+}
+
+.global-search-box input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: #2b0b0b;
+  background: transparent;
+}
+
+.global-search-box input::placeholder {
+  color: #b68a8a;
+}
+
+.global-search-box button {
+  border: none;
+  border-radius: 999px;
+  padding: 11px 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+#globalSearchButton {
+  background: #960018;
+  color: #ffffff;
+}
+
+.clear-global-search-button {
+  background: #f8eaea;
+  color: #960018;
+}
+
+.global-search-box button:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.global-search-results {
+  margin-top: 18px;
+}
+
+.global-search-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.global-search-results-header h3 {
+  margin: 0;
+  color: #2b0b0b;
+}
+
+.global-search-results-header span {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #f8eaea;
+  color: #960018;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.global-search-results-list {
+  display: grid;
+  gap: 12px;
+}
+
+.global-search-result-card {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #f0d0d0;
+  border-radius: 20px;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.global-search-result-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(60, 0, 0, 0.08);
+}
+
+.global-search-result-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #fff1f1;
+  color: #960018;
+}
+
+.global-search-result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.global-search-result-info span {
+  display: inline-block;
+  margin-bottom: 4px;
+  color: #960018;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.global-search-result-info strong {
+  display: block;
+  color: #2b0b0b;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.global-search-result-info p {
+  margin: 0 0 6px;
+  color: #7a5a5a;
+  font-size: 0.92rem;
+}
+
+.global-search-result-info small {
+  color: #9b7373;
+  font-weight: 700;
+}
+
+.global-search-empty {
+  padding: 26px;
+  border: 1px dashed #e6bcbc;
+  border-radius: 20px;
+  text-align: center;
+  color: #7a5a5a;
+  background: #fffafa;
+}
+
+.global-search-empty i {
+  font-size: 2rem;
+  color: #960018;
+  margin-bottom: 10px;
+}
+
+.global-search-empty h3 {
+  margin: 0 0 6px;
+  color: #2b0b0b;
+}
+
+.search-task .global-search-result-icon {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.search-reminder .global-search-result-icon {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.search-expense .global-search-result-icon {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.search-income .global-search-result-icon {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+@media (max-width: 768px) {
+  .global-search-panel {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .global-search-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .global-search-box > i {
+    display: none;
+  }
+
+  .global-search-box button {
+    width: 100%;
+  }
+
+  .global-search-results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* ===============================
+   Destellos IA - Buscador global
+================================ */
+
+.global-search-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.global-search-panel::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(70, 60, 236, 0.22), transparent 12%),
+    radial-gradient(circle at 80% 20%, rgba(255, 168, 224, 0.22), transparent 10%),
+    radial-gradient(circle at 65% 80%, rgba(150, 0, 24, 0.16), transparent 12%);
+  opacity: 0.65;
+  animation: aiGlowMove 10s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.global-search-panel::after {
+  content: "✦";
+  position: absolute;
+  top: 22px;
+  right: 30px;
+  color: rgba(70, 60, 236, 0.75);
+  font-size: 1.4rem;
+  text-shadow:
+    0 0 8px rgba(70, 60, 236, 0.45),
+    0 0 18px rgba(70, 60, 236, 0.25);
+  animation: aiSparkle 1.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.global-search-header,
+.global-search-box,
+.global-search-results {
+  position: relative;
+  z-index: 2;
+}
+
+.global-search-box {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 14px 35px rgba(70, 60, 236, 0.08);
+}
+
+.global-search-box:focus-within {
+  border-color: rgba(70, 60, 236, 0.45);
+  box-shadow:
+    0 0 0 4px rgba(70, 60, 236, 0.10),
+    0 18px 45px rgba(70, 60, 236, 0.16);
+}
+
+.global-search-box:focus-within > i {
+  color: #463cec;
+  animation: aiIconPulse 1.4s ease-in-out infinite;
+}
+
+.global-search-result-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.global-search-result-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  transform: skewX(-18deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.global-search-result-card:hover::after {
+  animation: aiCardShine 0.9s ease;
+}
+
+@keyframes aiGlowMove {
+  from {
+    transform: translate(-3%, -2%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(3%, 2%) rotate(8deg);
+  }
+}
+
+@keyframes aiSparkle {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.85) rotate(0deg);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.18) rotate(18deg);
+  }
+}
+
+@keyframes aiIconPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(70, 60, 236, 0));
+  }
+
+  50% {
+    transform: scale(1.12);
+    filter: drop-shadow(0 0 8px rgba(70, 60, 236, 0.45));
+  }
+}
+
+@keyframes aiCardShine {
+  from {
+    left: -80%;
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  to {
+    left: 130%;
+    opacity: 0;
+  }
+}
+
+/* Respeta usuarios que prefieren menos animación */
+@media (prefers-reduced-motion: reduce) {
+  .global-search-panel::before,
+  .global-search-panel::after,
+  .global-search-box:focus-within > i,
+  .global-search-result-card:hover::after {
+    animation: none;
+  }
+}
+
+/* ===============================
+   Resultado encontrado desde búsqueda global
+================================ */
+
+.dashboard-search-highlight,
+.dashboard-search-target-card.dashboard-search-highlight {
+  outline: 3px solid rgba(70, 60, 236, 0.45);
+  box-shadow: 0 0 0 8px rgba(70, 60, 236, 0.12);
+  animation: dashboardSearchPulse 1s ease-in-out infinite alternate;
+}
+
+.task-card.dashboard-search-highlight,
+.reminder-timeline-card.dashboard-search-highlight {
+  background: #eef2ff;
+}
+
+@keyframes dashboardSearchPulse {
+  from {
+    box-shadow: 0 0 0 6px rgba(70, 60, 236, 0.10);
+  }
+
+  to {
+    box-shadow: 0 0 0 12px rgba(70, 60, 236, 0.20);
+  }
+}

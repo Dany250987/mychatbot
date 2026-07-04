@@ -1773,3 +1773,242 @@ body {
     font-size: 11px;
   }
 }
+
+/* ===============================
+   Evidencia opcional del gasto
+================================ */
+
+.field-help {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.input-shell input[type="file"] {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.input-shell input[type="file"]::file-selector-button {
+  margin-right: 12px;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 999px;
+  background: #463cec;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.input-shell input[type="file"]::file-selector-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.evidence-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #463cec;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.evidence-view-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(70, 60, 236, 0.18);
+}
+
+.evidence-view-button i {
+  font-size: 0.95rem;
+}
+
+.no-evidence-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #9ca3af;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Ajuste visual para que la tabla soporte la nueva columna */
+.expenses-list table th,
+.expenses-list table td {
+  vertical-align: middle;
+}
+
+.expenses-list table th:nth-child(5),
+.expenses-list table td:nth-child(5) {
+  text-align: center;
+  min-width: 120px;
+}
+
+/* Responsive para la columna de evidencia */
+@media (max-width: 900px) {
+  .evidence-view-button,
+  .no-evidence-label {
+    font-size: 0.75rem;
+    padding: 7px 10px;
+  }
+
+  .input-shell input[type="file"] {
+    font-size: 0.82rem;
+  }
+
+  .input-shell input[type="file"]::file-selector-button {
+    padding: 8px 11px;
+    font-size: 0.78rem;
+  }
+}
+/* =========================================
+   EVIDENCIA OPCIONAL - DISEÑO MEJORADO
+========================================= */
+
+.evidence-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.evidence-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #2b0b0b;
+}
+
+.evidence-label i {
+  color: #960018;
+  font-size: 0.95rem;
+}
+
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+
+.custom-file-label {
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #e7c5c0;
+  border-radius: 18px;
+  background: #fffdfd;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.custom-file-label:hover {
+  border-color: #cb4c46;
+  box-shadow: 0 8px 22px rgba(150, 0, 24, 0.08);
+  transform: translateY(-1px);
+}
+
+.file-button {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #960018, #cb4c46);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 800;
+  box-shadow: 0 10px 20px rgba(150, 0, 24, 0.18);
+}
+
+.file-button i {
+  font-size: 0.9rem;
+}
+
+.file-name {
+  flex: 1;
+  min-width: 0;
+  color: #6b4a4a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.field-help {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #8a6a6a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .custom-file-label {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .file-button {
+    width: fit-content;
+  }
+
+  .file-name {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
+    font-size: 0.9rem;
+  }
+}
+
+/* ===============================
+   Resultado encontrado desde búsqueda global
+================================ */
+
+.search-result-highlight,
+.search-result-row.search-result-highlight {
+  outline: 3px solid rgba(70, 60, 236, 0.45);
+  box-shadow: 0 0 0 8px rgba(70, 60, 236, 0.12);
+  border-radius: 16px;
+  animation: searchHighlightPulse 1s ease-in-out infinite alternate;
+}
+
+tr.search-result-highlight {
+  background: #eef2ff !important;
+}
+
+.additional-income-card.search-result-highlight,
+.income-panel.search-result-highlight {
+  background: #eef2ff;
+}
+
+@keyframes searchHighlightPulse {
+  from {
+    box-shadow: 0 0 0 6px rgba(70, 60, 236, 0.10);
+  }
+
+  to {
+    box-shadow: 0 0 0 12px rgba(70, 60, 236, 0.20);
+  }
+}

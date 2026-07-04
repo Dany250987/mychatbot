@@ -1,11 +1,11 @@
-
 // ===============================
 // Sesión de usuario
 // ===============================
 
 // Obtenemos los datos del usuario que inició sesión.
-// Si no existe sesión válida, redirigimos al login.
+// Si no existe sesión válida o token, redirigimos al login.
 const userData = localStorage.getItem("userData");
+const authToken = localStorage.getItem("authToken");
 
 let user = null;
 
@@ -16,13 +16,16 @@ try {
   user = null;
 }
 
-if (!user || !user.id) {
-  alert("⚠️ Sesión no iniciada. Por favor, inicia sesión.");
+if (!user || !user.id || !authToken) {
+  localStorage.removeItem("userData");
+  localStorage.removeItem("authToken");
+
+  alert("⚠️ Sesión no iniciada o vencida. Por favor, inicia sesión nuevamente.");
   window.location.href = "login_google.html";
-  throw new Error("Sesión no iniciada");
+  throw new Error("Sesión no iniciada o token no encontrado");
 }
 
-// Tomamos el id real del usuario logueado.
+// Por ahora conservamos USER_ID porque ingresos todavía no está protegido con token.
 const USER_ID = user.id;
 
 // Ruta base del backend para gastos.
@@ -30,13 +33,49 @@ const API_URL = '/api/expenses';
 
 const INCOME_API_URL = '/api/incomes';
 
+function getAuthHeaders(includeJsonContent = false) {
+  const currentToken = localStorage.getItem("authToken");
+
+  const headers = {
+    Authorization: `Bearer ${currentToken}`
+  };
+
+  if (includeJsonContent) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  return headers;
+}
+
+async function handleUnauthorizedSession(data) {
+  localStorage.removeItem("userData");
+  localStorage.removeItem("authToken");
+
+  const message = data?.error || data?.mensaje || 'Tu sesión venció o no es válida. Inicia sesión nuevamente.';
+
+  if (typeof Swal !== 'undefined') {
+    await Swal.fire({
+      title: 'Sesión vencida',
+      text: message,
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+  } else {
+    alert(message);
+  }
+
+  window.location.href = "login_google.html";
+}
+
 // Tomamos los elementos del HTML que vamos a usar.
 const expenseForm = document.getElementById('expenseForm');
 const expenseDate = document.getElementById('expenseDate');
 const category = document.getElementById('category');
 const description = document.getElementById('description');
 const amount = document.getElementById('amount');
+const expenseEvidence = document.getElementById('expenseEvidence');
 const source = document.getElementById('source');
+const expenseEvidenceName = document.getElementById('expenseEvidenceName');
 const expenseId = document.getElementById('expenseId');
 const submitExpenseButton = document.getElementById('submitExpenseButton');
 const cancelEditButton = document.getElementById('cancelEditButton');
@@ -75,13 +114,20 @@ let categoryExpensesChart = null;
 let financeSummaryChart = null;
 let dailyExpensesChart = null;
 
+let hasHighlightedSearchResult = false;
+
 
 // Esta función consulta los gastos desde el backend.
 async function loadExpenses() {
   try {
-    const response = await fetch(`${API_URL}?user_id=${USER_ID}`);
+    const response = await fetch(API_URL, {
+      headers: getAuthHeaders()
+    });
     const data = await response.json();
-
+    if (response.status === 401) {
+      await handleUnauthorizedSession(data);
+      return;
+    }
     if (!response.ok) {
       expenseMessage.textContent = data.mensaje || 'Error al consultar los gastos';
       return;
@@ -99,14 +145,16 @@ async function loadExpenses() {
 
 
 // Esta función guarda un gasto nuevo en la base de datos.
+// La evidencia es opcional. Si se adjunta, se envía con FormData.
 async function saveExpense(event) {
   event.preventDefault();
 
+  const evidenceFile = expenseEvidence?.files?.[0] || null;
+
   const newExpense = {
-    user_id: USER_ID,
     expense_date: expenseDate.value,
     category: category.value,
-    description: description.value,
+    description: description.value.trim(),
     amount: Number(amount.value),
     source: source.value || 'manual'
   };
@@ -120,8 +168,24 @@ async function saveExpense(event) {
     !newExpense.amount ||
     newExpense.amount <= 0
   ) {
-    expenseMessage.textContent = 'Por favor completa todos los campos.';
+    expenseMessage.textContent = 'Por favor completa todos los campos obligatorios.';
     return;
+  }
+
+  if (!validateExpenseEvidenceFile(evidenceFile)) {
+    return;
+  }
+
+  const formData = new FormData();
+
+  formData.append('expense_date', newExpense.expense_date);
+  formData.append('category', newExpense.category);
+  formData.append('description', newExpense.description);
+  formData.append('amount', String(newExpense.amount));
+  formData.append('source', newExpense.source);
+
+  if (evidenceFile) {
+    formData.append('evidence', evidenceFile);
   }
 
   try {
@@ -130,13 +194,16 @@ async function saveExpense(event) {
 
     const response = await fetch(url, {
       method: method,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newExpense)
+      headers: getAuthHeaders(),
+      body: formData
     });
 
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       expenseMessage.textContent = data.mensaje || 'No se pudo guardar el gasto.';
@@ -156,12 +223,125 @@ async function saveExpense(event) {
 
     resetFormMode();
 
-    // Volvemos a consultar para actualizar la tabla y el total.
     loadExpenses();
 
   } catch (error) {
     console.error('Error al guardar gasto:', error);
     expenseMessage.textContent = 'Ocurrió un error al guardar el gasto.';
+  }
+}
+
+
+function validateExpenseEvidenceFile(file) {
+  if (!file) {
+    return true;
+  }
+
+  const allowedTypes = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/webp'
+  ];
+
+  const maxSizeBytes = 5 * 1024 * 1024;
+
+  if (!allowedTypes.includes(file.type)) {
+    Swal.fire({
+      title: 'Archivo no permitido',
+      text: 'La evidencia debe ser PDF, JPG, PNG o WEBP.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+
+    return false;
+  }
+
+  if (file.size > maxSizeBytes) {
+    Swal.fire({
+      title: 'Archivo muy pesado',
+      text: 'La evidencia no puede superar los 5 MB.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+
+    return false;
+  }
+
+  return true;
+}
+
+function renderEvidenceCell(expense) {
+  if (!expense.evidence_file_name) {
+    return `
+      <span class="no-evidence-label">
+        Sin evidencia
+      </span>
+    `;
+  }
+
+  return `
+    <button 
+      type="button"
+      class="evidence-view-button"
+      onclick="openExpenseEvidence(${expense.id})"
+    >
+      <i class="bi bi-paperclip"></i>
+      Ver
+    </button>
+  `;
+}
+
+async function openExpenseEvidence(expenseId) {
+  try {
+    const response = await fetch(`${API_URL}/${expenseId}/evidence`, {
+      headers: getAuthHeaders()
+    });
+
+    if (response.status === 401) {
+      const data = await response.json();
+      await handleUnauthorizedSession(data);
+      return;
+    }
+
+    if (!response.ok) {
+      let message = 'No se pudo abrir la evidencia.';
+
+      try {
+        const data = await response.json();
+        message = data.mensaje || message;
+      } catch (error) {
+        console.error('No se pudo leer el error de evidencia:', error);
+      }
+
+      Swal.fire({
+        title: 'Evidencia no disponible',
+        text: message,
+        icon: 'warning',
+        confirmButtonColor: '#3c0000'
+      });
+
+      return;
+    }
+
+    const blob = await response.blob();
+    const fileUrl = URL.createObjectURL(blob);
+
+    window.open(fileUrl, '_blank');
+
+    setTimeout(() => {
+      URL.revokeObjectURL(fileUrl);
+    }, 60000);
+
+  } catch (error) {
+    console.error('Error al abrir evidencia:', error);
+
+    Swal.fire({
+      title: 'Error',
+      text: 'Ocurrió un error al abrir la evidencia.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
   }
 }
 
@@ -185,6 +365,89 @@ function applyMonthFilter() {
 }
 
 
+
+function getExpenseSearchTarget() {
+  const urlParams = new URLSearchParams(window.location.search);
+
+  return {
+    type: urlParams.get('type'),
+    id: Number(urlParams.get('id')),
+    month: urlParams.get('month')
+  };
+}
+
+function isSearchTarget(type, id) {
+  const target = getExpenseSearchTarget();
+
+  return target.type === type && target.id === Number(id);
+}
+
+function highlightSearchTargetElement(element) {
+  if (!element || hasHighlightedSearchResult) {
+    return;
+  }
+
+  hasHighlightedSearchResult = true;
+
+  setTimeout(() => {
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+
+    element.classList.add('search-result-highlight');
+
+    setTimeout(() => {
+      element.classList.remove('search-result-highlight');
+    }, 5000);
+  }, 500);
+}
+
+function openIncomePanelForSearchTarget() {
+  const target = getExpenseSearchTarget();
+
+  if (target.type !== 'monthly_income' && target.type !== 'additional_income') {
+    return;
+  }
+
+  const incomeContent = document.getElementById('incomeContent');
+
+  if (incomeContent && incomeContent.classList.contains('is-collapsed')) {
+    incomeContent.classList.remove('is-collapsed');
+  }
+
+  const incomeButton = document.querySelector('[data-collapse-target="incomeContent"]');
+
+  if (incomeButton) {
+    incomeButton.setAttribute('aria-expanded', 'true');
+
+    const icon = incomeButton.querySelector('i');
+    const text = incomeButton.querySelector('span');
+
+    if (icon) {
+      icon.className = 'bi bi-chevron-up';
+    }
+
+    if (text) {
+      text.textContent = 'Ocultar';
+    }
+  }
+}
+
+function highlightMonthlyIncomeTarget() {
+  const target = getExpenseSearchTarget();
+
+  if (target.type !== 'monthly_income') {
+    return;
+  }
+
+  const incomePanel = document.querySelector('.income-panel');
+
+  highlightSearchTargetElement(incomePanel);
+}
+
+
+
 // Esta función pinta los gastos en la tabla.
 function showExpenses(expenses) {
   expensesTableBody.innerHTML = '';
@@ -192,7 +455,7 @@ function showExpenses(expenses) {
   if (expenses.length === 0) {
     expensesTableBody.innerHTML = `
         <tr>
-            <td colspan="6">
+            <td colspan="7">
             <div class="empty-state">
                 <i class="bi bi-inbox"></i>
                 <h3>No hay gastos para este mes</h3>
@@ -206,6 +469,12 @@ function showExpenses(expenses) {
 
   expenses.forEach((expense) => {
     const row = document.createElement('tr');
+
+    row.dataset.expenseId = expense.id;
+
+    if (isSearchTarget('expense', expense.id)) {
+      row.classList.add('search-result-row');
+    }
 
     row.innerHTML = `
     <td>
@@ -227,6 +496,10 @@ function showExpenses(expenses) {
 
     <td>
         <strong class="amount-cell">${formatMoney(expense.amount)}</strong>
+    </td>
+
+    <td>
+        ${renderEvidenceCell(expense)}
     </td>
 
     <td>
@@ -259,6 +532,10 @@ function showExpenses(expenses) {
     `;
 
     expensesTableBody.appendChild(row);
+
+    if (isSearchTarget('expense', expense.id)) {
+      highlightSearchTargetElement(row);
+    }
   });
 }
 
@@ -334,6 +611,7 @@ function formatMoney(value) {
 }
 
 
+
 // Esta función muestra la fecha sin que el navegador la cambie por zona horaria.
 function formatDate(dateValue) {
   const cleanDate = formatDateForInput(dateValue);
@@ -391,6 +669,14 @@ function getLocalMonth() {
 
 // Esta función coloca por defecto el mes actual local en el filtro.
 function setCurrentMonthFilter() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const monthFromUrl = urlParams.get('month');
+
+  if (monthFromUrl && /^\d{4}-\d{2}$/.test(monthFromUrl)) {
+    monthFilter.value = monthFromUrl;
+    return;
+  }
+
   monthFilter.value = getLocalMonth();
 }
 
@@ -410,10 +696,16 @@ function startEditExpense(id) {
   amount.value = Number(expense.amount);
   source.value = expense.source || 'manual';
 
+  if (expenseEvidence) {
+    expenseEvidence.value = '';
+  }
+
   submitExpenseButton.innerHTML = '<i class="bi bi-check2-circle"></i> Actualizar gasto';
   cancelEditButton.style.display = 'block';
 
-  expenseMessage.textContent = 'Editando gasto seleccionado.';
+  expenseMessage.textContent = expense.evidence_file_name
+    ? 'Editando gasto seleccionado. Si adjuntas una nueva evidencia, reemplazará la anterior.'
+    : 'Editando gasto seleccionado. Puedes adjuntar una evidencia opcional.';
 }
 
 // Esta función elimina un gasto desde la pantalla.
@@ -434,11 +726,16 @@ async function deleteExpense(expenseId) {
   }
 
   try {
-    const response = await fetch(`${API_URL}/${expenseId}?user_id=${USER_ID}`, {
-      method: 'DELETE'
+    const response = await fetch(`${API_URL}/${expenseId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(true)
     });
 
     const data = await response.json();
+    if (response.status === 401) {
+      await handleUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -477,6 +774,10 @@ function resetFormMode() {
 
   expenseId.value = '';
   source.value = 'manual';
+
+  if (expenseEvidence) {
+    expenseEvidence.value = '';
+  }
 
   submitExpenseButton.innerHTML = '<i class="bi bi-save2"></i> Guardar gasto';
   cancelEditButton.style.display = 'none';
@@ -538,7 +839,6 @@ async function fillExpenseFromVoice(text) {
   const detectedDate = extractDate(text);
 
   const detectedExpense = {
-    user_id: USER_ID,
     expense_date: detectedDate || getLocalDate(),
     category: detectedCategory || 'Otro',
     description: detectedDescription || 'Gasto registrado por voz',
@@ -581,13 +881,15 @@ async function saveVoiceExpenseAuto(expenseData) {
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getAuthHeaders(true),
       body: JSON.stringify(expenseData)
     });
 
     const data = await response.json();
+    if (response.status === 401) {
+      await handleUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -1289,7 +1591,7 @@ function downloadExpensesExcel() {
 
   // Hoja 3: Gastos
   const expenseRows = [
-    ['Fecha', 'Categoría', 'Descripción', 'Valor', 'Origen', 'Fecha de registro']
+    ['Fecha', 'Categoría', 'Descripción', 'Valor', 'Evidencia', 'Origen', 'Fecha de registro']
   ];
 
   if (expenses.length > 0) {
@@ -1299,6 +1601,7 @@ function downloadExpensesExcel() {
         expense.category,
         expense.description,
         Number(expense.amount),
+        expense.evidence_file_name ? 'Sí' : 'No',
         getSourceLabel(expense.source),
         formatDate(expense.created_at)
       ]);
@@ -1311,6 +1614,7 @@ function downloadExpensesExcel() {
       'TOTAL GASTOS DEL MES',
       totalExpenses,
       '',
+      '',
       ''
     ]);
   } else {
@@ -1318,6 +1622,7 @@ function downloadExpensesExcel() {
       '',
       '',
       'No hay gastos registrados para este mes',
+      '',
       '',
       '',
       ''
@@ -1331,16 +1636,17 @@ function downloadExpensesExcel() {
     { wch: 18 },
     { wch: 45 },
     { wch: 16 },
+    { wch: 12 },
     { wch: 14 },
     { wch: 18 }
   ];
 
   expensesWorksheet['!autofilter'] = {
-    ref: 'A1:F1'
+    ref: 'A1:G1'
   };
 
   applyTableStyle(expensesWorksheet, ['D']);
-  applyHeaderStyle(expensesWorksheet, 1, 0, 5);
+  applyHeaderStyle(expensesWorksheet, 1, 0, 6);
 
   if (expenses.length > 0) {
     const totalRowNumber = expenseRows.length;
@@ -1366,8 +1672,16 @@ async function loadMonthlyIncome() {
   const selectedMonth = monthFilter.value || getLocalMonth();
 
   try {
-    const response = await fetch(`${INCOME_API_URL}?user_id=${USER_ID}&month=${selectedMonth}`);
+    const response = await fetch(`${INCOME_API_URL}?month=${selectedMonth}`, {
+      headers: getAuthHeaders()
+    });
+
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       currentIncomeAmount = 0;
@@ -1376,11 +1690,11 @@ async function loadMonthlyIncome() {
     }
 
     if (!data.income) {
-        currentIncomeAmount = 0;
-        incomeAmount.value = '';
-        incomeDescription.value = '';
-        updateIncomePanel();
-        return;
+      currentIncomeAmount = 0;
+      incomeAmount.value = '';
+      incomeDescription.value = '';
+      updateIncomePanel();
+      return;
     }
 
     currentIncomeAmount = Number(data.income.amount);
@@ -1393,7 +1707,6 @@ async function loadMonthlyIncome() {
     console.error('Error al consultar ingreso mensual:', error);
   }
 }
-
 
 async function saveMonthlyIncome() {
   const selectedMonth = monthFilter.value || getLocalMonth();
@@ -1412,25 +1725,27 @@ async function saveMonthlyIncome() {
   try {
     const response = await fetch(INCOME_API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getAuthHeaders(true),
       body: JSON.stringify({
-        user_id: USER_ID,
         month_key: selectedMonth,
         amount: amountValue,
         description: incomeDescription.value || 'Ingreso mensual principal'
-    })
+      })
     });
 
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
         title: 'No se pudo guardar',
         text: data.mensaje || 'Ocurrió un error al guardar el ingreso.',
         icon: 'error',
-      confirmButtonColor: '#3c0000'
+        confirmButtonColor: '#3c0000'
       });
       return;
     }
@@ -1463,6 +1778,7 @@ function updateIncomePanel() {
   additionalIncomeTotal.textContent = formatMoney(currentAdditionalIncomeTotal);
   updateSavings();
   updateExpenseCharts();
+  highlightMonthlyIncomeTarget();
 }
 
 
@@ -1484,8 +1800,16 @@ async function loadAdditionalIncomes() {
   const selectedMonth = monthFilter.value || getLocalMonth();
 
   try {
-    const response = await fetch(`${INCOME_API_URL}/additional?user_id=${USER_ID}&month=${selectedMonth}`);
+    const response = await fetch(`${INCOME_API_URL}/additional?month=${selectedMonth}`, {
+      headers: getAuthHeaders()
+    });
+
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       currentAdditionalIncomes = [];
@@ -1509,12 +1833,10 @@ async function loadAdditionalIncomes() {
   }
 }
 
-
 async function saveAdditionalIncome() {
   const selectedMonth = monthFilter.value || getLocalMonth();
 
   const additionalIncomeData = {
-    user_id: USER_ID,
     month_key: selectedMonth,
     income_date: additionalIncomeDate.value || getLocalDate(),
     description: additionalIncomeDescription.value.trim(),
@@ -1545,24 +1867,26 @@ async function saveAdditionalIncome() {
 
   const method = isEditing ? 'PUT' : 'POST';
 
-
   try {
     const response = await fetch(url, {
       method: method,
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getAuthHeaders(true),
       body: JSON.stringify(additionalIncomeData)
     });
 
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
         title: isEditing ? 'No se pudo actualizar' : 'No se pudo guardar',
         text: data.mensaje || 'Ocurrió un error al procesar el ingreso adicional.',
         icon: 'error',
-      confirmButtonColor: '#3c0000'
+        confirmButtonColor: '#3c0000'
       });
       return;
     }
@@ -1573,8 +1897,8 @@ async function saveAdditionalIncome() {
 
     editingAdditionalIncomeId = null;
     saveAdditionalIncomeButton.innerHTML = `
-     <i class="bi bi-plus-circle"></i>
-     Agregar ingreso adicional
+      <i class="bi bi-plus-circle"></i>
+      Agregar ingreso adicional
     `;
 
     await loadAdditionalIncomes();
@@ -1617,18 +1941,24 @@ async function deleteAdditionalIncome(additionalIncomeId) {
   }
 
   try {
-    const response = await fetch(`${INCOME_API_URL}/additional/${additionalIncomeId}?user_id=${USER_ID}`, {
-      method: 'DELETE'
+    const response = await fetch(`${INCOME_API_URL}/additional/${additionalIncomeId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
     });
 
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
         title: 'No se pudo eliminar',
         text: data.mensaje || 'Ocurrió un error al eliminar el ingreso adicional.',
         icon: 'error',
-      confirmButtonColor: '#3c0000'
+        confirmButtonColor: '#3c0000'
       });
       return;
     }
@@ -1684,6 +2014,11 @@ function renderAdditionalIncomes() {
     const card = document.createElement('div');
 
     card.classList.add('additional-income-card');
+    card.dataset.additionalIncomeId = income.id;
+
+    if (isSearchTarget('additional_income', income.id)) {
+      card.classList.add('search-result-row');
+    }
 
     card.innerHTML = `
       <div class="additional-income-card-info">
@@ -1742,6 +2077,10 @@ function renderAdditionalIncomes() {
     });
 
     additionalIncomesList.appendChild(card);
+
+    if (isSearchTarget('additional_income', income.id)) {
+      highlightSearchTargetElement(card);
+    }
   });
 }
 
@@ -2010,8 +2349,21 @@ document.addEventListener('DOMContentLoaded', () => {
   setTodayDate();
   setCurrentMonthFilter();
   setupCollapsibleSections();
+  openIncomePanelForSearchTarget();
 
   additionalIncomeDate.value = getLocalDate();
+
+  if (expenseEvidence && expenseEvidenceName) {
+    expenseEvidence.addEventListener('change', () => {
+      const file = expenseEvidence.files[0];
+
+      if (file) {
+        expenseEvidenceName.textContent = file.name;
+      } else {
+        expenseEvidenceName.textContent = 'Ningún archivo seleccionado';
+      }
+    });
+  }
 
   loadExpenses();
   loadMonthlyIncome();

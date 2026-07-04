@@ -97,7 +97,8 @@ function formatRepeatType(repeatType) {
     una_vez: "Una vez",
     diario: "Diario",
     semanal: "Semanal",
-    mensual: "Mensual"
+    mensual: "Mensual",
+    anual: "Anual"
   };
 
   return types[repeatType] || "Una vez";
@@ -118,6 +119,10 @@ function getRepeatTypeClass(repeatType) {
     return "repeat-monthly";
   }
 
+  if (cleanRepeatType === "anual") {
+    return "repeat-yearly";
+  }
+
   return "repeat-once";
 }
 
@@ -134,6 +139,10 @@ function getRepeatTypeIcon(repeatType) {
 
   if (cleanRepeatType === "mensual") {
     return "fa-calendar-days";
+  }
+
+  if (cleanRepeatType === "anual") {
+    return "fa-calendar-check";
   }
 
   return "fa-circle-dot";

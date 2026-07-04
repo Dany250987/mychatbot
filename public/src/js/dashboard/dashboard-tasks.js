@@ -1,3 +1,85 @@
+// ===============================
+// Seguridad con token para tareas
+// ===============================
+
+function getTaskAuthToken() {
+  return localStorage.getItem("authToken");
+}
+
+function getTaskAuthHeaders(includeJsonContent = false) {
+  const token = getTaskAuthToken();
+
+  const headers = {
+    Authorization: `Bearer ${token}`
+  };
+
+  if (includeJsonContent) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  return headers;
+}
+
+let hasHighlightedTaskSearchResult = false;
+
+function getTaskSearchTarget() {
+  const urlParams = new URLSearchParams(window.location.search);
+
+  return {
+    type: urlParams.get("type"),
+    id: Number(urlParams.get("id")),
+    status: urlParams.get("status"),
+    date: urlParams.get("date")
+  };
+}
+
+function isTaskSearchTarget(taskId) {
+  const target = getTaskSearchTarget();
+
+  return target.type === "task" && target.id === Number(taskId);
+}
+
+function highlightTaskSearchTargetElement(element) {
+  if (!element || hasHighlightedTaskSearchResult) {
+    return;
+  }
+
+  hasHighlightedTaskSearchResult = true;
+
+  setTimeout(() => {
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    element.classList.add("dashboard-search-highlight");
+
+    setTimeout(() => {
+      element.classList.remove("dashboard-search-highlight");
+    }, 5000);
+  }, 500);
+}
+
+async function handleTaskUnauthorizedSession(data) {
+  localStorage.removeItem("userData");
+  localStorage.removeItem("authToken");
+
+  const message = data?.error || data?.mensaje || "Tu sesión venció o no es válida. Inicia sesión nuevamente.";
+
+  if (typeof Swal !== "undefined") {
+    await Swal.fire({
+      title: "Sesión vencida",
+      text: message,
+      icon: "warning",
+      confirmButtonColor: "#960018"
+    });
+  } else {
+    alert(message);
+  }
+
+  window.location.href = "login_google.html";
+}
+
 function renderTasksSection() {
   const contentEl = document.getElementById("section-content");
 
@@ -132,6 +214,10 @@ function renderTasksSection() {
     taskMainButton.addEventListener("click", startNewTask);
   }
 
+  if (getTaskSearchTarget().type === "task") {
+    currentTaskFilter = "todas";
+  }
+
   setupTaskFilters();
   loadTasks();
 }
@@ -264,13 +350,26 @@ function getFilteredTasks() {
 }
 
 async function loadTasks() {
-  if (!currentUserId) {
+  const token = getTaskAuthToken();
+
+  if (!token) {
+    await handleTaskUnauthorizedSession({
+      mensaje: "No se encontró token de sesión."
+    });
     return;
   }
 
   try {
-    const response = await fetch(`${TASKS_API_URL}?user_id=${currentUserId}`);
+    const response = await fetch(TASKS_API_URL, {
+      headers: getTaskAuthHeaders()
+    });
+
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleTaskUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -326,7 +425,6 @@ async function saveTask() {
     : null;
 
   const taskData = {
-    user_id: currentUserId,
     title: taskTitle.value.trim(),
     description: taskDescription.value.trim(),
     category: taskCategory.value,
@@ -335,15 +433,7 @@ async function saveTask() {
     status: currentTask ? currentTask.status : "pendiente"
   };
 
-  if (!taskData.user_id) {
-    Swal.fire({
-      title: "Sesión no válida",
-      text: "No se encontró el usuario de la sesión.",
-      icon: "warning",
-      confirmButtonColor: "#960018"
-    });
-    return;
-  }
+  
 
   if (!taskData.title || !taskData.category || !taskData.due_date) {
     Swal.fire({
@@ -364,13 +454,16 @@ async function saveTask() {
   try {
     const response = await fetch(url, {
       method: method,
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: getTaskAuthHeaders(true),
       body: JSON.stringify(taskData)
     });
 
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleTaskUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -517,6 +610,11 @@ function renderTasksList() {
     const completedUntilLabel = isCompleted ? formatTaskCompletedUntil(task) : "";
 
     taskCard.classList.add("task-card");
+    taskCard.dataset.taskId = task.id;
+
+    if (isTaskSearchTarget(task.id)) {
+      taskCard.classList.add("dashboard-search-target-card");
+    }
 
     if (isCompleted) {
       taskCard.classList.add("task-completed");
@@ -617,6 +715,10 @@ function renderTasksList() {
     `;
 
     tasksList.appendChild(taskCard);
+
+    if (isTaskSearchTarget(task.id)) {
+      highlightTaskSearchTargetElement(taskCard);
+    }
   });
 }
 
@@ -666,7 +768,6 @@ async function toggleTaskStatus(taskId) {
   const newStatus = task.status === "completada" ? "pendiente" : "completada";
 
   const updatedTask = {
-    user_id: currentUserId,
     title: task.title,
     description: task.description || "",
     category: task.category,
@@ -678,13 +779,16 @@ async function toggleTaskStatus(taskId) {
   try {
     const response = await fetch(`${TASKS_API_URL}/${taskId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: getTaskAuthHeaders(true),
       body: JSON.stringify(updatedTask)
     });
 
     const data = await response.json();
+
+    if (response.status === 401) {
+      await handleTaskUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
@@ -727,11 +831,16 @@ async function deleteTask(taskId) {
   }
 
   try {
-    const response = await fetch(`${TASKS_API_URL}/${taskId}?user_id=${currentUserId}`, {
-      method: "DELETE"
+    const response = await fetch(`${TASKS_API_URL}/${taskId}`, {
+      method: "DELETE",
+      headers: getTaskAuthHeaders()
     });
 
     const data = await response.json();
+    if (response.status === 401) {
+      await handleTaskUnauthorizedSession(data);
+      return;
+    }
 
     if (!response.ok) {
       Swal.fire({
