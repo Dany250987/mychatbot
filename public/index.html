@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda Personal Inteligente</title>
+</head>
+<body>
+  <script>
+    const userData = localStorage.getItem("userData");
+    const authToken = localStorage.getItem("authToken");
+
+    if (userData && authToken) {
+      window.location.replace("dashboard.html");
+    } else {
+      window.location.replace("login_google.html");
+    }
+  </script>
+
+  <noscript>
+    <p>Para usar la aplicación debes activar JavaScript.</p>
+    <a href="login_google.html">Ir al inicio de sesión</a>
+  </noscript>
+</body>
+</html>
+
+
+

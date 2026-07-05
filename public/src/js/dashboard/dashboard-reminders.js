@@ -940,13 +940,13 @@ function renderRemindersSection() {
 
   contentEl.innerHTML = `
     <div class="voice-reminders-section">
+
       <div class="voice-reminders-header">
         <div>
-          <span class="welcome-badge">Recordatorios por voz</span>
-          <h2>Habla y crea tu recordatorio</h2>
+          <span class="welcome-badge">Recordatorios</span>
+          <h2>Crea tus recordatorios</h2>
           <p>
-            Presiona el micrófono y di algo como:
-            “Recuérdame pagar el internet mañana a las 8 de la noche”.
+            Puedes crear un recordatorio manualmente con fecha, hora y repetición.
           </p>
         </div>
 
@@ -954,6 +954,73 @@ function renderRemindersSection() {
           <i class="fa-solid fa-volume-high"></i>
           Activar alertas
         </button>
+      </div>
+
+      <div class="manual-reminder-panel">
+        <div class="manual-reminder-header">
+          <span class="welcome-badge">Nuevo recordatorio</span>
+          <h3>Agregar recordatorio manual</h3>
+        </div>
+
+        <form id="manualReminderForm" class="manual-reminder-form">
+          <div class="manual-reminder-grid">
+            <div class="manual-reminder-field">
+              <label for="manualReminderTitle">Título</label>
+              <input 
+                type="text" 
+                id="manualReminderTitle" 
+                placeholder="Ej: Pagar internet"
+                required
+              >
+            </div>
+
+            <div class="manual-reminder-field">
+              <label for="manualReminderCategory">Categoría</label>
+              <select id="manualReminderCategory" required>
+                <option value="personal">Personal</option>
+                <option value="salud">Salud</option>
+                <option value="trabajo">Trabajo</option>
+                <option value="pagos">Pagos</option>
+                <option value="estudio">Estudio</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            <div class="manual-reminder-field">
+              <label for="manualReminderDate">Fecha</label>
+              <input 
+                type="date" 
+                id="manualReminderDate" 
+                required
+              >
+            </div>
+
+            <div class="manual-reminder-field">
+              <label for="manualReminderTime">Hora</label>
+              <input 
+                type="time" 
+                id="manualReminderTime" 
+                required
+              >
+            </div>
+
+            <div class="manual-reminder-field">
+              <label for="manualReminderRepeat">Repetición</label>
+              <select id="manualReminderRepeat" required>
+                <option value="una_vez">Una vez</option>
+                <option value="diario">Diario</option>
+                <option value="semanal">Semanal</option>
+                <option value="mensual">Mensual</option>
+                <option value="anual">Anual</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="manual-reminder-submit">
+            <i class="fa-solid fa-floppy-disk"></i>
+            Guardar recordatorio
+          </button>
+        </form>
       </div>
 
       <div class="voice-reminder-panel">
@@ -1003,6 +1070,7 @@ function renderRemindersSection() {
 
   const voiceButton = document.getElementById("voiceReminderButton");
   const enableAlertsButton = document.getElementById("enableReminderAlertsButton");
+  const manualReminderForm = document.getElementById("manualReminderForm");
 
   if (voiceButton) {
     voiceButton.addEventListener("click", startVoiceReminder);
@@ -1010,6 +1078,10 @@ function renderRemindersSection() {
 
   if (enableAlertsButton) {
     enableAlertsButton.addEventListener("click", enableReminderAlerts);
+  }
+
+  if (manualReminderForm) {
+    manualReminderForm.addEventListener("submit", handleManualReminderSubmit);
   }
 
   const reminderSearchTarget = getReminderSearchTarget();
@@ -1027,6 +1099,108 @@ function renderRemindersSection() {
 
   setupReminderFilters();
   loadReminders();
+}
+
+async function handleManualReminderSubmit(event) {
+  event.preventDefault();
+
+  const title = document.getElementById("manualReminderTitle").value.trim();
+  const category = document.getElementById("manualReminderCategory").value;
+  const reminderDate = document.getElementById("manualReminderDate").value;
+  const reminderTime = document.getElementById("manualReminderTime").value;
+  const repeatType = document.getElementById("manualReminderRepeat").value;
+
+  if (!title || !category || !reminderDate || !reminderTime || !repeatType) {
+    Swal.fire({
+      title: "Datos incompletos",
+      text: "Completa todos los campos del recordatorio.",
+      icon: "warning",
+      confirmButtonColor: "#960018"
+    });
+    return;
+  }
+
+  const token = localStorage.getItem("authToken");
+
+  if (!token) {
+    Swal.fire({
+      title: "Sesión no encontrada",
+      text: "Inicia sesión nuevamente.",
+      icon: "warning",
+      confirmButtonColor: "#960018"
+    });
+
+    window.location.href = "login_google.html";
+    return;
+  }
+
+  const reminderData = {
+    title,
+    original_text: title,
+    text_original: title,
+    category,
+    reminder_date: reminderDate,
+    reminder_time: `${reminderTime}:00`,
+    repeat_type: repeatType
+  };
+
+  try {
+    const response = await fetch(REMINDERS_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(reminderData)
+    });
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      Swal.fire({
+        title: "Sesión vencida",
+        text: data.mensaje || "Inicia sesión nuevamente.",
+        icon: "warning",
+        confirmButtonColor: "#960018"
+      });
+
+      localStorage.removeItem("userData");
+      localStorage.removeItem("authToken");
+      window.location.href = "login_google.html";
+      return;
+    }
+
+    if (!response.ok) {
+      Swal.fire({
+        title: "No se pudo guardar",
+        text: data.mensaje || data.error || "No se pudo guardar el recordatorio.",
+        icon: "error",
+        confirmButtonColor: "#960018"
+      });
+      return;
+    }
+
+    await Swal.fire({
+      title: "Recordatorio creado",
+      text: data.mensaje || "Tu recordatorio fue guardado correctamente.",
+      icon: "success",
+      confirmButtonColor: "#960018"
+    });
+
+    event.target.reset();
+
+    loadReminders();
+
+  } catch (error) {
+    console.error("Error al guardar recordatorio manual:", error);
+
+    Swal.fire({
+      title: "Error",
+      text: "No fue posible guardar el recordatorio.",
+      icon: "error",
+      confirmButtonColor: "#960018"
+    });
+  }
 }
 
 function setupReminderFilters() {

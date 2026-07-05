@@ -1,0 +1,9 @@
+{
+  "appId": "com.danybot.agenda",
+  "appName": "Agenda Personal Inteligente",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  }
+}

@@ -265,8 +265,28 @@ async function completeReminderFromAlert(reminder) {
 async function enableReminderAlerts() {
   unlockReminderSound();
 
+  const isMobileApp =
+    typeof window.isDanyBotMobileApp === "function"
+      ? await window.isDanyBotMobileApp()
+      : false;
+
+  if (isMobileApp) {
+    if (typeof window.testDanyBotLocalNotification !== "function") {
+      Swal.fire({
+        title: "Notificaciones móviles no disponibles",
+        text: "No se encontró la configuración de notificaciones nativas.",
+        icon: "warning",
+        confirmButtonColor: "#960018"
+      });
+      return;
+    }
+
+    await window.testDanyBotLocalNotification();
+    return;
+  }
+
   if (!("Notification" in window)) {
-    Swal.fire({
+    await Swal.fire({
       title: "Notificaciones no compatibles",
       text: "Tu navegador no permite notificaciones de escritorio.",
       icon: "warning",

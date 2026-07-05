@@ -706,6 +706,21 @@ function startEditExpense(id) {
   expenseMessage.textContent = expense.evidence_file_name
     ? 'Editando gasto seleccionado. Si adjuntas una nueva evidencia, reemplazará la anterior.'
     : 'Editando gasto seleccionado. Puedes adjuntar una evidencia opcional.';
+
+  const expenseForm = document.getElementById('expenseForm') || document.querySelector('.expense-form');
+
+  if (expenseForm) {
+    expenseForm.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+
+  setTimeout(() => {
+    if (description) {
+      description.focus();
+    }
+  }, 450);
 }
 
 // Esta función elimina un gasto desde la pantalla.
@@ -786,6 +801,22 @@ function resetFormMode() {
 }
 
 function startVoiceExpense() {
+  const isMobileApp =
+    window.location.origin === 'http://localhost' ||
+    window.location.origin === 'https://localhost' ||
+    window.location.protocol === 'capacitor:' ||
+    window.location.protocol === 'ionic:';
+
+  if (isMobileApp) {
+    Swal.fire({
+      title: 'Dictado no disponible en móvil',
+      text: 'Por ahora el dictado por voz está disponible en la versión web. Puedes registrar el gasto manualmente.',
+      icon: 'info',
+      confirmButtonColor: '#3c0000'
+    });
+    return;
+  }
+
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
@@ -807,9 +838,29 @@ function startVoiceExpense() {
   voiceButton.classList.add('listening');
   voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Escuchando...';
 
+  let voiceTimeout = setTimeout(() => {
+    try {
+      recognition.stop();
+    } catch (error) {
+      console.warn('No se pudo detener el reconocimiento:', error);
+    }
+
+    voiceButton.classList.remove('listening');
+    voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+
+    Swal.fire({
+      title: 'No se detectó voz',
+      text: 'No logré escuchar ningún texto. Intenta nuevamente.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+  }, 10000);
+
   recognition.start();
 
   recognition.onresult = async (event) => {
+    clearTimeout(voiceTimeout);
+
     const transcript = event.results[0][0].transcript.toLowerCase();
 
     voiceText.textContent = `Texto detectado: "${transcript}"`;
@@ -818,6 +869,11 @@ function startVoiceExpense() {
   };
 
   recognition.onerror = () => {
+    clearTimeout(voiceTimeout);
+
+    voiceButton.classList.remove('listening');
+    voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+
     Swal.fire({
       title: 'No se pudo escuchar',
       text: 'Revisa el permiso del micrófono o intenta hablar más cerca del dispositivo.',
@@ -827,6 +883,8 @@ function startVoiceExpense() {
   };
 
   recognition.onend = () => {
+    clearTimeout(voiceTimeout);
+
     voiceButton.classList.remove('listening');
     voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
   };

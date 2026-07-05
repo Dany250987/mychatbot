@@ -1,7 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agenda Personal Inteligente | Iniciar sesión</title>
 
@@ -15,6 +16,7 @@
 
   <link rel="stylesheet" href="src/css/login_google.css">
   <script src="src/js/script.js" defer></script>
+  <script src="src/js/api-config.js"></script>
 </head>
 
 <body>
@@ -127,6 +129,12 @@
         <button type="submit">Iniciar sesión</button>
       </form>
 
+      <p class="forgot-password-text">
+        <button type="button" id="forgotPasswordButton" class="forgot-password-button">
+          ¿Olvidaste tu contraseña?
+        </button>
+      </p>
+
       <p class="signup-text">
         ¿No tienes una cuenta?
         <a class="register" href="signup.html">Crear cuenta gratis</a>
@@ -136,10 +144,13 @@
       <div id="chat-container">
         <h3 id="user-name" style="margin-top: 10px;"></h3>
         <img id="user-avatar" width="80" style="border-radius: 50%; margin-bottom: 10px;" />
-        <p>✅ Acceso correcto. Aquí se cargará el chatbot...</p>
+        <p>âœ… Acceso correcto. Aquí se cargará el chatbot...</p>
       </div>
     </section>
 
   </main>
 </body>
 </html>
+
+
+

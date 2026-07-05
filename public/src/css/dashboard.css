@@ -3344,3 +3344,123 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===============================
+   Formulario manual de recordatorios
+================================ */
+
+.manual-reminder-panel {
+  margin-top: 24px;
+  padding: 24px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #ffffff, #fff3f3);
+  border: 1px solid rgba(150, 0, 24, 0.12);
+  box-shadow: 0 18px 45px rgba(60, 0, 0, 0.08);
+}
+
+.manual-reminder-header {
+  margin-bottom: 20px;
+}
+
+.manual-reminder-header h3 {
+  margin: 10px 0 0;
+  color: #3c0000;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.manual-reminder-form {
+  display: grid;
+  gap: 20px;
+}
+
+.manual-reminder-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.manual-reminder-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.manual-reminder-field label {
+  color: #3c0000;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.manual-reminder-field input,
+.manual-reminder-field select {
+  width: 100%;
+  border: 1px solid rgba(150, 0, 24, 0.18);
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: #ffffff;
+  color: #2b0b0b;
+  font-size: 0.96rem;
+  font-weight: 700;
+  outline: none;
+  box-shadow: 0 8px 18px rgba(60, 0, 0, 0.04);
+}
+
+.manual-reminder-field input:focus,
+.manual-reminder-field select:focus {
+  border-color: #960018;
+  box-shadow: 0 0 0 4px rgba(150, 0, 24, 0.10);
+}
+
+.manual-reminder-submit {
+  border: none;
+  border-radius: 999px;
+  padding: 15px 22px;
+  background: linear-gradient(135deg, #960018, #d44848);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 14px 28px rgba(150, 0, 24, 0.22);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.manual-reminder-submit:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.manual-reminder-submit:active {
+  transform: scale(0.98);
+}
+
+/* En móvil, el formulario queda en una sola columna */
+@media (max-width: 768px) {
+  .manual-reminder-panel {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .manual-reminder-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .manual-reminder-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .manual-reminder-field input,
+  .manual-reminder-field select {
+    padding: 13px 14px;
+    border-radius: 16px;
+  }
+
+  .manual-reminder-submit {
+    width: 100%;
+  }
+}

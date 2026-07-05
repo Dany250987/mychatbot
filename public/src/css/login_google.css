@@ -345,7 +345,6 @@ label {
 
 input[type="email"],
 input[type="password"] {
-  width: 100%;
   padding: 16px 17px;
   border: 1px solid var(--pale-salmon);
   border-radius: 18px;
@@ -560,5 +559,182 @@ button[type="submit"]:hover {
 
   .card-header h1 {
     font-size: 23px;
+  }
+}
+
+/* ===============================
+   Recuperar contraseña
+================================ */
+
+.forgot-password-text {
+  margin: 14px 0 0;
+  text-align: center;
+}
+
+.forgot-password-button {
+  border: none;
+  background: transparent;
+  color: #960018;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 0.92rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.forgot-password-button:hover {
+  color: #3c0000;
+}
+
+/* ===============================
+   Login móvil / app Android
+   No afecta escritorio
+================================ */
+
+@media (max-width: 768px) {
+  html,
+  body {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    padding: 0;
+    margin: 0;
+    display: block;
+    background: linear-gradient(180deg, #fff7f7 0%, #ffffff 100%);
+  }
+
+  .login-background-decoration {
+    display: none;
+  }
+
+  .login-card {
+    width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    display: block;
+    overflow: visible;
+  }
+
+  .login-visual-panel {
+    display: none;
+  }
+
+  .login-form-panel {
+    width: 100%;
+    min-height: 100vh;
+    padding: 28px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-header {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+
+  .logo-container {
+    margin: 0 auto 14px;
+  }
+
+  .logo-container img {
+    max-width: 92px;
+    height: auto;
+  }
+
+  .login-kicker {
+    font-size: 0.78rem;
+  }
+
+  .card-header h1 {
+    font-size: 1.55rem;
+    line-height: 1.18;
+    margin: 10px 0;
+  }
+
+  .card-header p {
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .linea-arriba,
+  .linea-abajo {
+    display: inline;
+  }
+
+  .g_id_signin {
+    display: flex;
+    justify-content: center;
+    margin: 8px auto 16px;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .login-divider {
+    margin: 16px 0;
+  }
+
+  .form {
+    width: 100%;
+  }
+
+  .form-fields {
+    gap: 10px;
+  }
+
+  .form-fields label {
+    font-size: 0.88rem;
+  }
+
+  .form-fields input {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    padding: 13px 14px;
+  }
+
+  .form button[type="submit"] {
+    width: 100%;
+    min-height: 50px;
+    border-radius: 999px;
+    font-size: 0.98rem;
+    margin-top: 16px;
+  }
+
+  .forgot-password-text {
+    margin: 14px 0 0;
+  }
+
+  .signup-text {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  #chat-container {
+    display: none;
+  }
+}
+
+@media (max-width: 390px) {
+  .login-form-panel {
+    padding: 22px 18px;
+  }
+
+  .card-header h1 {
+    font-size: 1.35rem;
+  }
+
+  .card-header p {
+    font-size: 0.86rem;
+  }
+
+  .logo-container img {
+    max-width: 78px;
   }
 }

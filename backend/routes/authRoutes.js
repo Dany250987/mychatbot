@@ -280,6 +280,44 @@ async function sendVerificationEmail(email, code) {
   });
 }
 
+async function sendPasswordResetEmail(email, code) {
+  const transporter = createEmailTransporter();
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM,
+    to: email,
+    subject: 'Recuperación de contraseña - DanyBot',
+    text: `Tu código para recuperar contraseña es: ${code}. Este código vence en 10 minutos.`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #2b0b0b;">
+        <h2>Recuperación de contraseña</h2>
+        <p>Usa este código para cambiar tu contraseña:</p>
+
+        <div style="
+          display: inline-block;
+          padding: 14px 22px;
+          background: #f8eaea;
+          color: #960018;
+          border-radius: 12px;
+          font-size: 28px;
+          font-weight: bold;
+          letter-spacing: 4px;
+        ">
+          ${code}
+        </div>
+
+        <p style="margin-top: 18px;">
+          Este código vence en 10 minutos.
+        </p>
+
+        <p style="font-size: 13px; color: #7a5a5a;">
+          Si no solicitaste este cambio, puedes ignorar este correo.
+        </p>
+      </div>
+    `
+  });
+}
+
 // ===============================
 // Enviar código de verificación
 // ===============================
@@ -592,6 +630,167 @@ router.post('/login', (req, res) => {
       token
     });
   });
+});
+
+// ===============================
+// Solicitar código para recuperar contraseña
+// ===============================
+
+router.post('/request-password-reset', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      error: 'El correo es obligatorio.'
+    });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  try {
+    const users = await queryAsync(
+      'SELECT id, email, password FROM users WHERE email = ?',
+      [normalizedEmail]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        error: 'No existe una cuenta registrada con este correo.'
+      });
+    }
+
+    const user = users[0];
+
+    if (!user.password) {
+      return res.status(400).json({
+        error: 'Esta cuenta fue creada con Google. Debes iniciar sesión con Google.'
+      });
+    }
+
+    const resetCode = createVerificationCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const expiresAtMySQL = formatDateTimeForMySQL(expiresAt);
+
+    await queryAsync(
+      `
+        INSERT INTO password_resets
+          (email, reset_code, expires_at)
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          reset_code = VALUES(reset_code),
+          expires_at = VALUES(expires_at),
+          created_at = CURRENT_TIMESTAMP
+      `,
+      [
+        normalizedEmail,
+        resetCode,
+        expiresAtMySQL
+      ]
+    );
+
+    await sendPasswordResetEmail(normalizedEmail, resetCode);
+
+    return res.json({
+      mensaje: 'Código de recuperación enviado al correo.'
+    });
+
+  } catch (error) {
+    console.error('❌ Error al solicitar recuperación de contraseña:', error);
+
+    return res.status(500).json({
+      error: 'No se pudo enviar el código de recuperación.'
+    });
+  }
+});
+
+// ===============================
+// Validar código y cambiar contraseña
+// ===============================
+
+router.post('/reset-password', async (req, res) => {
+  const { email, code, new_password } = req.body;
+
+  if (!email || !code || !new_password) {
+    return res.status(400).json({
+      error: 'Correo, código y nueva contraseña son obligatorios.'
+    });
+  }
+
+  if (String(new_password).length < 6) {
+    return res.status(400).json({
+      error: 'La nueva contraseña debe tener al menos 6 caracteres.'
+    });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  try {
+    const resetRows = await queryAsync(
+      `
+        SELECT *
+        FROM password_resets
+        WHERE email = ?
+          AND reset_code = ?
+          AND expires_at > NOW()
+        LIMIT 1
+      `,
+      [
+        normalizedEmail,
+        String(code).trim()
+      ]
+    );
+
+    if (resetRows.length === 0) {
+      return res.status(400).json({
+        error: 'El código es incorrecto o ya venció.'
+      });
+    }
+
+    const users = await queryAsync(
+      'SELECT id, password FROM users WHERE email = ?',
+      [normalizedEmail]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({
+        error: 'No existe una cuenta registrada con este correo.'
+      });
+    }
+
+    const user = users[0];
+
+    if (!user.password) {
+      return res.status(400).json({
+        error: 'Esta cuenta fue creada con Google. Debes iniciar sesión con Google.'
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+
+    await queryAsync(
+      'UPDATE users SET password = ? WHERE email = ?',
+      [
+        hashedPassword,
+        normalizedEmail
+      ]
+    );
+
+    await queryAsync(
+      'DELETE FROM password_resets WHERE email = ?',
+      [normalizedEmail]
+    );
+
+    return res.json({
+      mensaje: 'Contraseña actualizada correctamente.'
+    });
+
+  } catch (error) {
+    console.error('❌ Error al cambiar contraseña:', error);
+
+    return res.status(500).json({
+      error: 'No se pudo cambiar la contraseña.'
+    });
+  }
 });
 
 // ===============================

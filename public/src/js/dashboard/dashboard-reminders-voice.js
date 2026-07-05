@@ -620,9 +620,31 @@ async function saveVoiceReminder(reminderData) {
 }
 
 function startVoiceReminder() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const statusText = document.getElementById("voiceReminderStatus");
   const voiceButton = document.getElementById("voiceReminderButton");
+
+  const isMobileApp =
+    window.location.origin === "http://localhost" ||
+    window.location.origin === "https://localhost" ||
+    window.location.protocol === "capacitor:" ||
+    window.location.protocol === "ionic:";
+
+  if (isMobileApp) {
+    if (statusText) {
+      statusText.textContent = "El dictado por voz estará disponible próximamente en la app móvil.";
+    }
+
+    Swal.fire({
+      title: "Dictado no disponible en móvil",
+      text: "Por ahora el dictado por voz está disponible en la versión web. Puedes crear el recordatorio manualmente.",
+      icon: "info",
+      confirmButtonColor: "#960018"
+    });
+
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
     Swal.fire({
@@ -706,7 +728,24 @@ function startVoiceReminder() {
     voiceButton.innerHTML = `<i class="fa-solid fa-microphone-lines"></i>`;
   }
 
-  recognition.start();
+  try {
+    recognition.start();
+  } catch (error) {
+    resetVoiceButton();
+
+    Swal.fire({
+      title: "No se pudo iniciar el micrófono",
+      text: "Intenta nuevamente.",
+      icon: "error",
+      confirmButtonColor: "#960018"
+    });
+
+    return;
+  }
+
+  maxListenTimer = setTimeout(() => {
+    finishVoiceReminder();
+  }, 15000);
 
   recognition.onresult = (event) => {
     interimTranscript = "";
@@ -758,10 +797,6 @@ function startVoiceReminder() {
       finishVoiceReminder();
     }
   };
-
-  maxListenTimer = setTimeout(() => {
-    finishVoiceReminder();
-  }, 12000);
 }
 
 async function processCompletedVoiceReminder(spokenText) {
