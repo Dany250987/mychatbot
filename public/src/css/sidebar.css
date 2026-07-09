@@ -349,3 +349,88 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Ajuste móvil Android/Capacitor: zona segura compacta */
+@media (max-width: 900px) {
+  .app-layout {
+    min-height: 100dvh;
+  }
+
+  .app-sidebar {
+    top: 0;
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    padding-right: 16px;
+    padding-bottom: 16px;
+    padding-left: 16px;
+    box-sizing: border-box;
+  }
+
+  .sidebar-brand {
+    align-items: center;
+  }
+
+  .sidebar-brand-logo,
+  .sidebar-user-avatar,
+  .sidebar-user-initial {
+    width: 46px;
+    height: 46px;
+  }
+
+  .sidebar-brand-logo img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .sidebar-brand-text strong {
+    font-size: 15px;
+  }
+
+  .sidebar-brand-text small {
+    font-size: 10.5px;
+  }
+
+  .sidebar-menu {
+    gap: 8px;
+  }
+
+  .sidebar-link,
+  .sidebar-logout {
+    min-height: 42px;
+    padding: 9px 8px;
+    font-size: 13px;
+    border-radius: 15px;
+  }
+
+  .sidebar-link i,
+  .sidebar-logout i {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-sidebar {
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    padding-right: 14px;
+    padding-bottom: 14px;
+    padding-left: 14px;
+  }
+
+  .sidebar-brand-logo,
+  .sidebar-user-avatar,
+  .sidebar-user-initial {
+    width: 42px;
+    height: 42px;
+  }
+
+  .sidebar-brand-logo img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .sidebar-link,
+  .sidebar-logout {
+    min-height: 40px;
+    padding: 8px 7px;
+    font-size: 12.5px;
+  }
+}
