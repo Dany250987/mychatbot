@@ -1,5 +1,5 @@
 ﻿(function () {
-  const LOCAL_MOBILE_API_URL = "http://10.0.2.2:3000";
+  const LOCAL_MOBILE_API_URL = "http://192.168.1.9:3000";
 
   window.DANYBOT_API_DEBUG = {
     lastUrl: null,

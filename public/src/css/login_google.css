@@ -738,3 +738,51 @@ button[type="submit"]:hover {
     max-width: 78px;
   }
 }
+
+/* Botón nativo de Google para Android/Capacitor */
+.native-google-login-button {
+  width: 100%;
+  height: 48px;
+  margin-top: 14px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #3c4043;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.native-google-login-button:hover {
+  background: #f8fafd;
+  box-shadow: 0 1px 4px rgba(60, 64, 67, 0.25);
+}
+
+.native-google-login-button:active {
+  transform: scale(0.99);
+}
+
+.native-google-login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.native-google-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #4285f4;
+  border: 1px solid #dadce0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-family: Arial, sans-serif;
+}

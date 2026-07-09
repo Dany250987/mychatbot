@@ -94,10 +94,17 @@ function renderTasksSection() {
           </p>
         </div>
 
-        <button type="button" class="task-main-button">
-          <i class="fa-solid fa-plus"></i>
-          Nueva tarea
-        </button>
+        <div class="task-header-actions">
+          <button type="button" class="task-voice-button">
+            <i class="fa-solid fa-microphone"></i>
+            Crear por voz
+          </button>
+
+          <button type="button" class="task-main-button">
+            <i class="fa-solid fa-plus"></i>
+            Nueva tarea
+          </button>
+        </div>
       </div>
 
       <div class="tasks-summary">
@@ -117,23 +124,7 @@ function renderTasksSection() {
         </div>
       </div>
 
-      <div class="task-filters">
-        <button type="button" class="task-filter-button active" data-filter="todas">
-          Todas
-        </button>
-
-        <button type="button" class="task-filter-button" data-filter="pendiente">
-          Pendientes
-        </button>
-
-        <button type="button" class="task-filter-button" data-filter="completada">
-          Completadas
-        </button>
-
-        <button type="button" class="task-filter-button" data-filter="hoy">
-          Vencen hoy
-        </button>
-      </div>
+      
 
       <form class="task-form">
         <div class="form-group">
@@ -193,6 +184,24 @@ function renderTasksSection() {
         </div>
       </form>
 
+      <div class="task-filters">
+        <button type="button" class="task-filter-button active" data-filter="todas">
+          Todas
+        </button>
+
+        <button type="button" class="task-filter-button" data-filter="pendiente">
+          Pendientes
+        </button>
+
+        <button type="button" class="task-filter-button" data-filter="completada">
+          Completadas
+        </button>
+
+        <button type="button" class="task-filter-button" data-filter="hoy">
+          Vencen hoy
+        </button>
+      </div>
+
       <div class="tasks-list">
         <div class="empty-tasks">
           <i class="fa-solid fa-clipboard-list"></i>
@@ -205,6 +214,7 @@ function renderTasksSection() {
 
   const taskSaveButton = document.querySelector(".task-save-button");
   const taskMainButton = document.querySelector(".task-main-button");
+  const taskVoiceButton = document.querySelector(".task-voice-button");
 
   if (taskSaveButton) {
     taskSaveButton.addEventListener("click", saveTask);
@@ -212,6 +222,10 @@ function renderTasksSection() {
 
   if (taskMainButton) {
     taskMainButton.addEventListener("click", startNewTask);
+  }
+
+  if (taskVoiceButton) {
+    taskVoiceButton.addEventListener("click", startVoiceTask);
   }
 
   if (getTaskSearchTarget().type === "task") {
@@ -222,26 +236,371 @@ function renderTasksSection() {
   loadTasks();
 }
 
+async function startVoiceTask() {
+  const taskVoiceButton = document.querySelector(".task-voice-button");
+  const taskTitle = document.getElementById("taskTitle");
+  const taskCategory = document.getElementById("taskCategory");
+  const taskPriority = document.getElementById("taskPriority");
+  const taskDueDate = document.getElementById("taskDueDate");
+  const taskDescription = document.getElementById("taskDescription");
+
+  const isMobileApp =
+    typeof window.isDanyBotRunningInMobileApp === "function" &&
+    window.isDanyBotRunningInMobileApp();
+
+  if (!isMobileApp || typeof window.startDanyBotNativeSpeech !== "function") {
+    Swal.fire({
+      title: "Voz no disponible",
+      text: "No se encontró la configuración de voz nativa.",
+      icon: "warning",
+      confirmButtonColor: "#960018"
+    });
+    return;
+  }
+
+  try {
+    if (taskVoiceButton) {
+      taskVoiceButton.classList.add("listening");
+      taskVoiceButton.innerHTML = `
+        <i class="fa-solid fa-microphone-lines"></i>
+        Escuchando...
+      `;
+    }
+
+    const result = await window.startDanyBotNativeSpeech({
+      language: "es-CO",
+      prompt: "Di la tarea que quieres crear"
+    });
+
+    if (taskVoiceButton) {
+      taskVoiceButton.classList.remove("listening");
+      taskVoiceButton.innerHTML = `
+        <i class="fa-solid fa-microphone"></i>
+        Crear por voz
+      `;
+    }
+
+    if (!result.success) {
+      Swal.fire({
+        title: "No se pudo escuchar",
+        text: result.reason || "No se detectó ningún texto.",
+        icon: "warning",
+        confirmButtonColor: "#960018"
+      });
+      return;
+    }
+
+    const spokenText = result.text.toLowerCase();
+
+    const detectedTask = detectTaskFromVoice(spokenText);
+
+    taskTitle.value = detectedTask.title;
+    taskCategory.value = detectedTask.category;
+    taskPriority.value = detectedTask.priority;
+    taskDueDate.value = detectedTask.due_date;
+    taskDescription.value = spokenText;
+
+    const taskForm = document.querySelector(".task-form");
+
+    if (taskForm) {
+      scrollToFullTaskForm();
+    }
+
+    function scrollToTasksList() {
+      const tasksList = document.querySelector(".tasks-list");
+
+      if (!tasksList) {
+        return;
+      }
+
+      const listTop = tasksList.getBoundingClientRect().top + window.scrollY;
+
+      window.scrollTo({
+        top: listTop - 16,
+        behavior: "smooth"
+      });
+    }
+
+    const confirmation = await Swal.fire({
+      title: "Tarea detectada",
+      html: `
+        <p><strong>Título:</strong> ${detectedTask.title}</p>
+        <p><strong>Categoría:</strong> ${detectedTask.category}</p>
+        <p><strong>Prioridad:</strong> ${detectedTask.priority}</p>
+        <p><strong>Fecha límite:</strong> ${detectedTask.due_date}</p>
+        <p style="margin-top: 10px;">¿Quieres guardar esta tarea?</p>
+      `,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Guardar tarea",
+      cancelButtonText: "Revisar primero",
+      confirmButtonColor: "#960018",
+      cancelButtonColor: "#6b7280"
+    });
+
+    if (confirmation.isConfirmed) {
+      await saveTask();
+    } else {
+      setTimeout(() => {
+        scrollToFullTaskForm();
+      }, 300);
+    }
+
+  } catch (error) {
+    console.error("Error en voz nativa de tareas:", error);
+
+    if (taskVoiceButton) {
+      taskVoiceButton.classList.remove("listening");
+      taskVoiceButton.innerHTML = `
+        <i class="fa-solid fa-microphone"></i>
+        Crear por voz
+      `;
+    }
+
+    Swal.fire({
+      title: "Error de voz",
+      text: "No fue posible usar el micrófono del celular.",
+      icon: "error",
+      confirmButtonColor: "#960018"
+    });
+  }
+}
+
+function detectTaskFromVoice(text) {
+  const cleanText = normalizeTaskVoiceText(text);
+
+  const category = detectTaskCategoryFromVoice(cleanText);
+  const priority = detectTaskPriorityFromVoice(cleanText);
+  const dueDate = detectTaskDueDateFromVoice(cleanText);
+  const title = detectTaskTitleFromVoice(cleanText);
+
+  return {
+    title,
+    category,
+    priority,
+    due_date: dueDate
+  };
+}
+
+function normalizeTaskVoiceText(text) {
+  return String(text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function detectTaskCategoryFromVoice(text) {
+  if (text.includes("trabajo") || text.includes("laboral")) {
+    return "Trabajo";
+  }
+
+  if (text.includes("estudio") || text.includes("estudiar") || text.includes("universidad")) {
+    return "Estudio";
+  }
+
+  if (text.includes("salud") || text.includes("medico") || text.includes("cita")) {
+    return "Salud";
+  }
+
+  if (text.includes("finanzas") || text.includes("pago") || text.includes("banco") || text.includes("dinero")) {
+    return "Finanzas";
+  }
+
+  if (text.includes("casa") || text.includes("hogar") || text.includes("aseo")) {
+    return "Casa";
+  }
+
+  if (text.includes("compra") || text.includes("comprar") || text.includes("mercado")) {
+    return "Compras";
+  }
+
+  if (text.includes("proyecto") || text.includes("danybot") || text.includes("app")) {
+    return "Proyectos";
+  }
+
+  if (text.includes("tramite") || text.includes("documento")) {
+    return "Trámites";
+  }
+
+  return "Personal";
+}
+
+function detectTaskPriorityFromVoice(text) {
+  if (text.includes("prioridad alta") || text.includes("urgente") || text.includes("importante")) {
+    return "Alta";
+  }
+
+  if (text.includes("prioridad baja") || text.includes("no urgente")) {
+    return "Baja";
+  }
+
+  return "Media";
+}
+
+function detectTaskDueDateFromVoice(text) {
+  const today = new Date();
+
+  if (text.includes("pasado manana")) {
+    const date = new Date(today);
+    date.setDate(date.getDate() + 2);
+    return formatTaskDateForInput(date);
+  }
+
+  if (text.includes("manana")) {
+    const date = new Date(today);
+    date.setDate(date.getDate() + 1);
+    return formatTaskDateForInput(date);
+  }
+
+  if (text.includes("hoy")) {
+    return formatTaskDateForInput(today);
+  }
+
+  const daysMatch = text.match(/en (\d+) dias?/);
+
+  if (daysMatch) {
+    const daysToAdd = Number(daysMatch[1]);
+    const date = new Date(today);
+    date.setDate(date.getDate() + daysToAdd);
+    return formatTaskDateForInput(date);
+  }
+
+  if (
+    text.includes("proxima semana") ||
+    text.includes("la otra semana") ||
+    text.includes("siguiente semana")
+  ) {
+    const date = new Date(today);
+    date.setDate(date.getDate() + 7);
+    return formatTaskDateForInput(date);
+  }
+
+  const weekdays = {
+    domingo: 0,
+    lunes: 1,
+    martes: 2,
+    miercoles: 3,
+    jueves: 4,
+    viernes: 5,
+    sabado: 6
+  };
+
+  for (const dayName in weekdays) {
+    if (text.includes(dayName)) {
+      const targetDay = weekdays[dayName];
+      const date = new Date(today);
+      let daysToAdd = targetDay - today.getDay();
+
+      if (daysToAdd <= 0) {
+        daysToAdd += 7;
+      }
+
+      date.setDate(date.getDate() + daysToAdd);
+      return formatTaskDateForInput(date);
+    }
+  }
+
+  const months = {
+    enero: 0,
+    febrero: 1,
+    marzo: 2,
+    abril: 3,
+    mayo: 4,
+    junio: 5,
+    julio: 6,
+    agosto: 7,
+    septiembre: 8,
+    octubre: 9,
+    noviembre: 10,
+    diciembre: 11
+  };
+
+  const dateMatch = text.match(/(\d{1,2}) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)/);
+
+  if (dateMatch) {
+    const day = Number(dateMatch[1]);
+    const month = months[dateMatch[2]];
+    let year = today.getFullYear();
+
+    let date = new Date(year, month, day);
+
+    if (date < today) {
+      date = new Date(year + 1, month, day);
+    }
+
+    return formatTaskDateForInput(date);
+  }
+
+  return formatTaskDateForInput(today);
+}
+
+function formatTaskDateForInput(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function scrollToFullTaskForm() {
+  const taskForm = document.querySelector(".task-form");
+
+  if (!taskForm) {
+    return;
+  }
+
+  const formTop = taskForm.getBoundingClientRect().top + window.scrollY;
+
+  window.scrollTo({
+    top: formTop - 12,
+    behavior: "smooth"
+  });
+}
+
+function detectTaskTitleFromVoice(text) {
+  let title = text
+    .replace(/\b(crea|crear|agrega|agregar|anota|registrar|registra)\b/g, "")
+    .replace(/\b(una tarea|tarea|pendiente)\b/g, "")
+    .replace(/\b(para hoy|para manana|para pasado manana|hoy|manana|pasado manana)\b/g, "")
+    .replace(/\b(con prioridad alta|con prioridad media|con prioridad baja|prioridad alta|prioridad media|prioridad baja)\b/g, "")
+    .replace(/\b(urgente|importante|no urgente)\b/g, "")
+    .replace(/\b(de trabajo|de estudio|de salud|de finanzas|de casa|de compras|de proyectos|de tramites|personal)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!title) {
+    title = "Tarea creada por voz";
+  }
+
+  return title.charAt(0).toUpperCase() + title.slice(1);
+}
+
 function setupTaskFilters() {
   const filterButtons = document.querySelectorAll(".task-filter-button");
 
   filterButtons.forEach((button) => {
-    button.classList.remove("active");
-
     if (button.dataset.filter === currentTaskFilter) {
       button.classList.add("active");
+    } else {
+      button.classList.remove("active");
     }
 
     button.addEventListener("click", () => {
       currentTaskFilter = button.dataset.filter;
 
-      filterButtons.forEach((item) => {
-        item.classList.remove("active");
+      filterButtons.forEach((btn) => {
+        btn.classList.remove("active");
       });
 
       button.classList.add("active");
 
       renderTasksList();
+
+      setTimeout(() => {
+        scrollToTasksList();
+      }, 120);
     });
   });
 }
@@ -531,10 +890,7 @@ function startNewTask() {
   const taskTitle = document.getElementById("taskTitle");
 
   if (taskForm) {
-    taskForm.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
+    scrollToFullTaskForm();
   }
 
   if (taskTitle) {

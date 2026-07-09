@@ -5,5 +5,15 @@
   "server": {
     "androidScheme": "http",
     "cleartext": true
+  },
+  "plugins": {
+    "SocialLogin": {
+      "providers": {
+        "google": true,
+        "facebook": false,
+        "apple": false,
+        "twitter": false
+      }
+    }
   }
 }

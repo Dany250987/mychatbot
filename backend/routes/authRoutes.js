@@ -540,32 +540,58 @@ router.post('/google-login', async (req, res) => {
       });
     }
 
-    const users = await queryAsync(
+    let users = await queryAsync(
       'SELECT * FROM users WHERE email = ?',
       [normalizedEmail]
     );
 
+    let message = 'Bienvenida de nuevo';
+    let statusCode = 200;
+
     if (users.length === 0) {
-      return res.status(404).json({
-        error: 'No existe una cuenta registrada con este correo. Primero crea tu cuenta con verificación por código.'
-      });
+      const crypto = require('crypto');
+      const generatedPassword = crypto.randomBytes(32).toString('hex');
+      const googlePasswordHash = await bcrypt.hash(generatedPassword, 10);
+
+      await queryAsync(
+        `
+          INSERT INTO users
+            (name, email, password, date_of_birth, phone_number)
+          VALUES (?, ?, ?, ?, ?)
+        `,
+        [
+          googleUser.name,
+          normalizedEmail,
+          googlePasswordHash,
+          null,
+          null
+        ]
+      );
+
+      users = await queryAsync(
+        'SELECT * FROM users WHERE email = ?',
+        [normalizedEmail]
+      );
+
+      message = 'Cuenta creada con Google correctamente';
+      statusCode = 201;
     }
 
     const user = users[0];
     const userResponse = buildUserResponse(user, googleUser.picture);
     const token = createAuthToken(userResponse);
 
-    return res.status(200).json({
-      message: 'Bienvenida de nuevo',
+    return res.status(statusCode).json({
+      message,
       user: userResponse,
       token
     });
 
   } catch (error) {
-    console.error('❌ Error en login con Google:', error);
+    console.error('Error en login con Google:', error);
 
-    return res.status(401).json({
-      error: error.message || 'No se pudo validar la cuenta de Google.'
+    return res.status(500).json({
+      error: error.message || 'No se pudo iniciar sesión con Google.'
     });
   }
 });

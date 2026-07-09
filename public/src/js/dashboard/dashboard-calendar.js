@@ -575,18 +575,15 @@ function renderCalendarSection() {
   loadCalendarReminders();
 }
 
-async function loadCalendarReminders() {
+async function loadCalendarTasks() {
   const token = getDashboardReminderAuthToken();
 
   if (!token) {
-    await handleDashboardReminderUnauthorizedSession({
-      mensaje: "No se encontró token de sesión."
-    });
     return;
   }
 
   try {
-    const response = await fetch(REMINDERS_API_URL, {
+    const response = await fetch(TASKS_API_URL, {
       headers: getDashboardReminderAuthHeaders()
     });
 
@@ -598,30 +595,28 @@ async function loadCalendarReminders() {
     }
 
     if (!response.ok) {
-      Swal.fire({
-        title: "No se pudo cargar el calendario",
-        text: data.mensaje || "No se pudieron consultar los recordatorios.",
-        icon: "error",
-        confirmButtonColor: "#960018"
-      });
+      console.error("No se pudieron cargar las tareas para el calendario:", data);
+      tasks = [];
       return;
     }
 
-    reminders = data.reminders || [];
-
-    renderCalendarView();
-    updateDashboardRemindersCount();
-    updateDashboardTodayEventsCount();
+    tasks = (data.tareas || []).map((task) => {
+      return {
+        id: task.id,
+        user_id: task.user_id,
+        title: task.title,
+        description: task.description || "",
+        category: task.category || "Personal",
+        priority: task.priority || "Media",
+        dueDate: task.due_date ? String(task.due_date).split("T")[0] : "",
+        status: task.status,
+        completedAt: task.completed_at || null
+      };
+    });
 
   } catch (error) {
-    console.error("Error al cargar calendario:", error);
-
-    Swal.fire({
-      title: "Error",
-      text: "Ocurrió un error al cargar el calendario.",
-      icon: "error",
-      confirmButtonColor: "#960018"
-    });
+    console.error("Error al cargar tareas para el calendario:", error);
+    tasks = [];
   }
 }
 
@@ -665,7 +660,7 @@ function renderCalendarGrid() {
   for (let day = 1; day <= totalDays; day++) {
     const date = new Date(year, month, day);
     const dateKey = formatDateForDatabase(date);
-    const dayReminders = getRemindersByDate(dateKey);
+    const dayEvents = getCalendarEventsByDate(dateKey);
 
     const dayCell = document.createElement("button");
     dayCell.type = "button";
@@ -679,13 +674,13 @@ function renderCalendarGrid() {
       dayCell.classList.add("calendar-day-selected");
     }
 
-    if (dayReminders.length > 0) {
+    if (dayEvents.length > 0) {
       dayCell.classList.add("calendar-day-has-events");
     }
 
     dayCell.innerHTML = `
       <span class="calendar-day-number">${day}</span>
-      ${renderCalendarDayIndicators(dayReminders)}
+      ${renderCalendarDayIndicators(dayEvents)}
     `;
 
     dayCell.addEventListener("click", () => {
@@ -709,26 +704,17 @@ function renderCalendarEventsList() {
   const year = currentCalendarDate.getFullYear();
   const month = currentCalendarDate.getMonth();
 
-  let filteredReminders = reminders.filter((reminder) => {
-    if (!shouldShowReminderInCalendar(reminder)) {
-      return false;
-    }
-
-    const reminderDate = getReminderDateValue(reminder.reminder_date);
-    const date = new Date(`${reminderDate}T00:00:00`);
-
-    return date.getFullYear() === year && date.getMonth() === month;
-  });
+  let calendarEvents = getCalendarEventsForMonth(year, month);
 
   if (selectedCalendarDate) {
-    filteredReminders = filteredReminders.filter((reminder) => {
-      return getReminderDateValue(reminder.reminder_date) === selectedCalendarDate;
+    calendarEvents = calendarEvents.filter((event) => {
+      return event.date === selectedCalendarDate;
     });
   }
 
-  filteredReminders = filteredReminders.sort((a, b) => {
-    const dateA = `${getReminderDateValue(a.reminder_date)} ${a.reminder_time || "00:00:00"}`;
-    const dateB = `${getReminderDateValue(b.reminder_date)} ${b.reminder_time || "00:00:00"}`;
+  calendarEvents = calendarEvents.sort((a, b) => {
+    const dateA = `${a.date} ${a.time || "00:00:00"}`;
+    const dateB = `${b.date} ${b.time || "00:00:00"}`;
 
     return dateA.localeCompare(dateB);
   });
@@ -740,16 +726,16 @@ function renderCalendarEventsList() {
   if (subtitle) {
     subtitle.textContent = selectedCalendarDate
       ? formatReminderDateLabel(selectedCalendarDate)
-      : `${filteredReminders.length} aviso(s) programado(s) este mes.`;
+      : `${calendarEvents.length} evento(s) programado(s) este mes.`;
   }
 
-  if (filteredReminders.length === 0) {
+  if (calendarEvents.length === 0) {
     list.innerHTML = `
       <p class="empty-calendar-events">
         ${
           selectedCalendarDate
-            ? "No hay recordatorios para este día."
-            : "No hay recordatorios para este mes."
+            ? "No hay eventos para este día."
+            : "No hay eventos para este mes."
         }
       </p>
     `;
@@ -758,42 +744,181 @@ function renderCalendarEventsList() {
 
   list.innerHTML = "";
 
-  filteredReminders.forEach((reminder) => {
+  calendarEvents.forEach((event) => {
     const eventCard = document.createElement("div");
-    eventCard.classList.add("calendar-event-card", getCalendarEventCategoryClass(reminder.category));
+    eventCard.classList.add(
+      "calendar-event-card",
+      getCalendarEventCategoryClass(event.category)
+    );
 
-    eventCard.innerHTML = `
-      <div class="calendar-event-date">
-        <strong>${formatCalendarDay(getReminderDateValue(reminder.reminder_date))}</strong>
-        <span>${formatCalendarMonth(getReminderDateValue(reminder.reminder_date))}</span>
-      </div>
-
-      <div class="calendar-event-info">
-        <span class="calendar-event-category">
-          <i class="fa-solid ${getReminderCategoryIcon(reminder.category)}"></i>
-          ${reminder.category || "Personal"}
-        </span>
-
-        <h4>${reminder.title}</h4>
-        <p>${reminder.original_text}</p>
-
-        <div class="calendar-event-meta">
-          <span>
-            <i class="fa-solid fa-clock"></i>
-            ${formatReminderTime(reminder.reminder_time)}
-          </span>
-
-          <span class="repeat-type-pill ${getRepeatTypeClass(reminder.repeat_type)}">
-            <i class="fa-solid ${getRepeatTypeIcon(reminder.repeat_type)}"></i>
-            ${formatRepeatType(reminder.repeat_type)}
-          </span>
-        </div>
-      </div>
-    `;
+    if (event.type === "task") {
+      eventCard.classList.add("calendar-event-task");
+      eventCard.innerHTML = renderCalendarTaskEvent(event.data);
+    } else {
+      eventCard.innerHTML = renderCalendarReminderEvent(event.data);
+    }
 
     list.appendChild(eventCard);
   });
 }
+
+function getCalendarEventsForMonth(year, month) {
+  const reminderEvents = reminders
+    .filter((reminder) => {
+      if (!shouldShowReminderInCalendar(reminder)) {
+        return false;
+      }
+
+      const reminderDate = getReminderDateValue(reminder.reminder_date);
+      const date = new Date(`${reminderDate}T00:00:00`);
+
+      return date.getFullYear() === year && date.getMonth() === month;
+    })
+    .map((reminder) => {
+      return {
+        type: "reminder",
+        date: getReminderDateValue(reminder.reminder_date),
+        time: reminder.reminder_time || "00:00:00",
+        category: reminder.category || "Personal",
+        data: reminder
+      };
+    });
+
+  const taskEvents = tasks
+    .filter((task) => {
+      if (!shouldShowTaskInCalendar(task)) {
+        return false;
+      }
+
+      const taskDate = getTaskCalendarDate(task);
+      const date = new Date(`${taskDate}T00:00:00`);
+
+      return date.getFullYear() === year && date.getMonth() === month;
+    })
+    .map((task) => {
+      return {
+        type: "task",
+        date: getTaskCalendarDate(task),
+        time: "23:59:00",
+        category: task.category || "Personal",
+        data: task
+      };
+    });
+
+  return [...reminderEvents, ...taskEvents];
+}
+
+function getCalendarEventsByDate(dateKey) {
+  const reminderEvents = getRemindersByDate(dateKey).map((reminder) => {
+    return {
+      type: "reminder",
+      date: getReminderDateValue(reminder.reminder_date),
+      time: reminder.reminder_time || "00:00:00",
+      category: reminder.category || "Personal",
+      data: reminder
+    };
+  });
+
+  const taskEvents = tasks
+    .filter((task) => {
+      return shouldShowTaskInCalendar(task)
+        && getTaskCalendarDate(task) === dateKey;
+    })
+    .map((task) => {
+      return {
+        type: "task",
+        date: getTaskCalendarDate(task),
+        time: "23:59:00",
+        category: task.category || "Personal",
+        data: task
+      };
+    });
+
+  return [...reminderEvents, ...taskEvents];
+}
+
+function shouldShowTaskInCalendar(task) {
+  const status = String(task.status || "").toLowerCase();
+
+  return status === "pendiente" && Boolean(getTaskCalendarDate(task));
+}
+
+function getTaskCalendarDate(task) {
+  if (task.dueDate) {
+    return String(task.dueDate).split("T")[0];
+  }
+
+  if (task.due_date) {
+    return String(task.due_date).split("T")[0];
+  }
+
+  return "";
+}
+
+function renderCalendarReminderEvent(reminder) {
+  return `
+    <div class="calendar-event-date">
+      <strong>${formatCalendarDay(getReminderDateValue(reminder.reminder_date))}</strong>
+      <span>${formatCalendarMonth(getReminderDateValue(reminder.reminder_date))}</span>
+    </div>
+
+    <div class="calendar-event-info">
+      <span class="calendar-event-category">
+        <i class="fa-solid ${getReminderCategoryIcon(reminder.category)}"></i>
+        ${reminder.category || "Personal"}
+      </span>
+
+      <h4>${reminder.title}</h4>
+      <p>${reminder.original_text}</p>
+
+      <div class="calendar-event-meta">
+        <span>
+          <i class="fa-solid fa-clock"></i>
+          ${formatReminderTime(reminder.reminder_time)}
+        </span>
+
+        <span class="repeat-type-pill ${getRepeatTypeClass(reminder.repeat_type)}">
+          <i class="fa-solid ${getRepeatTypeIcon(reminder.repeat_type)}"></i>
+          ${formatRepeatType(reminder.repeat_type)}
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+function renderCalendarTaskEvent(task) {
+  const taskDate = getTaskCalendarDate(task);
+
+  return `
+    <div class="calendar-event-date">
+      <strong>${formatCalendarDay(taskDate)}</strong>
+      <span>${formatCalendarMonth(taskDate)}</span>
+    </div>
+
+    <div class="calendar-event-info">
+      <span class="calendar-event-category">
+        <i class="fa-solid fa-list-check"></i>
+        Tarea · ${task.category || "Personal"}
+      </span>
+
+      <h4>${task.title}</h4>
+      <p>${task.description || "Tarea pendiente por completar."}</p>
+
+      <div class="calendar-event-meta">
+        <span>
+          <i class="fa-solid fa-flag"></i>
+          Prioridad ${task.priority || "Media"}
+        </span>
+
+        <span class="repeat-type-pill">
+          <i class="fa-solid fa-hourglass-half"></i>
+          Pendiente
+        </span>
+      </div>
+    </div>
+  `;
+}
+
 
 function renderCalendarDayIndicators(dayReminders) {
   if (dayReminders.length === 0) {

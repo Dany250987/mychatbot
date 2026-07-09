@@ -2012,3 +2012,150 @@ tr.search-result-highlight {
     box-shadow: 0 0 0 12px rgba(70, 60, 236, 0.20);
   }
 }
+
+/* Modal para ver evidencia del gasto en móvil */
+.expense-evidence-popup {
+  max-width: 520px;
+  border-radius: 18px;
+}
+
+.expense-evidence-modal {
+  width: 100%;
+  max-height: 70vh;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.expense-evidence-image {
+  width: 100%;
+  max-width: 100%;
+  max-height: 68vh;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 600px) {
+  .expense-evidence-popup {
+    width: 94% !important;
+  }
+
+  .expense-evidence-modal {
+    max-height: 65vh;
+    padding: 4px;
+  }
+
+  .expense-evidence-image {
+    max-height: 62vh;
+  }
+}
+
+/* Vista de archivos de evidencia */
+.expense-evidence-frame {
+  width: 100%;
+  height: 68vh;
+  border: none;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.expense-evidence-file-card {
+  min-height: 220px;
+  padding: 24px 16px;
+  border-radius: 16px;
+  background: #f9fafb;
+  color: #374151;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.expense-evidence-file-card i {
+  font-size: 3rem;
+  color: #463cec;
+}
+
+.expense-evidence-file-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.expense-evidence-open-link {
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #463cec;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  .expense-evidence-frame {
+    height: 62vh;
+  }
+}
+
+/* Vista de PDF dentro del modal de evidencia */
+.expense-evidence-pdf {
+  width: 100%;
+  height: 68vh;
+  border: none;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+/* Mensaje para archivos que no son imagen ni PDF */
+.expense-evidence-file-message {
+  width: 100%;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  color: #3c0000;
+  padding: 20px;
+}
+
+.expense-evidence-file-message i {
+  font-size: 3rem;
+  color: #463cec;
+}
+
+.expense-evidence-file-message p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.expense-evidence-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 999px;
+  background: #463cec;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .expense-evidence-pdf {
+    height: 62vh;
+  }
+} 
+
+

@@ -292,6 +292,67 @@ function renderEvidenceCell(expense) {
   `;
 }
 
+function convertBlobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const result = reader.result || '';
+      const base64 = String(result).split(',')[1];
+      resolve(base64);
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function openExpensePdfWithNativeViewer(blob, expenseId) {
+  try {
+    const CapacitorPlugins = window.Capacitor?.Plugins || {};
+    const Filesystem = CapacitorPlugins.Filesystem;
+    const FileViewer = CapacitorPlugins.FileViewer;
+
+    if (!Filesystem || !FileViewer) {
+      Swal.fire({
+        title: 'Visor no disponible',
+        text: 'No se encontró el visor nativo de archivos en la app.',
+        icon: 'warning',
+        confirmButtonColor: '#3c0000'
+      });
+      return;
+    }
+
+    const base64Data = await convertBlobToBase64(blob);
+    const fileName = `evidencia-gasto-${expenseId}.pdf`;
+
+    await Filesystem.writeFile({
+      path: fileName,
+      data: base64Data,
+      directory: 'CACHE'
+    });
+
+    const fileInfo = await Filesystem.getUri({
+      path: fileName,
+      directory: 'CACHE'
+    });
+
+    await FileViewer.openDocumentFromLocalPath({
+      path: fileInfo.uri
+    });
+
+  } catch (error) {
+    console.error('Error al abrir PDF con visor nativo:', error);
+
+    Swal.fire({
+      title: 'No se pudo abrir el PDF',
+      text: 'El archivo se recibió, pero no se pudo abrir con el visor del celular.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
+  }
+}
+
 async function openExpenseEvidence(expenseId) {
   try {
     const response = await fetch(`${API_URL}/${expenseId}/evidence`, {
@@ -326,12 +387,67 @@ async function openExpenseEvidence(expenseId) {
 
     const blob = await response.blob();
     const fileUrl = URL.createObjectURL(blob);
+    const contentType = (response.headers.get('content-type') || blob.type || '').toLowerCase();
 
-    window.open(fileUrl, '_blank');
+    let evidencePreviewHtml = '';
 
-    setTimeout(() => {
-      URL.revokeObjectURL(fileUrl);
-    }, 60000);
+    if (contentType.startsWith('image/')) {
+      evidencePreviewHtml = `
+        <img src="${fileUrl}" alt="Evidencia del gasto" class="expense-evidence-image">
+      `;
+    } else if (contentType.includes('pdf')) {
+      evidencePreviewHtml = `
+        <div class="expense-evidence-file-message">
+          <i class="bi bi-file-earmark-pdf"></i>
+          <p>El PDF no se puede previsualizar directamente en esta ventana.</p>
+          <button
+            type="button"
+            id="openExpensePdfButton"
+            class="expense-evidence-download"
+          >
+            Abrir PDF
+          </button>
+        </div>
+      `;
+    } else {
+      evidencePreviewHtml = `
+        <div class="expense-evidence-file-message">
+          <i class="bi bi-file-earmark-text"></i>
+          <p>Este tipo de archivo no se puede previsualizar directamente en la app.</p>
+          <a href="${fileUrl}" target="_blank" download="evidencia-gasto" class="expense-evidence-download">
+            Abrir archivo
+          </a>
+        </div>
+      `;
+    }
+
+    Swal.fire({
+      title: 'Evidencia del gasto',
+      html: `
+        <div class="expense-evidence-modal">
+          ${evidencePreviewHtml}
+        </div>
+      `,
+      confirmButtonText: 'Volver',
+      confirmButtonColor: '#3c0000',
+      showCloseButton: true,
+      width: '92%',
+      customClass: {
+        popup: 'expense-evidence-popup'
+      },
+      didOpen: () => {
+        const openPdfButton = document.getElementById('openExpensePdfButton');
+
+        if (openPdfButton) {
+          openPdfButton.addEventListener('click', async () => {
+            await openExpensePdfWithNativeViewer(blob, expenseId);
+          });
+        }
+      },
+      didClose: () => {
+        URL.revokeObjectURL(fileUrl);
+      }
+    });
 
   } catch (error) {
     console.error('Error al abrir evidencia:', error);
@@ -800,59 +916,105 @@ function resetFormMode() {
   setTodayDate();
 }
 
-function startVoiceExpense() {
+async function startVoiceExpense() {
   const isMobileApp =
-    window.location.origin === 'http://localhost' ||
-    window.location.origin === 'https://localhost' ||
-    window.location.protocol === 'capacitor:' ||
-    window.location.protocol === 'ionic:';
+    typeof window.isDanyBotRunningInMobileApp === "function" &&
+    window.isDanyBotRunningInMobileApp();
 
   if (isMobileApp) {
-    Swal.fire({
-      title: 'Dictado no disponible en móvil',
-      text: 'Por ahora el dictado por voz está disponible en la versión web. Puedes registrar el gasto manualmente.',
-      icon: 'info',
-      confirmButtonColor: '#3c0000'
-    });
-    return;
+    if (typeof window.startDanyBotNativeSpeech !== "function") {
+      Swal.fire({
+        title: "Voz no disponible",
+        text: "No se encontró la configuración de voz nativa.",
+        icon: "warning",
+        confirmButtonColor: "#3c0000"
+      });
+      return;
+    }
+
+    try {
+      voiceButton.classList.add("listening");
+      voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Escuchando...';
+
+      const result = await window.startDanyBotNativeSpeech({
+        language: "es-CO",
+        prompt: "Di el gasto que quieres registrar"
+      });
+
+      voiceButton.classList.remove("listening");
+      voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+
+      if (!result.success) {
+        Swal.fire({
+          title: "No se pudo escuchar",
+          text: result.reason || "No se detectó ningún texto.",
+          icon: "warning",
+          confirmButtonColor: "#3c0000"
+        });
+        return;
+      }
+
+      const transcript = result.text.toLowerCase();
+
+      voiceText.textContent = `Texto detectado: "${transcript}"`;
+
+      await fillExpenseFromVoice(transcript);
+
+      return;
+
+    } catch (error) {
+      console.error("Error en voz nativa de gastos:", error);
+
+      voiceButton.classList.remove("listening");
+      voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+
+      Swal.fire({
+        title: "Error de voz",
+        text: "No fue posible usar el micrófono del celular.",
+        icon: "error",
+        confirmButtonColor: "#3c0000"
+      });
+
+      return;
+    }
   }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
     Swal.fire({
-      title: 'Reconocimiento de voz no disponible',
-      text: 'Tu navegador no permite usar dictado por voz en esta página. Prueba con Chrome.',
-      icon: 'warning',
-      confirmButtonColor: '#3c0000'
+      title: "Reconocimiento de voz no disponible",
+      text: "Tu navegador no permite usar dictado por voz en esta página. Prueba con Chrome.",
+      icon: "warning",
+      confirmButtonColor: "#3c0000"
     });
     return;
   }
 
   const recognition = new SpeechRecognition();
 
-  recognition.lang = 'es-CO';
+  recognition.lang = "es-CO";
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
 
-  voiceButton.classList.add('listening');
+  voiceButton.classList.add("listening");
   voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Escuchando...';
 
   let voiceTimeout = setTimeout(() => {
     try {
       recognition.stop();
     } catch (error) {
-      console.warn('No se pudo detener el reconocimiento:', error);
+      console.warn("No se pudo detener el reconocimiento:", error);
     }
 
-    voiceButton.classList.remove('listening');
+    voiceButton.classList.remove("listening");
     voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
 
     Swal.fire({
-      title: 'No se detectó voz',
-      text: 'No logré escuchar ningún texto. Intenta nuevamente.',
-      icon: 'warning',
-      confirmButtonColor: '#3c0000'
+      title: "No se detectó voz",
+      text: "No logré escuchar ningún texto. Intenta nuevamente.",
+      icon: "warning",
+      confirmButtonColor: "#3c0000"
     });
   }, 10000);
 
@@ -871,21 +1033,21 @@ function startVoiceExpense() {
   recognition.onerror = () => {
     clearTimeout(voiceTimeout);
 
-    voiceButton.classList.remove('listening');
+    voiceButton.classList.remove("listening");
     voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
 
     Swal.fire({
-      title: 'No se pudo escuchar',
-      text: 'Revisa el permiso del micrófono o intenta hablar más cerca del dispositivo.',
-      icon: 'error',
-      confirmButtonColor: '#3c0000'
+      title: "No se pudo escuchar",
+      text: "Revisa el permiso del micrófono o intenta hablar más cerca del dispositivo.",
+      icon: "error",
+      confirmButtonColor: "#3c0000"
     });
   };
 
   recognition.onend = () => {
     clearTimeout(voiceTimeout);
 
-    voiceButton.classList.remove('listening');
+    voiceButton.classList.remove("listening");
     voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
   };
 }

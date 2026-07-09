@@ -619,29 +619,90 @@ async function saveVoiceReminder(reminderData) {
   }
 }
 
-function startVoiceReminder() {
+async function startVoiceReminder() {
   const statusText = document.getElementById("voiceReminderStatus");
   const voiceButton = document.getElementById("voiceReminderButton");
 
   const isMobileApp =
-    window.location.origin === "http://localhost" ||
-    window.location.origin === "https://localhost" ||
-    window.location.protocol === "capacitor:" ||
-    window.location.protocol === "ionic:";
+    typeof window.isDanyBotRunningInMobileApp === "function" &&
+    window.isDanyBotRunningInMobileApp();
 
   if (isMobileApp) {
-    if (statusText) {
-      statusText.textContent = "El dictado por voz estará disponible próximamente en la app móvil.";
+    if (typeof window.startDanyBotNativeSpeech !== "function") {
+      Swal.fire({
+        title: "Voz no disponible",
+        text: "No se encontró la configuración de voz nativa.",
+        icon: "warning",
+        confirmButtonColor: "#960018"
+      });
+      return;
     }
 
-    Swal.fire({
-      title: "Dictado no disponible en móvil",
-      text: "Por ahora el dictado por voz está disponible en la versión web. Puedes crear el recordatorio manualmente.",
-      icon: "info",
-      confirmButtonColor: "#960018"
-    });
+    try {
+      if (statusText) {
+        statusText.textContent = "Escuchando... di tu recordatorio completo.";
+      }
 
-    return;
+      if (voiceButton) {
+        voiceButton.classList.add("listening");
+        voiceButton.innerHTML = `<i class="fa-solid fa-microphone-lines"></i>`;
+      }
+
+      const result = await window.startDanyBotNativeSpeech({
+        language: "es-CO",
+        prompt: "Di el recordatorio que quieres crear"
+      });
+
+      if (voiceButton) {
+        voiceButton.classList.remove("listening");
+        voiceButton.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
+      }
+
+      if (!result.success) {
+        if (statusText) {
+          statusText.textContent = "No pude escuchar bien. Intenta de nuevo.";
+        }
+
+        Swal.fire({
+          title: "No se pudo escuchar",
+          text: result.reason || "No se detectó ningún texto.",
+          icon: "warning",
+          confirmButtonColor: "#960018"
+        });
+        return;
+      }
+
+      const spokenText = result.text.toLowerCase();
+
+      if (statusText) {
+        statusText.textContent = `"${spokenText}"`;
+      }
+
+      await processCompletedVoiceReminder(spokenText);
+
+      return;
+
+    } catch (error) {
+      console.error("Error en voz nativa de recordatorios:", error);
+
+      if (voiceButton) {
+        voiceButton.classList.remove("listening");
+        voiceButton.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
+      }
+
+      if (statusText) {
+        statusText.textContent = "No se pudo usar el micrófono.";
+      }
+
+      Swal.fire({
+        title: "Error de voz",
+        text: "No fue posible usar el micrófono del celular.",
+        icon: "error",
+        confirmButtonColor: "#960018"
+      });
+
+      return;
+    }
   }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
