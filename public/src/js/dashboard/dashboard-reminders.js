@@ -1231,6 +1231,38 @@ function isReminderInTrash(reminder) {
   return reminder.status === "papelera" || reminder.status === "completado";
 }
 
+function isAnnualReminderDueToday(reminder, today) {
+  const reminderDate = getReminderDateValue(reminder.reminder_date);
+
+  if (!reminderDate) {
+    return false;
+  }
+
+  // Si la fecha original todavía no ha llegado, no se muestra.
+  if (reminderDate > today) {
+    return false;
+  }
+
+  // Para anual, se compara día y mes. Ej: 2026-07-08 -> 07-08
+  return reminderDate.slice(5) === today.slice(5);
+}
+
+function shouldShowReminderOnBoard(reminder, today) {
+  if (reminder.repeat_type === "anual") {
+    return isAnnualReminderDueToday(reminder, today);
+  }
+
+  return true;
+}
+
+function isReminderDueForTodayFilter(reminder, today) {
+  if (reminder.repeat_type === "anual") {
+    return isAnnualReminderDueToday(reminder, today);
+  }
+
+  return getReminderDateValue(reminder.reminder_date) === today;
+}
+
 function getFilteredReminders() {
   const today = getTodayDate();
 
@@ -1238,14 +1270,15 @@ function getFilteredReminders() {
 
   if (currentReminderFilter === "activos") {
     filteredReminders = reminders.filter((reminder) => {
-      return reminder.status === "activo";
+      return reminder.status === "activo"
+        && shouldShowReminderOnBoard(reminder, today);
     });
   }
 
   if (currentReminderFilter === "hoy") {
     filteredReminders = reminders.filter((reminder) => {
-      return getReminderDateValue(reminder.reminder_date) === today
-        && reminder.status === "activo";
+      return reminder.status === "activo"
+        && isReminderDueForTodayFilter(reminder, today);
     });
   }
 
@@ -1257,12 +1290,14 @@ function getFilteredReminders() {
 
   if (currentReminderFilter === "todos") {
     filteredReminders = reminders.filter((reminder) => {
-      return !isReminderInTrash(reminder);
+      return !isReminderInTrash(reminder)
+        && shouldShowReminderOnBoard(reminder, today);
     });
   }
 
   return sortReminders(filteredReminders);
 }
+
 function sortReminders(reminderList) {
   return [...reminderList].sort((a, b) => {
     if (a.status !== b.status) {
