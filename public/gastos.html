@@ -28,6 +28,19 @@
   <link rel="stylesheet" href="./src/css/sidebar.css">
 
   <!-- CSS propio -->
+   <script>
+    (function () {
+      const isDanyBotNativeApp =
+        window.location.origin === "http://localhost" ||
+        window.location.origin === "https://localhost" ||
+        window.location.protocol === "capacitor:" ||
+        window.location.protocol === "ionic:";
+
+      if (isDanyBotNativeApp) {
+        document.documentElement.classList.add("danybot-mobile-app");
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="./src/css/gastos.css">
   <script src="src/js/api-config.js"></script>
   <script src="src/js/mobile-speech.js"></script>

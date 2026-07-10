@@ -71,34 +71,22 @@ function detectReminderTitle(text) {
   let title = text.toLowerCase().trim();
 
   title = title
-    .replace(/\b(recuerdame|recordarme|recordame|acuerdame|acuérdame|dejame|déjame)\b/g, "")
-    .replace(/\b(que debo|debo|tengo que|quiero que me recuerdes|necesito que me recuerdes|necesito que|quiero)\b/g, "")  
-    .replace(/\b(recordatorio|agenda)\b/g, "")
+    .replace(/\b(crea|crear|agrega|agregar|anota|anotar|programa|programar)\b/g, "")
+    .replace(/\b(recuerdame|recordarme|recordame|acuerdame|dejame|recordatorio|agenda)\b/g, "")
+    .replace(/\b(quiero que me recuerdes|necesito que me recuerdes|me recuerdas|me recuerde)\b/g, "")
+    .replace(/\b(que debo|debo|tengo que|necesito que|quiero que|quiero|para que|que)\b/g, "")
     .trim();
 
   title = extractTitleAfterDate(title);
 
   title = title
-    .replace(/\ba las\s+\d{1,2}(?:(?::|\s+y\s+|\s+con\s+)\d{1,2})?\s*(de la manana|por la manana|de la tarde|de la noche|am|pm)?/g, "")
-    .replace(/\b\d{1,2}(?:(?::|\s+y\s+|\s+con\s+)\d{1,2})\s*(am|pm)?\b/g, "")
+    .replace(/\ba las\s+\d{1,2}(?:(?::|\s+y\s+|\s+con\s+)\d{1,2})?\s*(de la manana|por la manana|de la tarde|de la noche|am|pm|a m|p m)?/g, "")
+    .replace(/\b\d{1,2}(?:(?::|\s+y\s+|\s+con\s+)\d{1,2})\s*(am|pm|a m|p m)?\b/g, "")
     .replace(/\b\d{1,2}\s*(am|pm|a m|p m)\b/g, "")
     .replace(/\bhoy\b/g, "")
     .replace(/\bpasado manana\b/g, "")
     .replace(/\bmanana\b/g, "")
-    .replace(/\bel lunes\b/g, "")
-    .replace(/\bel martes\b/g, "")
-    .replace(/\bel miercoles\b/g, "")
-    .replace(/\bel jueves\b/g, "")
-    .replace(/\bel viernes\b/g, "")
-    .replace(/\bel sabado\b/g, "")
-    .replace(/\bel domingo\b/g, "")
-    .replace(/\blunes\b/g, "")
-    .replace(/\bmartes\b/g, "")
-    .replace(/\bmiercoles\b/g, "")
-    .replace(/\bjueves\b/g, "")
-    .replace(/\bviernes\b/g, "")
-    .replace(/\bsabado\b/g, "")
-    .replace(/\bdomingo\b/g, "")
+    .replace(/\b(el|los|las)?\s*(lunes|martes|miercoles|jueves|viernes|sabado|domingo)\b/g, "")
     .replace(/\bpara el dia\s+\d{1,2}\s*(de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/g, "")
     .replace(/\bpara el\s+\d{1,2}\s*(de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/g, "")
     .replace(/\bel dia\s+\d{1,2}\s*(de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/g, "")
@@ -133,13 +121,38 @@ function detectReminderTitle(text) {
     .replace(/\buna vez al ano\b/g, "")
     .replace(/\buna vez por ano\b/g, "")
     .replace(/\bcada aniversario\b/g, "")
+    .replace(/\bpara\s*$/g, "")
+    .replace(/^para\s+/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
-  title = title.replace(/^para\s+/g, "").trim();
+  const fillerWords = [
+    "por favor",
+    "porfa",
+    "favor",
+    "me",
+    "mi",
+    "mis",
+    "el",
+    "la",
+    "los",
+    "las",
+    "un",
+    "una"
+  ];
+
+  fillerWords.forEach((word) => {
+    title = title.replace(new RegExp(`^${word}\\s+`, "g"), "").trim();
+  });
 
   if (!title || title.length <= 2) {
     return "Recordatorio";
+  }
+
+  const words = title.split(" ").filter(Boolean);
+
+  if (words.length > 6) {
+    title = words.slice(0, 6).join(" ");
   }
 
   return title.charAt(0).toUpperCase() + title.slice(1);
@@ -605,7 +618,25 @@ async function saveVoiceReminder(reminderData) {
       confirmButtonColor: "#960018"
     });
 
-    await loadReminders();
+    if (typeof showSection === "function") {
+      window.location.hash = "recordatorios";
+      showSection("recordatorios");
+    } else {
+      await loadReminders();
+    }
+
+    setTimeout(() => {
+      const remindersList = document.getElementById("remindersList");
+
+      if (remindersList) {
+        const y = remindersList.getBoundingClientRect().top + window.scrollY - 90;
+
+        window.scrollTo({
+          top: y,
+          behavior: "smooth"
+        });
+      }
+    }, 700);
 
   } catch (error) {
     console.error("Error al guardar recordatorio:", error);

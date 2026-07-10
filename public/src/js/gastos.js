@@ -353,6 +353,22 @@ async function openExpensePdfWithNativeViewer(blob, expenseId) {
   }
 }
 
+function refreshExpensesListHeight() {
+  const content = document.getElementById("expensesListContent");
+
+  if (!content) return;
+
+  if (content.classList.contains("is-collapsed")) {
+    content.style.maxHeight = "0px";
+    return;
+  }
+
+  content.style.maxHeight = "none";
+  content.style.height = "auto";
+  content.style.overflow = "visible";
+}
+
+
 async function openExpenseEvidence(expenseId) {
   try {
     const response = await fetch(`${API_URL}/${expenseId}/evidence`, {
@@ -396,19 +412,9 @@ async function openExpenseEvidence(expenseId) {
         <img src="${fileUrl}" alt="Evidencia del gasto" class="expense-evidence-image">
       `;
     } else if (contentType.includes('pdf')) {
-      evidencePreviewHtml = `
-        <div class="expense-evidence-file-message">
-          <i class="bi bi-file-earmark-pdf"></i>
-          <p>El PDF no se puede previsualizar directamente en esta ventana.</p>
-          <button
-            type="button"
-            id="openExpensePdfButton"
-            class="expense-evidence-download"
-          >
-            Abrir PDF
-          </button>
-        </div>
-      `;
+      await openExpensePdfWithNativeViewer(blob, expenseId);
+      URL.revokeObjectURL(fileUrl);
+      return;
     } else {
       evidencePreviewHtml = `
         <div class="expense-evidence-file-message">
@@ -434,15 +440,6 @@ async function openExpenseEvidence(expenseId) {
       width: '92%',
       customClass: {
         popup: 'expense-evidence-popup'
-      },
-      didOpen: () => {
-        const openPdfButton = document.getElementById('openExpensePdfButton');
-
-        if (openPdfButton) {
-          openPdfButton.addEventListener('click', async () => {
-            await openExpensePdfWithNativeViewer(blob, expenseId);
-          });
-        }
       },
       didClose: () => {
         URL.revokeObjectURL(fileUrl);

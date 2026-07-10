@@ -754,3 +754,168 @@ input:-webkit-autofill {
     max-width: 76px;
   }
 }
+
+/* ======================================================
+   AJUSTE FINAL MÓVIL - CREAR CUENTA
+   Escala compacta app móvil
+====================================================== */
+@media (max-width: 768px) {
+  html,
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  body {
+    padding: 0 !important;
+    align-items: flex-start !important;
+  }
+
+  .signup-layout {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100dvh !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .signup-visual-panel {
+    display: none !important;
+  }
+
+  .signup-form-panel {
+    width: 100% !important;
+    min-height: 100dvh !important;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 18px calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .signup-header {
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .signup-header .logo-container,
+  .logo-container {
+    width: 58px !important;
+    height: 58px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .signup-header .logo-container img,
+  .logo-container img {
+    max-width: 46px !important;
+  }
+
+  .signup-kicker {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+  }
+
+  .signup-header h1 {
+    font-size: 20px !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+  }
+
+  .signup-header p {
+    max-width: 100% !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+  }
+
+  .signup-form {
+    gap: 10px !important;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .form-col {
+    gap: 5px !important;
+  }
+
+  .form-col label {
+    font-size: 12.5px !important;
+  }
+
+  .form-col input,
+  .form-col select,
+  .input-group input,
+  .iti input {
+    min-height: 44px !important;
+    padding: 11px 13px !important;
+    font-size: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .input-group {
+    min-height: 44px !important;
+    border-radius: 14px !important;
+  }
+
+  .input-group input {
+    padding-right: 44px !important;
+  }
+
+  .toggle-password {
+    width: 40px !important;
+    height: 40px !important;
+    right: 4px !important;
+    font-size: 13px !important;
+  }
+
+  .form-actions {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-top: 4px !important;
+  }
+
+  .form-actions button,
+  .btn-cancel,
+  .btn-submit,
+  #btn-submit {
+    min-height: 44px !important;
+    padding: 11px 16px !important;
+    font-size: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .signin-text {
+    margin-top: 8px !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .signup-form-panel {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .signup-header h1 {
+    font-size: 19px !important;
+  }
+
+  .signup-header p {
+    font-size: 12.5px !important;
+  }
+
+  .signup-header .logo-container,
+  .logo-container {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .signup-header .logo-container img,
+  .logo-container img {
+    max-width: 42px !important;
+  }
+}

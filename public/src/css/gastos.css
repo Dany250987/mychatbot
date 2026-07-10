@@ -2158,4 +2158,450 @@ tr.search-result-highlight {
   }
 } 
 
+/* PASO 4 - Ajuste exclusivo app móvil: cards compactas de gastos */
+@media (max-width: 620px) {
+  .danybot-mobile-app .expenses-list tbody {
+    gap: 9px !important;
+  }
+
+  .danybot-mobile-app .expenses-list tbody tr {
+    gap: 7px !important;
+    padding: 10px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 6px 16px rgba(60, 0, 0, 0.035) !important;
+    border-color: rgba(203, 76, 70, 0.10) !important;
+  }
+
+  .danybot-mobile-app .expenses-list td {
+    grid-template-columns: 72px minmax(0, 1fr) !important;
+    gap: 7px !important;
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    min-height: auto !important;
+  }
+
+  .danybot-mobile-app .expenses-list td::before {
+    font-size: 9.5px !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.2px;
+  }
+
+  .danybot-mobile-app .date-pill,
+  .danybot-mobile-app .category-badge,
+  .danybot-mobile-app .source-badge {
+    padding: 5px 8px !important;
+    border-radius: 999px !important;
+    font-size: 10.5px !important;
+    line-height: 1.1 !important;
+    font-weight: 800 !important;
+    gap: 4px !important;
+  }
+
+  .danybot-mobile-app .expense-description {
+    font-size: 12.2px !important;
+    line-height: 1.3 !important;
+    color: #6f3f3f !important;
+  }
+
+  .danybot-mobile-app .amount-cell {
+    font-size: 14px !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.3px;
+    white-space: nowrap !important;
+  }
+
+  .danybot-mobile-app .action-buttons {
+    display: flex !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .danybot-mobile-app .edit-btn,
+  .danybot-mobile-app .delete-btn,
+  .danybot-mobile-app .evidence-view-button {
+    min-height: 30px !important;
+    padding: 5px 8px !important;
+    border-radius: 10px !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    gap: 4px !important;
+  }
+
+  .danybot-mobile-app .edit-btn i,
+  .danybot-mobile-app .delete-btn i,
+  .danybot-mobile-app .evidence-view-button i {
+    font-size: 10.5px !important;
+  }
+
+  .danybot-mobile-app .no-evidence-label {
+    padding: 5px 8px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+    opacity: 0.75;
+  }
+}
+
+@media (max-width: 390px) {
+  .danybot-mobile-app .expenses-list tbody tr {
+    padding: 9px !important;
+    gap: 6px !important;
+  }
+
+  .danybot-mobile-app .expenses-list td {
+    grid-template-columns: 66px minmax(0, 1fr) !important;
+    gap: 6px !important;
+    font-size: 11.5px !important;
+  }
+
+  .danybot-mobile-app .expenses-list td::before {
+    font-size: 9px !important;
+  }
+
+  .danybot-mobile-app .date-pill,
+  .danybot-mobile-app .category-badge,
+  .danybot-mobile-app .source-badge {
+    font-size: 10px !important;
+    padding: 4px 7px !important;
+  }
+
+  .danybot-mobile-app .amount-cell {
+    font-size: 13.5px !important;
+  }
+
+  .danybot-mobile-app .edit-btn,
+  .danybot-mobile-app .delete-btn,
+  .danybot-mobile-app .evidence-view-button {
+    min-height: 29px !important;
+    font-size: 10px !important;
+    padding: 5px 7px !important;
+  }
+}
+
+/* PASO 4 - Ajuste exclusivo app móvil: cards compactas de gastos */
+@media (max-width: 620px) {
+  .danybot-mobile-app .expenses-list tbody {
+    gap: 9px !important;
+  }
+
+  .danybot-mobile-app .expenses-list tbody tr {
+    gap: 7px !important;
+    padding: 10px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 6px 16px rgba(60, 0, 0, 0.035) !important;
+    border-color: rgba(203, 76, 70, 0.10) !important;
+  }
+
+  .danybot-mobile-app .expenses-list td {
+    grid-template-columns: 72px minmax(0, 1fr) !important;
+    gap: 7px !important;
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    min-height: auto !important;
+  }
+
+  .danybot-mobile-app .expenses-list td::before {
+    font-size: 9.5px !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.2px;
+  }
+
+  .danybot-mobile-app .date-pill,
+  .danybot-mobile-app .category-badge,
+  .danybot-mobile-app .source-badge {
+    padding: 5px 8px !important;
+    border-radius: 999px !important;
+    font-size: 10.5px !important;
+    line-height: 1.1 !important;
+    font-weight: 800 !important;
+    gap: 4px !important;
+  }
+
+  .danybot-mobile-app .expense-description {
+    font-size: 12.2px !important;
+    line-height: 1.3 !important;
+    color: #6f3f3f !important;
+  }
+
+  .danybot-mobile-app .amount-cell {
+    font-size: 14px !important;
+    line-height: 1.1 !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.3px;
+    white-space: nowrap !important;
+  }
+
+  .danybot-mobile-app .action-buttons {
+    display: flex !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .danybot-mobile-app .edit-btn,
+  .danybot-mobile-app .delete-btn,
+  .danybot-mobile-app .evidence-view-button {
+    min-height: 30px !important;
+    padding: 5px 8px !important;
+    border-radius: 10px !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    gap: 4px !important;
+  }
+
+  .danybot-mobile-app .edit-btn i,
+  .danybot-mobile-app .delete-btn i,
+  .danybot-mobile-app .evidence-view-button i {
+    font-size: 10.5px !important;
+  }
+
+  .danybot-mobile-app .no-evidence-label {
+    padding: 5px 8px !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+    opacity: 0.75;
+  }
+}
+
+@media (max-width: 390px) {
+  .danybot-mobile-app .expenses-list tbody tr {
+    padding: 9px !important;
+    gap: 6px !important;
+  }
+
+  .danybot-mobile-app .expenses-list td {
+    grid-template-columns: 66px minmax(0, 1fr) !important;
+    gap: 6px !important;
+    font-size: 11.5px !important;
+  }
+
+  .danybot-mobile-app .expenses-list td::before {
+    font-size: 9px !important;
+  }
+
+  .danybot-mobile-app .date-pill,
+  .danybot-mobile-app .category-badge,
+  .danybot-mobile-app .source-badge {
+    font-size: 10px !important;
+    padding: 4px 7px !important;
+  }
+
+  .danybot-mobile-app .amount-cell {
+    font-size: 13.5px !important;
+  }
+
+  .danybot-mobile-app .edit-btn,
+  .danybot-mobile-app .delete-btn,
+  .danybot-mobile-app .evidence-view-button {
+    min-height: 29px !important;
+    font-size: 10px !important;
+    padding: 5px 7px !important;
+  }
+}
+
+/* =========================================
+   GASTOS - AJUSTE MÓVIL REAL PARA LA APP
+   Compacta cards y alinea acciones
+========================================= */
+@media (max-width: 768px) {
+  .danybot-mobile-app .expenses-list {
+    overflow: visible;
+  }
+
+  .danybot-mobile-app .expenses-list table {
+    width: 100%;
+    min-width: 0;
+    border-spacing: 0;
+  }
+
+  .danybot-mobile-app .expenses-list thead {
+    display: none;
+  }
+
+  .danybot-mobile-app .expenses-list tbody {
+    display: grid;
+    gap: 14px;
+  }
+
+  .danybot-mobile-app .expenses-list tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "fecha categoria"
+      "descripcion descripcion"
+      "valor origen"
+      "acciones acciones";
+    gap: 12px 14px;
+    padding: 16px;
+    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid rgba(150, 0, 24, 0.10);
+    box-shadow: 0 8px 22px rgba(60, 0, 0, 0.06);
+  }
+
+  .danybot-mobile-app .expenses-list tbody tr:hover {
+    transform: none;
+    box-shadow: 0 8px 22px rgba(60, 0, 0, 0.06);
+  }
+
+  .danybot-mobile-app .expenses-list td {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    text-align: left;
+  }
+
+  .danybot-mobile-app .expenses-list td::before {
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(1) {
+    grid-area: fecha;
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(2) {
+    grid-area: categoria;
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(3) {
+    grid-area: descripcion;
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(4) {
+    grid-area: valor;
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(5) {
+    grid-area: origen;
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(6) {
+    grid-area: acciones;
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(1)::before {
+    content: "Fecha";
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(2)::before {
+    content: "Categoría";
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(3)::before {
+    content: "Descripción";
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(4)::before {
+    content: "Valor";
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(5)::before {
+    content: "Origen";
+  }
+
+  .danybot-mobile-app .expenses-list td:nth-child(6)::before {
+    content: "Acciones";
+  }
+
+  .danybot-mobile-app .date-pill,
+  .danybot-mobile-app .category-badge,
+  .danybot-mobile-app .source-badge,
+  .danybot-mobile-app .no-evidence-label,
+  .danybot-mobile-app .evidence-view-button {
+    width: auto;
+    max-width: 100%;
+    align-self: flex-start;
+  }
+
+  .danybot-mobile-app .date-pill,
+  .danybot-mobile-app .category-badge,
+  .danybot-mobile-app .source-badge {
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .expense-description {
+    font-size: 15px;
+    line-height: 1.35;
+    color: #5b2c2c;
+    word-break: break-word;
+  }
+
+  .danybot-mobile-app .amount-cell {
+    font-size: 1.15rem;
+    line-height: 1.1;
+    font-weight: 900;
+    color: #111827;
+  }
+
+  .danybot-mobile-app .no-evidence-label,
+  .danybot-mobile-app .evidence-view-button {
+    min-height: 40px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    justify-content: center;
+  }
+
+  .danybot-mobile-app .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  .danybot-mobile-app .action-buttons button,
+  .danybot-mobile-app .edit-btn,
+  .danybot-mobile-app .delete-btn {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 800;
+    justify-content: center;
+  }
+
+  .danybot-mobile-app .edit-btn i,
+  .danybot-mobile-app .delete-btn i {
+    font-size: 14px;
+  }
+}
+
+/* Corrección app móvil: evitar recorte en lista de gastos abierta */
+@media (max-width: 768px) {
+  .danybot-mobile-app #expensesListContent:not(.is-collapsed) {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .danybot-mobile-app .expenses-list:not(:has(.collapsible-content.is-collapsed)) {
+    overflow: visible !important;
+  }
+
+  .danybot-mobile-app .expenses-list table,
+  .danybot-mobile-app .expenses-list tbody {
+    overflow: visible !important;
+  }
+}
 

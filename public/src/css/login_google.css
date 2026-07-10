@@ -910,3 +910,157 @@ button[type="submit"]:hover {
     font-size: 0.8rem;
   }
 }
+
+/* ======================================================
+   AJUSTE FINAL MÓVIL - LOGIN
+   Escala compacta app móvil
+====================================================== */
+@media (max-width: 768px) {
+  html,
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  body {
+    padding: 0 !important;
+    align-items: flex-start !important;
+  }
+
+  .login-background-decoration {
+    display: none !important;
+  }
+
+  .login-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100dvh !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .login-visual-panel {
+    display: none !important;
+  }
+
+  .login-form-panel {
+    width: 100% !important;
+    min-height: 100dvh !important;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 18px calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
+  }
+
+  .card-header {
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .logo-container {
+    width: 58px !important;
+    height: 58px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .logo-container img {
+    max-width: 46px !important;
+  }
+
+  .login-kicker {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+  }
+
+  .card-header h1 {
+    font-size: 20px !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+  }
+
+  .card-header p {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+  }
+
+  .native-google-login-button {
+    min-height: 42px !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    border-radius: 14px !important;
+  }
+
+  .login-divider {
+    margin: 8px 0 !important;
+  }
+
+  .login-divider span {
+    font-size: 12px !important;
+  }
+
+  .form {
+    gap: 12px !important;
+  }
+
+  .form-fields {
+    gap: 6px !important;
+  }
+
+  .form-fields label {
+    font-size: 12.5px !important;
+  }
+
+  .form-fields input,
+  input[type="email"],
+  input[type="password"] {
+    min-height: 44px !important;
+    padding: 11px 13px !important;
+    font-size: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .form button[type="submit"],
+  button[type="submit"] {
+    min-height: 44px !important;
+    padding: 11px 16px !important;
+    font-size: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .forgot-password-text,
+  .signup-text {
+    margin-top: 8px !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+  }
+
+  .forgot-password-button {
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .login-form-panel {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .card-header h1 {
+    font-size: 19px !important;
+  }
+
+  .card-header p {
+    font-size: 12.5px !important;
+  }
+
+  .logo-container {
+    width: 52px !important;
+    height: 52px !important;
+  }
+
+  .logo-container img {
+    max-width: 42px !important;
+  }
+}

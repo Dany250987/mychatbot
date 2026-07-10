@@ -1189,7 +1189,25 @@ async function handleManualReminderSubmit(event) {
 
     event.target.reset();
 
-    loadReminders();
+  if (typeof showSection === "function") {
+    window.location.hash = "recordatorios";
+    showSection("recordatorios");
+  } else {
+    await loadReminders();
+  }
+
+  setTimeout(() => {
+    const remindersList = document.getElementById("remindersList");
+
+    if (remindersList) {
+      const y = remindersList.getBoundingClientRect().top + window.scrollY - 90;
+
+      window.scrollTo({
+        top: y,
+        behavior: "smooth"
+      });
+    }
+  }, 700);
 
   } catch (error) {
     console.error("Error al guardar recordatorio manual:", error);

@@ -3536,3 +3536,1184 @@ body {
     justify-content: center;
   }
 }
+
+/* Ajuste visual exclusivo para app móvil - Recordatorios compacto */
+@media (max-width: 620px) {
+  .danybot-mobile-app .reminders-list-panel {
+    padding: 10px;
+    border-radius: 18px;
+    border-color: rgba(203, 76, 70, 0.08);
+    box-shadow: 0 8px 22px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .reminders-list-header h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .danybot-mobile-app .reminders-list {
+    gap: 10px;
+  }
+
+  .danybot-mobile-app .reminder-timeline-card {
+    padding: 12px 12px 13px 16px;
+    border-radius: 18px;
+    gap: 9px;
+    border-color: rgba(203, 76, 70, 0.08);
+    box-shadow: 0 7px 18px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .reminder-timeline-card::before {
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+  }
+
+  .danybot-mobile-app .reminder-date-badge {
+    width: 46px;
+    height: 50px;
+    border-radius: 15px;
+  }
+
+  .danybot-mobile-app .reminder-date-badge strong {
+    font-size: 18px;
+  }
+
+  .danybot-mobile-app .reminder-date-badge span {
+    font-size: 9px;
+    margin-top: 2px;
+  }
+
+  .danybot-mobile-app .reminder-type-label {
+    padding: 5px 8px;
+    font-size: 10.5px;
+    margin-bottom: 7px;
+    gap: 5px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .reminder-content h3 {
+    font-size: 16px;
+    line-height: 1.22;
+    letter-spacing: -0.2px;
+  }
+
+  .danybot-mobile-app .reminder-content p {
+    margin-top: 7px;
+    font-size: 12.8px;
+    line-height: 1.38;
+  }
+
+  .danybot-mobile-app .reminder-status-pill {
+    padding: 5px 8px;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .reminder-meta {
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .danybot-mobile-app .reminder-meta span,
+  .danybot-mobile-app .reminder-meta .repeat-type-pill {
+    padding: 6px 8px;
+    font-size: 10.5px;
+    gap: 5px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .reminder-actions {
+    grid-column: auto;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  .danybot-mobile-app .reminder-actions button {
+    width: auto;
+    flex: 1 1 0;
+    min-height: 34px;
+    padding: 6px 7px;
+    border-radius: 11px;
+    font-size: 11px;
+    font-weight: 800;
+    gap: 5px;
+    justify-content: center;
+  }
+
+  .danybot-mobile-app .reminder-actions button i {
+    font-size: 11px;
+  }
+
+  .danybot-mobile-app .complete-reminder-button {
+    min-height: 34px;
+  }
+}
+
+@media (max-width: 390px) {
+  .danybot-mobile-app .reminder-timeline-card {
+    padding: 11px 10px 12px 14px;
+  }
+
+  .danybot-mobile-app .reminder-content h3 {
+    font-size: 15.5px;
+  }
+
+  .danybot-mobile-app .reminder-content p {
+    font-size: 12.3px;
+  }
+
+  .danybot-mobile-app .reminder-date-badge {
+    width: 42px;
+    height: 48px;
+  }
+
+  .danybot-mobile-app .reminder-actions button {
+    min-height: 32px;
+    padding: 5px 6px;
+    font-size: 10.5px;
+  }
+}
+
+/* Ajuste exclusivo app móvil - Filtros de recordatorios compactos */
+@media (max-width: 620px) {
+  .danybot-mobile-app .reminders-list-header {
+    margin-bottom: 8px;
+  }
+
+  .danybot-mobile-app .reminders-list-header h3 {
+    font-size: 17px;
+    line-height: 1.2;
+  }
+
+  .danybot-mobile-app .reminder-filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0 0 12px;
+  }
+
+  .danybot-mobile-app .reminder-filter-button {
+    width: 100%;
+    min-height: 34px;
+    padding: 7px 6px;
+    border-radius: 999px;
+    font-size: 10.8px;
+    font-weight: 800;
+    box-shadow: none;
+  }
+
+  .danybot-mobile-app .reminder-filter-button.active {
+    box-shadow: 0 6px 14px rgba(150, 0, 24, 0.14);
+  }
+}
+
+@media (max-width: 390px) {
+  .danybot-mobile-app .reminder-filter-button {
+    min-height: 32px;
+    font-size: 10.2px;
+    padding: 6px 4px;
+  }
+}
+
+/* Ajuste exclusivo app móvil - Secciones superiores de recordatorios */
+@media (max-width: 620px) {
+  .danybot-mobile-app .voice-reminders-section {
+    gap: 14px;
+  }
+
+  .danybot-mobile-app .voice-reminders-header {
+    padding: 0;
+  }
+
+  .danybot-mobile-app .voice-reminders-header h2 {
+    margin: 4px 0 6px;
+    font-size: 19px;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+  }
+
+  .danybot-mobile-app .voice-reminders-header p {
+    font-size: 13px;
+    line-height: 1.42;
+    max-width: 100%;
+  }
+
+  .danybot-mobile-app .voice-reminder-panel {
+    display: grid;
+    grid-template-columns: 58px 1fr;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
+    align-items: center;
+    box-shadow: 0 7px 18px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .voice-reminder-button {
+    width: 54px;
+    height: 54px;
+    box-shadow: 0 10px 20px rgba(150, 0, 24, 0.18);
+  }
+
+  .danybot-mobile-app .voice-reminder-button i {
+    font-size: 22px;
+  }
+
+  .danybot-mobile-app .voice-reminder-info h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    line-height: 1.18;
+    letter-spacing: -0.2px;
+  }
+
+  .danybot-mobile-app .voice-reminder-info p {
+    font-size: 12.8px;
+    line-height: 1.35;
+  }
+
+  .danybot-mobile-app .manual-reminder-panel {
+    padding: 14px;
+    border-radius: 18px;
+    box-shadow: 0 7px 18px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .manual-reminder-header {
+    margin-bottom: 12px;
+  }
+
+  .danybot-mobile-app .manual-reminder-header h3 {
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+  }
+
+  .danybot-mobile-app .manual-reminder-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .danybot-mobile-app .manual-reminder-field {
+    gap: 6px;
+  }
+
+  .danybot-mobile-app .manual-reminder-field label {
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .manual-reminder-field input,
+  .danybot-mobile-app .manual-reminder-field select {
+    min-height: 42px;
+    padding: 9px 12px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .danybot-mobile-app .manual-reminder-submit {
+    min-height: 42px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 10px 22px rgba(150, 0, 24, 0.16);
+  }
+
+  .danybot-mobile-app .manual-reminder-submit i {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 390px) {
+  .danybot-mobile-app .voice-reminder-panel {
+    grid-template-columns: 52px 1fr;
+    padding: 12px;
+  }
+
+  .danybot-mobile-app .voice-reminder-button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .danybot-mobile-app .voice-reminder-button i {
+    font-size: 20px;
+  }
+
+  .danybot-mobile-app .voice-reminder-info h3 {
+    font-size: 15px;
+  }
+
+  .danybot-mobile-app .voice-reminder-info p {
+    font-size: 12.2px;
+  }
+
+  .danybot-mobile-app .manual-reminder-panel {
+    padding: 12px;
+  }
+
+  .danybot-mobile-app .manual-reminder-header h3 {
+    font-size: 17px;
+  }
+
+  .danybot-mobile-app .manual-reminder-field input,
+  .danybot-mobile-app .manual-reminder-field select {
+    min-height: 40px;
+    font-size: 12.5px;
+  }
+
+  .danybot-mobile-app .manual-reminder-submit {
+    min-height: 40px;
+    font-size: 12.5px;
+  }
+}
+
+/* Ajuste exclusivo app móvil - Dashboard general, tareas, calendario, búsqueda y cuenta */
+@media (max-width: 620px) {
+  /* Inicio / bienvenida */
+  .danybot-mobile-app .welcome-panel {
+    padding: 14px;
+    border-radius: 18px;
+    gap: 12px;
+    box-shadow: 0 7px 18px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .welcome-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .welcome-text h2 {
+    font-size: 19px;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+  }
+
+  .danybot-mobile-app .welcome-text p {
+    font-size: 12.8px;
+    line-height: 1.38;
+  }
+
+  /* Tarjetas resumen del inicio */
+  .danybot-mobile-app .cards-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .danybot-mobile-app .dashboard-card {
+    min-height: auto;
+    padding: 12px;
+    border-radius: 17px;
+    gap: 9px;
+    box-shadow: 0 7px 18px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .card-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 13px;
+  }
+
+  .danybot-mobile-app .card-icon i {
+    font-size: 16px;
+  }
+
+  .danybot-mobile-app .dashboard-card .card-info h3 {
+    font-size: 14px;
+    line-height: 1.15;
+  }
+
+  .danybot-mobile-app .dashboard-card .card-info p {
+    font-size: 11.5px;
+    line-height: 1.3;
+  }
+
+  /* Secciones generales */
+  .danybot-mobile-app .tasks-section,
+  .danybot-mobile-app .calendar-section,
+  .danybot-mobile-app .global-search-panel,
+  .danybot-mobile-app .account-section {
+    gap: 14px;
+  }
+
+  .danybot-mobile-app .tasks-header,
+  .danybot-mobile-app .calendar-header,
+  .danybot-mobile-app .global-search-header {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .danybot-mobile-app .tasks-header h2,
+  .danybot-mobile-app .calendar-header h2,
+  .danybot-mobile-app .global-search-header h2 {
+    font-size: 19px;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+  }
+
+  .danybot-mobile-app .tasks-header p,
+  .danybot-mobile-app .calendar-header p,
+  .danybot-mobile-app .global-search-header p {
+    font-size: 12.8px;
+    line-height: 1.38;
+  }
+
+  /* Tareas */
+  .danybot-mobile-app .task-main-button,
+  .danybot-mobile-app .task-save-button {
+    min-height: 40px;
+    padding: 9px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .tasks-summary {
+    gap: 8px;
+  }
+
+  .danybot-mobile-app .task-summary-card {
+    padding: 10px;
+    border-radius: 15px;
+  }
+
+  .danybot-mobile-app .task-summary-card span {
+    font-size: 11px;
+  }
+
+  .danybot-mobile-app .task-summary-card strong {
+    font-size: 17px;
+  }
+
+  .danybot-mobile-app .task-card {
+    padding: 12px;
+    border-radius: 17px;
+    gap: 10px;
+    box-shadow: 0 7px 18px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .task-card-main h3 {
+    font-size: 16px;
+    line-height: 1.22;
+  }
+
+  .danybot-mobile-app .task-card-main p {
+    font-size: 12.8px;
+    line-height: 1.38;
+  }
+
+  .danybot-mobile-app .task-card-footer {
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .danybot-mobile-app .task-card-footer span,
+  .danybot-mobile-app .task-priority,
+  .danybot-mobile-app .task-status {
+    padding: 6px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .task-card-actions {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .danybot-mobile-app .task-complete-button,
+  .danybot-mobile-app .task-delete-button,
+  .danybot-mobile-app .task-reopen-button,
+  .danybot-mobile-app .task-edit-button {
+    width: auto;
+    flex: 1 1 0;
+    min-height: 34px;
+    padding: 6px 7px;
+    border-radius: 11px;
+    font-size: 11px;
+    font-weight: 800;
+    justify-content: center;
+  }
+
+  /* Calendario */
+  .danybot-mobile-app .calendar-panel,
+  .danybot-mobile-app .calendar-events-panel {
+    padding: 12px;
+    border-radius: 18px;
+    box-shadow: 0 7px 18px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .calendar-toolbar {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .danybot-mobile-app .calendar-toolbar h3 {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .danybot-mobile-app .calendar-nav-button,
+  .danybot-mobile-app .calendar-today-button {
+    min-height: 32px;
+    padding: 6px 9px;
+    border-radius: 11px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .calendar-weekdays span {
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .calendar-day {
+    min-height: 42px;
+    padding: 5px;
+    border-radius: 12px;
+  }
+
+  .danybot-mobile-app .calendar-day-number {
+    font-size: 11px;
+  }
+
+  .danybot-mobile-app .calendar-day-indicators strong {
+    font-size: 9.5px;
+  }
+
+  .danybot-mobile-app .calendar-events-heading h3 {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  .danybot-mobile-app .calendar-events-heading p {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .danybot-mobile-app .calendar-event-card {
+    padding: 10px 10px 10px 14px;
+    border-radius: 16px;
+    gap: 10px;
+  }
+
+  .danybot-mobile-app .calendar-event-date {
+    width: 42px;
+    height: 46px;
+    border-radius: 13px;
+  }
+
+  .danybot-mobile-app .calendar-event-date strong {
+    font-size: 16px;
+  }
+
+  .danybot-mobile-app .calendar-event-date span {
+    font-size: 9px;
+  }
+
+  .danybot-mobile-app .calendar-event-info h4 {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .danybot-mobile-app .calendar-event-info p,
+  .danybot-mobile-app .calendar-event-meta span,
+  .danybot-mobile-app .calendar-event-category {
+    font-size: 11px;
+    line-height: 1.32;
+  }
+
+  /* Buscador global */
+  .danybot-mobile-app .global-search-panel {
+    padding: 14px;
+    border-radius: 18px;
+    box-shadow: 0 7px 18px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .global-search-box {
+    min-height: 42px;
+    padding: 6px 8px;
+    border-radius: 14px;
+    gap: 6px;
+  }
+
+  .danybot-mobile-app .global-search-box input {
+    font-size: 12.8px;
+  }
+
+  .danybot-mobile-app .global-search-box button {
+    min-height: 32px;
+    padding: 6px 9px;
+    border-radius: 11px;
+    font-size: 11px;
+  }
+
+  .danybot-mobile-app .global-search-result-card {
+    padding: 10px;
+    border-radius: 15px;
+    gap: 9px;
+  }
+
+  .danybot-mobile-app .global-search-result-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+
+  .danybot-mobile-app .global-search-result-info span,
+  .danybot-mobile-app .global-search-result-info small {
+    font-size: 10.5px;
+  }
+
+  .danybot-mobile-app .global-search-result-info strong {
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .danybot-mobile-app .global-search-result-info p {
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+
+  /* Cuenta */
+  .danybot-mobile-app .account-card,
+  .danybot-mobile-app .danger-zone-card {
+    padding: 14px;
+    border-radius: 18px;
+    box-shadow: 0 7px 18px rgba(60, 0, 0, 0.035);
+  }
+
+  .danybot-mobile-app .account-header {
+    gap: 10px;
+  }
+
+  .danybot-mobile-app .account-avatar,
+  .danybot-mobile-app .account-avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+
+  .danybot-mobile-app .account-header h2,
+  .danybot-mobile-app .danger-zone-card h2 {
+    font-size: 17px;
+    line-height: 1.2;
+  }
+
+  .danybot-mobile-app .account-header p,
+  .danybot-mobile-app .danger-zone-card p {
+    font-size: 12.5px;
+    line-height: 1.35;
+  }
+
+  .danybot-mobile-app .account-info-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .danybot-mobile-app .account-info-grid div {
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .danybot-mobile-app .account-info-grid span {
+    font-size: 10.5px;
+  }
+
+  .danybot-mobile-app .account-info-grid strong {
+    font-size: 12.5px;
+  }
+
+  .danybot-mobile-app .delete-account-button {
+    min-height: 40px;
+    padding: 9px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+}
+
+@media (max-width: 390px) {
+  .danybot-mobile-app .welcome-text h2,
+  .danybot-mobile-app .tasks-header h2,
+  .danybot-mobile-app .calendar-header h2,
+  .danybot-mobile-app .global-search-header h2 {
+    font-size: 18px;
+  }
+
+  .danybot-mobile-app .dashboard-card {
+    padding: 10px;
+  }
+
+  .danybot-mobile-app .card-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .danybot-mobile-app .task-card-main h3 {
+    font-size: 15.5px;
+  }
+
+  .danybot-mobile-app .task-card-main p {
+    font-size: 12.3px;
+  }
+
+  .danybot-mobile-app .calendar-day {
+    min-height: 38px;
+  }
+
+  .danybot-mobile-app .calendar-event-info h4 {
+    font-size: 13.5px;
+  }
+
+  .danybot-mobile-app .global-search-panel,
+  .danybot-mobile-app .account-card,
+  .danybot-mobile-app .danger-zone-card {
+    padding: 12px;
+  }
+}
+
+/* PASO 1 - Ajuste exclusivo app móvil: Inicio / resumen */
+@media (max-width: 620px) {
+  .danybot-mobile-app .cards-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+    align-items: stretch;
+  }
+
+  .danybot-mobile-app .dashboard-card {
+    min-height: 82px !important;
+    padding: 10px !important;
+    border-radius: 16px !important;
+    gap: 8px !important;
+    align-items: center;
+    box-shadow: 0 6px 16px rgba(60, 0, 0, 0.035) !important;
+  }
+
+  .danybot-mobile-app .card-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 11px !important;
+    flex: 0 0 32px;
+  }
+
+  .danybot-mobile-app .card-icon i {
+    font-size: 14px !important;
+  }
+
+  .danybot-mobile-app .dashboard-card .card-info {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .danybot-mobile-app .dashboard-card .card-info h3 {
+    margin: 0 0 4px !important;
+    font-size: 11.5px !important;
+    line-height: 1.15 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.1px;
+    color: #8a4b4b;
+  }
+
+  .danybot-mobile-app .dashboard-card .card-info p {
+    margin: 0 !important;
+    font-size: 15.5px !important;
+    line-height: 1.08 !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.45px;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  .danybot-mobile-app #monthlyExpensesAmount,
+  .danybot-mobile-app #monthlyIncomeAmount,
+  .danybot-mobile-app #monthlySavingsAmount {
+    font-size: 16px !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.7px;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: clip;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  .danybot-mobile-app .welcome-panel {
+    padding: 14px !important;
+    border-radius: 18px !important;
+    gap: 10px !important;
+    box-shadow: 0 6px 16px rgba(60, 0, 0, 0.035) !important;
+  }
+
+  .danybot-mobile-app .welcome-badge {
+    padding: 5px 9px !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .danybot-mobile-app .welcome-text h2 {
+    margin: 0 0 6px !important;
+    font-size: 18px !important;
+    line-height: 1.18 !important;
+    letter-spacing: -0.35px;
+  }
+
+  .danybot-mobile-app .welcome-text p {
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+  }
+
+  .danybot-mobile-app .quick-actions {
+    gap: 7px !important;
+    margin-top: 12px !important;
+  }
+
+  .danybot-mobile-app .quick-action {
+    min-height: 34px !important;
+    padding: 7px 10px !important;
+    border-radius: 12px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    gap: 6px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .danybot-mobile-app .dashboard-card {
+    min-height: 78px !important;
+    padding: 9px !important;
+  }
+
+  .danybot-mobile-app .card-icon {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+  }
+
+  .danybot-mobile-app .card-icon i {
+    font-size: 13px !important;
+  }
+
+  .danybot-mobile-app .dashboard-card .card-info h3 {
+    font-size: 11px !important;
+  }
+
+  .danybot-mobile-app .dashboard-card .card-info p,
+  .danybot-mobile-app #monthlyExpensesAmount,
+  .danybot-mobile-app #monthlyIncomeAmount,
+  .danybot-mobile-app #monthlySavingsAmount {
+    font-size: 15px !important;
+  }
+
+  .danybot-mobile-app .welcome-text h2 {
+    font-size: 17px !important;
+  }
+
+  .danybot-mobile-app .welcome-text p {
+    font-size: 12px !important;
+  }
+}
+
+/* PASO 2 - Ajuste exclusivo app móvil: formulario y filtros de tareas */
+@media (max-width: 620px) {
+  .danybot-mobile-app .tasks-section {
+    gap: 12px !important;
+  }
+
+  .danybot-mobile-app .tasks-header {
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .danybot-mobile-app .tasks-header h2 {
+    margin: 4px 0 5px !important;
+    font-size: 18px !important;
+    line-height: 1.18 !important;
+    letter-spacing: -0.3px;
+  }
+
+  .danybot-mobile-app .tasks-header p {
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+  }
+
+  .danybot-mobile-app .tasks-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .danybot-mobile-app .task-summary-card {
+    padding: 9px !important;
+    border-radius: 14px !important;
+  }
+
+  .danybot-mobile-app .task-summary-card span {
+    font-size: 10.5px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .danybot-mobile-app .task-summary-card strong {
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+
+  .danybot-mobile-app .task-form {
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+    padding: 12px !important;
+    border-radius: 17px !important;
+    box-shadow: 0 6px 16px rgba(60, 0, 0, 0.035) !important;
+  }
+
+  .danybot-mobile-app .form-group {
+    gap: 5px !important;
+  }
+
+  .danybot-mobile-app .form-group label {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    font-weight: 800 !important;
+  }
+
+  .danybot-mobile-app .form-group input,
+  .danybot-mobile-app .form-group select {
+    min-height: 40px !important;
+    padding: 8px 11px !important;
+    border-radius: 13px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+  }
+
+  .danybot-mobile-app .form-group textarea {
+    min-height: 76px !important;
+    padding: 9px 11px !important;
+    border-radius: 13px !important;
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+  }
+
+  .danybot-mobile-app .task-form-actions {
+    justify-content: stretch !important;
+    margin-top: 4px !important;
+  }
+
+  .danybot-mobile-app .task-save-button {
+    width: 100% !important;
+    min-height: 40px !important;
+    justify-content: center !important;
+    padding: 9px 12px !important;
+    border-radius: 999px !important;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    gap: 7px !important;
+    box-shadow: 0 8px 18px rgba(150, 0, 24, 0.16) !important;
+  }
+
+  .danybot-mobile-app .task-save-button i {
+    font-size: 13px !important;
+  }
+
+  .danybot-mobile-app .task-filters {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    margin-top: 10px !important;
+  }
+
+  .danybot-mobile-app .task-filter-button {
+    width: 100% !important;
+    min-height: 34px !important;
+    padding: 6px 8px !important;
+    border-radius: 999px !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+  }
+
+  .danybot-mobile-app .task-filter-button.active {
+    box-shadow: 0 6px 14px rgba(150, 0, 24, 0.14) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .danybot-mobile-app .task-form {
+    padding: 11px !important;
+    gap: 8px !important;
+  }
+
+  .danybot-mobile-app .form-group label {
+    font-size: 11.5px !important;
+  }
+
+  .danybot-mobile-app .form-group input,
+  .danybot-mobile-app .form-group select {
+    min-height: 38px !important;
+    font-size: 12px !important;
+  }
+
+  .danybot-mobile-app .form-group textarea {
+    min-height: 70px !important;
+    font-size: 12px !important;
+  }
+
+  .danybot-mobile-app .task-save-button {
+    min-height: 38px !important;
+    font-size: 12px !important;
+  }
+
+  .danybot-mobile-app .task-filter-button {
+    min-height: 32px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* PASO 3 - Ajuste exclusivo app móvil: listado y tarjetas de tareas */
+@media (max-width: 620px) {
+  .danybot-mobile-app .tasks-list {
+    gap: 10px !important;
+  }
+
+  .danybot-mobile-app .task-card {
+    padding: 11px !important;
+    margin-bottom: 10px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 6px 16px rgba(60, 0, 0, 0.035) !important;
+  }
+
+  .danybot-mobile-app .task-card-main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+  }
+
+  .danybot-mobile-app .task-card-main h3 {
+    margin: 0 0 4px !important;
+    font-size: 15.5px !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.25px;
+  }
+
+  .danybot-mobile-app .task-card-main p {
+    font-size: 12.4px !important;
+    line-height: 1.35 !important;
+  }
+
+  .danybot-mobile-app .task-priority {
+    align-self: flex-start;
+    padding: 5px 8px !important;
+    border-radius: 999px !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+  }
+
+  .danybot-mobile-app .task-card-footer {
+    gap: 6px !important;
+    margin-top: 9px !important;
+    font-size: 11px !important;
+  }
+
+  .danybot-mobile-app .task-card-footer span,
+  .danybot-mobile-app .task-status {
+    padding: 5px 8px !important;
+    border-radius: 999px !important;
+    font-size: 10.5px !important;
+    line-height: 1.15 !important;
+    font-weight: 800 !important;
+    gap: 5px !important;
+  }
+
+  .danybot-mobile-app .task-card-footer span i,
+  .danybot-mobile-app .task-status i {
+    font-size: 10.5px !important;
+  }
+
+  .danybot-mobile-app .task-card-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-top: 10px !important;
+    width: 100% !important;
+  }
+
+  .danybot-mobile-app .task-complete-button,
+  .danybot-mobile-app .task-delete-button,
+  .danybot-mobile-app .task-reopen-button,
+  .danybot-mobile-app .task-edit-button {
+    width: 100% !important;
+    min-height: 32px !important;
+    padding: 5px 6px !important;
+    border-radius: 11px !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    gap: 4px !important;
+    justify-content: center !important;
+  }
+
+  .danybot-mobile-app .task-complete-button i,
+  .danybot-mobile-app .task-delete-button i,
+  .danybot-mobile-app .task-reopen-button i,
+  .danybot-mobile-app .task-edit-button i {
+    font-size: 10.5px !important;
+  }
+
+  .danybot-mobile-app .empty-tasks {
+    padding: 18px 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .danybot-mobile-app .empty-tasks i {
+    font-size: 26px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .danybot-mobile-app .empty-tasks h3 {
+    font-size: 16px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .danybot-mobile-app .empty-tasks p {
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .danybot-mobile-app .task-card {
+    padding: 10px !important;
+  }
+
+  .danybot-mobile-app .task-card-main h3 {
+    font-size: 15px !important;
+  }
+
+  .danybot-mobile-app .task-card-main p {
+    font-size: 12px !important;
+  }
+
+  .danybot-mobile-app .task-card-actions {
+    gap: 5px !important;
+  }
+
+  .danybot-mobile-app .task-complete-button,
+  .danybot-mobile-app .task-delete-button,
+  .danybot-mobile-app .task-reopen-button,
+  .danybot-mobile-app .task-edit-button {
+    min-height: 31px !important;
+    font-size: 10px !important;
+    padding: 5px !important;
+  }
+}
