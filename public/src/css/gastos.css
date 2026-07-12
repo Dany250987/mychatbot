@@ -531,8 +531,8 @@ body {
   position: relative;
   margin-top: 18px;
   margin-bottom: 22px;
-  padding: 24px 28px;
-  border-radius: 28px;
+  padding: 16px 18px;
+  border-radius: 22px;
   background: linear-gradient(135deg, #ffffff, #fff7f5);
   border: 1px solid rgba(203, 76, 70, 0.14);
   box-shadow: 0 16px 38px rgba(60, 0, 0, 0.07);
@@ -563,15 +563,15 @@ body {
 .modern-expense-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 24px;
-  row-gap: 20px;
+  column-gap: 14px;
+  row-gap: 12px;
   position: relative;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 6px;
 }
 
 .form-field.full-field,
@@ -586,13 +586,13 @@ body {
   gap: 8px;
   margin-bottom: 0;
   color: #1f2937;
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 800;
 }
 
 .form-field label i {
   color: var(--primary);
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .input-shell {
@@ -603,22 +603,22 @@ body {
 
 .input-shell > i {
   position: absolute;
-  left: 15px;
+  left: 13px;
   z-index: 1;
   color: #8b8fa7;
-  font-size: 17px;
+  font-size: 14px;
 }
 
 .input-shell input,
 .input-shell select {
   width: 100%;
-  height: 54px;
-  padding: 0 14px 0 45px;
+  height: 44px;
+  padding: 0 12px 0 38px;
   border: 1px solid #dbe0f0;
-  border-radius: 18px;
+  border-radius: 14px;
   background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
   color: var(--text);
-  font-size: 15px;
+  font-size: 14px;
   outline: none;
   transition: 0.2s ease;
 }
@@ -630,7 +630,7 @@ body {
 .input-shell input:focus,
 .input-shell select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(150, 0, 24, 0.12);
+  box-shadow: 0 0 0 3px rgba(150, 0, 24, 0.10);
 }
 
 #expenseMessage {
@@ -645,10 +645,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  padding: 16px 18px;
+  gap: 10px;
+  padding: 12px 14px;
   border: 1px solid rgba(150, 0, 24, 0.16);
-  border-radius: 20px;
+  border-radius: 16px;
   background: #fffafa;
 }
 
@@ -661,9 +661,10 @@ body {
   gap: 10px;
   border: none;
   border-radius: 999px;
-  padding: 12px 18px;
+  padding: 9px 14px;
   color: #ffffff;
   font-weight: 900;
+  font-size: 13px;
   cursor: pointer;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   box-shadow: 0 12px 25px rgba(150, 0, 24, 0.16);
@@ -682,7 +683,7 @@ body {
 .voice-text {
   margin: 0;
   color: #64748b;
-  font-size: 14px;
+  font-size: 12.5px;
   line-height: 1.5;
 }
 
@@ -706,26 +707,26 @@ body {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 12px;
-  margin-top: 6px;
+  gap: 8px;
+  margin-top: 2px;
 }
 
 .form-actions button {
-  height: 52px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
   border: none;
-  border-radius: 18px;
-  font-size: 15px;
+  border-radius: 14px;
+  font-size: 14px;
   font-weight: 900;
   cursor: pointer;
   transition: 0.25s ease;
 }
 
 #submitExpenseButton {
-  min-width: 260px;
+  min-width: 190px;
   color: #ffffff;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   box-shadow: 0 12px 24px rgba(150, 0, 24, 0.18);
@@ -737,7 +738,7 @@ body {
 }
 
 #cancelEditButton {
-  min-width: 180px;
+  min-width: 140px;
   color: var(--primary);
   background: #fff1ef;
 }
@@ -1885,7 +1886,7 @@ body {
 .evidence-field {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .evidence-label {
@@ -1899,7 +1900,7 @@ body {
 
 .evidence-label i {
   color: #960018;
-  font-size: 0.95rem;
+  font-size: 13px;
 }
 
 .custom-file-upload input[type="file"] {
@@ -1908,13 +1909,13 @@ body {
 
 .custom-file-label {
   width: 100%;
-  min-height: 64px;
+  min-height: 50px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 10px 12px;
   border: 1px solid #e7c5c0;
-  border-radius: 18px;
+  border-radius: 14px;
   background: #fffdfd;
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
@@ -1931,24 +1932,24 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 16px;
+  padding: 8px 12px;
   border-radius: 999px;
   background: linear-gradient(135deg, #960018, #cb4c46);
   color: #ffffff;
-  font-size: 0.92rem;
+  font-size: 13px;
   font-weight: 800;
-  box-shadow: 0 10px 20px rgba(150, 0, 24, 0.18);
+  box-shadow: 0 8px 16px rgba(150, 0, 24, 0.14);
 }
 
 .file-button i {
-  font-size: 0.9rem;
+  font-size: 13px;
 }
 
 .file-name {
   flex: 1;
   min-width: 0;
   color: #6b4a4a;
-  font-size: 0.95rem;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -1957,8 +1958,8 @@ body {
 
 .field-help {
   margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.35;
   color: #8a6a6a;
 }
 
@@ -1990,7 +1991,7 @@ body {
 .search-result-row.search-result-highlight {
   outline: 3px solid rgba(70, 60, 236, 0.45);
   box-shadow: 0 0 0 8px rgba(70, 60, 236, 0.12);
-  border-radius: 16px;
+  border-radius: 13px;
   animation: searchHighlightPulse 1s ease-in-out infinite alternate;
 }
 
@@ -2434,7 +2435,8 @@ tr.search-result-highlight {
     grid-template-areas:
       "fecha categoria"
       "descripcion descripcion"
-      "valor origen"
+      "valor evidencia"
+      "origen origen"
       "acciones acciones";
     gap: 12px 14px;
     padding: 16px;
@@ -2472,27 +2474,35 @@ tr.search-result-highlight {
   }
 
   .danybot-mobile-app .expenses-list td:nth-child(1) {
-    grid-area: fecha;
-  }
+      grid-area: fecha;
+    }
 
-  .danybot-mobile-app .expenses-list td:nth-child(2) {
-    grid-area: categoria;
-  }
+    .danybot-mobile-app .expenses-list td:nth-child(2) {
+      grid-area: categoria;
+    }
 
-  .danybot-mobile-app .expenses-list td:nth-child(3) {
-    grid-area: descripcion;
-  }
+    .danybot-mobile-app .expenses-list td:nth-child(3) {
+      grid-area: descripcion;
+    }
 
-  .danybot-mobile-app .expenses-list td:nth-child(4) {
-    grid-area: valor;
-  }
+    .danybot-mobile-app .expenses-list td:nth-child(4) {
+      grid-area: valor;
+    }
 
-  .danybot-mobile-app .expenses-list td:nth-child(5) {
-    grid-area: origen;
-  }
+    .danybot-mobile-app .expenses-list td:nth-child(5) {
+      grid-area: evidencia;
+    }
 
-  .danybot-mobile-app .expenses-list td:nth-child(6) {
-    grid-area: acciones;
+    .danybot-mobile-app .expenses-list td:nth-child(6) {
+      grid-area: origen;
+    }
+
+    .danybot-mobile-app .expenses-list td:nth-child(7) {
+      grid-area: acciones;
+    }
+
+  
+    content: "Fecha";
   }
 
   .danybot-mobile-app .expenses-list td:nth-child(1)::before {
@@ -2512,13 +2522,16 @@ tr.search-result-highlight {
   }
 
   .danybot-mobile-app .expenses-list td:nth-child(5)::before {
-    content: "Origen";
+    content: "Evidencia";
   }
 
   .danybot-mobile-app .expenses-list td:nth-child(6)::before {
-    content: "Acciones";
+    content: "Origen";
   }
 
+  .danybot-mobile-app .expenses-list td:nth-child(7)::before {
+    content: "Acciones";
+  }
   .danybot-mobile-app .date-pill,
   .danybot-mobile-app .category-badge,
   .danybot-mobile-app .source-badge,
@@ -2529,7 +2542,7 @@ tr.search-result-highlight {
     align-self: flex-start;
   }
 
-  .danybot-mobile-app .date-pill,
+  .danybot-mobi.danybot-mobile-app .expenses-list td:nth-child(1)::before {le-app .date-pill,
   .danybot-mobile-app .category-badge,
   .danybot-mobile-app .source-badge {
     padding: 7px 12px;
@@ -2562,23 +2575,23 @@ tr.search-result-highlight {
   }
 
   .danybot-mobile-app .action-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    width: 100%;
-    margin-top: 2px;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 2px !important;
   }
 
   .danybot-mobile-app .action-buttons button,
   .danybot-mobile-app .edit-btn,
   .danybot-mobile-app .delete-btn {
-    width: 100%;
-    min-height: 42px;
-    padding: 10px 12px;
-    border-radius: 14px;
-    font-size: 14px;
-    font-weight: 800;
-    justify-content: center;
+    width: 100% !important;
+    min-height: 40px !important;
+    padding: 9px 10px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    justify-content: center !important;
   }
 
   .danybot-mobile-app .edit-btn i,

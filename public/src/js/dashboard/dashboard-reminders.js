@@ -21,6 +21,7 @@ function getReminderAuthHeaders(includeJsonContent = false) {
 }
 
 let hasHighlightedReminderSearchResult = false;
+let pendingCreatedReminderId = null;
 
 function getReminderSearchTarget() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -291,6 +292,52 @@ function renderRemindersList() {
       highlightReminderSearchTargetElement(card);
     }
   });
+}
+
+function scrollToCreatedReminderCard(reminderId) {
+  if (!reminderId) return;
+
+  let attempts = 0;
+  const maxAttempts = 60;
+
+  function tryScroll() {
+    const card = document.querySelector(
+      `.reminder-timeline-card[data-reminder-id="${reminderId}"]`
+    );
+
+    if (card) {
+      card.classList.add("dashboard-search-highlight");
+
+      const y = card.getBoundingClientRect().top + window.scrollY - 120;
+
+      window.scrollTo({
+        top: y,
+        behavior: "smooth"
+      });
+
+      setTimeout(() => {
+        card.classList.remove("dashboard-search-highlight");
+        pendingCreatedReminderId = null;
+      }, 4000);
+
+      return;
+    }
+
+    attempts++;
+
+    if (attempts < maxAttempts) {
+      setTimeout(tryScroll, 150);
+    } else {
+      pendingCreatedReminderId = null;
+    }
+  }
+
+  setTimeout(tryScroll, 250);
+}
+
+function isPendingCreatedReminder(reminder) {
+  return pendingCreatedReminderId !== null
+    && Number(reminder.id) === Number(pendingCreatedReminderId);
 }
 
 function formatReminderDateLabel(dateValue) {
@@ -1187,27 +1234,25 @@ async function handleManualReminderSubmit(event) {
       confirmButtonColor: "#960018"
     });
 
+    const createdReminderId = data.reminder_id;
+
+    pendingCreatedReminderId = createdReminderId;
+
     event.target.reset();
 
-  if (typeof showSection === "function") {
-    window.location.hash = "recordatorios";
-    showSection("recordatorios");
-  } else {
-    await loadReminders();
-  }
-
-  setTimeout(() => {
-    const remindersList = document.getElementById("remindersList");
-
-    if (remindersList) {
-      const y = remindersList.getBoundingClientRect().top + window.scrollY - 90;
-
-      window.scrollTo({
-        top: y,
-        behavior: "smooth"
-      });
+    if (typeof currentReminderFilter !== "undefined") {
+      currentReminderFilter = "activos";
     }
-  }, 700);
+
+    if (typeof showSection === "function") {
+      window.location.hash = "recordatorios";
+      showSection("recordatorios");
+    } else {
+      await loadReminders();
+    }
+
+      scrollToCreatedReminderCard(createdReminderId);
+
 
   } catch (error) {
     console.error("Error al guardar recordatorio manual:", error);
@@ -1289,7 +1334,10 @@ function getFilteredReminders() {
   if (currentReminderFilter === "activos") {
     filteredReminders = reminders.filter((reminder) => {
       return reminder.status === "activo"
-        && shouldShowReminderOnBoard(reminder, today);
+        && (
+          shouldShowReminderOnBoard(reminder, today) ||
+          isPendingCreatedReminder(reminder)
+        );
     });
   }
 
@@ -1309,7 +1357,10 @@ function getFilteredReminders() {
   if (currentReminderFilter === "todos") {
     filteredReminders = reminders.filter((reminder) => {
       return !isReminderInTrash(reminder)
-        && shouldShowReminderOnBoard(reminder, today);
+        && (
+          shouldShowReminderOnBoard(reminder, today) ||
+          isPendingCreatedReminder(reminder)
+        );
     });
   }
 
