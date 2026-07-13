@@ -103,7 +103,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     Luego cargamos los datos.
     No usamos await aquí para no bloquear el sidebar.
   */
-  loadDashboardTasksCount();
   loadDashboardRemindersCount();
   loadDashboardFinancialSummary();
 
@@ -127,7 +126,7 @@ function updateSidebar(activePage = "dashboard") {
 function getActiveDashboardPage() {
   const hash = window.location.hash.replace("#", "");
 
-  const validSections = ["tareas", "recordatorios", "calendario", "cuenta"];
+  const validSections = ["recordatorios", "calendario", "cuenta"];
 
   if (validSections.includes(hash)) {
     return hash;
@@ -192,7 +191,7 @@ function showSection(section, selectedLink = null) {
   const sectionTitles = {
     tareas: "Tus tareas pendientes",
     motivacion: "Motivación",
-    recordatorios: "Tus recordatorios",
+    recordatorios: "Tus actividades",
     calendario: "Tu calendario",
     cuenta: "Mi cuenta",
     crecimiento: "Crecimiento personal",
@@ -216,11 +215,6 @@ function showSection(section, selectedLink = null) {
 
   if (title) {
     title.textContent = selectedTitle;
-  }
-
-  if (section === "tareas") {
-    renderTasksSection();
-    return;
   }
 
   if (section === "recordatorios") {
@@ -264,11 +258,11 @@ function setupDashboardCardNavigation() {
   const cardRoutes = [
     {
       counterId: "totalTasksCount",
-      section: "tareas"
+      section: "recordatorios"
     },
     {
       counterId: "pendingTasksCount",
-      section: "tareas"
+      section: "recordatorios"
     },
     {
       counterId: "todayEventsCount",

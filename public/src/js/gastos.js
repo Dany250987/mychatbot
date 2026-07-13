@@ -412,9 +412,24 @@ async function openExpenseEvidence(expenseId) {
         <img src="${fileUrl}" alt="Evidencia del gasto" class="expense-evidence-image">
       `;
     } else if (contentType.includes('pdf')) {
-      await openExpensePdfWithNativeViewer(blob, expenseId);
-      URL.revokeObjectURL(fileUrl);
-      return;
+      const isNativeApp =
+        window.Capacitor &&
+        typeof window.Capacitor.isNativePlatform === 'function' &&
+        window.Capacitor.isNativePlatform();
+
+      if (isNativeApp) {
+        await openExpensePdfWithNativeViewer(blob, expenseId);
+        URL.revokeObjectURL(fileUrl);
+        return;
+      }
+
+      evidencePreviewHtml = `
+        <iframe 
+          src="${fileUrl}" 
+          class="expense-evidence-pdf"
+          
+        ></iframe>
+      `;
     } else {
       evidencePreviewHtml = `
         <div class="expense-evidence-file-message">
@@ -435,11 +450,16 @@ async function openExpenseEvidence(expenseId) {
         </div>
       `,
       confirmButtonText: 'Volver',
-      confirmButtonColor: '#3c0000',
+      confirmButtonColor: '#960018',
       showCloseButton: true,
-      width: '92%',
+      width: 'min(92vw, 760px)',
+      padding: 0,
       customClass: {
-        popup: 'expense-evidence-popup'
+        popup: 'expense-evidence-popup',
+        title: 'expense-evidence-title',
+        htmlContainer: 'expense-evidence-html',
+        closeButton: 'expense-evidence-close',
+        confirmButton: 'expense-evidence-confirm'
       },
       didClose: () => {
         URL.revokeObjectURL(fileUrl);
@@ -577,10 +597,12 @@ function showExpenses(expenses) {
             </td>
         </tr>
         `;
+
+    refreshExpensesListHeight();
     return;
   }
 
-  expenses.forEach((expense) => {
+   expenses.forEach((expense) => {
     const row = document.createElement('tr');
 
     row.dataset.expenseId = expense.id;
@@ -650,6 +672,8 @@ function showExpenses(expenses) {
       highlightSearchTargetElement(row);
     }
   });
+
+  refreshExpensesListHeight();
 }
 
 
@@ -2539,6 +2563,9 @@ function setupCollapsibleSections() {
       }
 
       const isCollapsed = content.classList.toggle('is-collapsed');
+      if (targetId === 'expensesListContent') {
+        requestAnimationFrame(refreshExpensesListHeight);
+      }
 
       button.setAttribute('aria-expanded', String(!isCollapsed));
 

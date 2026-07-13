@@ -42,14 +42,9 @@ function renderSidebar(activePage = "") {
         <span>Inicio</span>
       </a>
 
-      <a href="./dashboard.html#tareas" class="sidebar-link ${activePage === "tareas" ? "active" : ""}">
-        <i class="fa-solid fa-list-check"></i>
-        <span>Tareas</span>
-      </a>
-
       <a href="./dashboard.html#recordatorios" class="sidebar-link ${activePage === "recordatorios" ? "active" : ""}">
         <i class="fa-solid fa-bell"></i>
-        <span>Recordatorios</span>
+        <span>Actividades</span>
       </a>
 
       <a href="./dashboard.html#calendario" class="sidebar-link ${activePage === "calendario" ? "active" : ""}">

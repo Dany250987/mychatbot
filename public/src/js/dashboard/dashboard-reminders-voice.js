@@ -618,6 +618,16 @@ async function saveVoiceReminder(reminderData) {
       confirmButtonColor: "#960018"
     });
 
+    const createdReminderId = data.reminder_id;
+
+    if (typeof pendingCreatedReminderId !== "undefined") {
+      pendingCreatedReminderId = createdReminderId;
+    }
+
+    if (typeof currentReminderFilter !== "undefined") {
+      currentReminderFilter = "activos";
+    }
+
     if (typeof showSection === "function") {
       window.location.hash = "recordatorios";
       showSection("recordatorios");
@@ -625,18 +635,9 @@ async function saveVoiceReminder(reminderData) {
       await loadReminders();
     }
 
-    setTimeout(() => {
-      const remindersList = document.getElementById("remindersList");
-
-      if (remindersList) {
-        const y = remindersList.getBoundingClientRect().top + window.scrollY - 90;
-
-        window.scrollTo({
-          top: y,
-          behavior: "smooth"
-        });
-      }
-    }, 700);
+    if (typeof scrollToCreatedReminderCard === "function") {
+      scrollToCreatedReminderCard(createdReminderId);
+    }
 
   } catch (error) {
     console.error("Error al guardar recordatorio:", error);

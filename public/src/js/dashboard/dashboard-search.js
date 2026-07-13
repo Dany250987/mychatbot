@@ -30,8 +30,8 @@ async function handleGlobalSearchUnauthorized(data) {
 
 function getGlobalSearchTypeLabel(type) {
   const labels = {
-    task: "Tarea",
-    reminder: "Recordatorio",
+    task: "Actividad antigua",
+    reminder: "Actividad",
     expense: "Gasto",
     monthly_income: "Ingreso mensual",
     additional_income: "Ingreso adicional"

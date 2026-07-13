@@ -70,17 +70,33 @@ function updateDashboardTasksCount() {
 // ===============================
 
 function updateDashboardRemindersCount() {
-  const activeRemindersCount = document.getElementById("activeRemindersCount");
+  const totalActivitiesCount = document.getElementById("totalTasksCount");
+  const pendingActivitiesCount = document.getElementById("pendingTasksCount");
+  const activeAlertsCount = document.getElementById("activeRemindersCount");
 
-  if (!activeRemindersCount) {
-    return;
-  }
+  const visibleActivities = reminders.filter((reminder) => {
+    return reminder.status !== "papelera" && reminder.status !== "completado";
+  });
 
-  const activeReminders = reminders.filter((reminder) => {
+  const pendingActivities = reminders.filter((reminder) => {
     return reminder.status === "activo";
   });
 
-  activeRemindersCount.textContent = activeReminders.length;
+  const activeAlerts = reminders.filter((reminder) => {
+    return reminder.status === "activo" && reminder.reminder_time;
+  });
+
+  if (totalActivitiesCount) {
+    totalActivitiesCount.textContent = visibleActivities.length;
+  }
+
+  if (pendingActivitiesCount) {
+    pendingActivitiesCount.textContent = pendingActivities.length;
+  }
+
+  if (activeAlertsCount) {
+    activeAlertsCount.textContent = activeAlerts.length;
+  }
 }
 
 function updateDashboardTodayEventsCount() {

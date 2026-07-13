@@ -23,6 +23,12 @@ function getReminderAuthHeaders(includeJsonContent = false) {
 let hasHighlightedReminderSearchResult = false;
 let pendingCreatedReminderId = null;
 
+let activitySearchText = "";
+let currentActivitiesPage = 1;
+
+const ACTIVITIES_PAGE_SIZE_DESKTOP = 6;
+const ACTIVITIES_PAGE_SIZE_MOBILE = 5;
+
 function getReminderSearchTarget() {
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -204,6 +210,182 @@ function renderReminderActions(reminder) {
   `;
 }
 
+function getActivityPriorityLabel(priority) {
+  const labels = {
+    alta: "Alta prioridad",
+    media: "Prioridad media",
+    baja: "Baja prioridad"
+  };
+
+  return labels[priority] || "Prioridad media";
+}
+
+function getActivityPriorityClass(priority) {
+  const classes = {
+    alta: "activity-priority-high",
+    media: "activity-priority-medium",
+    baja: "activity-priority-low"
+  };
+
+  return classes[priority] || "activity-priority-medium";
+}
+
+function getActivityDescription(reminder) {
+  return reminder.description || reminder.original_text || "Sin descripción adicional.";
+}
+
+function getActivityDueDateLabel(reminder) {
+  const dueDate = reminder.due_date || reminder.reminder_date;
+
+  return formatReminderDateLabel(dueDate);
+}
+
+function getActivityReminderLabel(reminder) {
+  const reminderDate = formatReminderDateLabel(reminder.reminder_date);
+  const reminderTime = reminder.reminder_time
+    ? formatReminderTime(reminder.reminder_time)
+    : "Sin hora";
+
+  return `${reminderDate} · ${reminderTime}`;
+}
+
+function getActivitiesPageSize() {
+  const isNativeMobile =
+    document.documentElement.classList.contains("danybot-mobile-app");
+
+  if (isNativeMobile || window.innerWidth <= 768) {
+    return ACTIVITIES_PAGE_SIZE_MOBILE;
+  }
+
+  return ACTIVITIES_PAGE_SIZE_DESKTOP;
+}
+
+function getActivitySearchValue(reminder) {
+  return [
+    reminder.title,
+    reminder.original_text,
+    reminder.description,
+    reminder.category,
+    reminder.priority,
+    reminder.repeat_type,
+    reminder.status
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function matchesActivitySearch(reminder) {
+  const search = activitySearchText.trim().toLowerCase();
+
+  if (!search) {
+    return true;
+  }
+
+  return getActivitySearchValue(reminder).includes(search);
+}
+
+function isActivityOverdue(reminder) {
+  const today = getTodayDate();
+  const dueDate = getReminderDateValue(reminder.due_date || reminder.reminder_date);
+
+  return reminder.status === "activo"
+    && dueDate
+    && dueDate < today;
+}
+
+function getPaginatedActivities(activityList) {
+  const pageSize = getActivitiesPageSize();
+  const totalPages = Math.max(1, Math.ceil(activityList.length / pageSize));
+
+  if (currentActivitiesPage > totalPages) {
+    currentActivitiesPage = totalPages;
+  }
+
+  if (currentActivitiesPage < 1) {
+    currentActivitiesPage = 1;
+  }
+
+  const start = (currentActivitiesPage - 1) * pageSize;
+  const end = start + pageSize;
+
+  return {
+    items: activityList.slice(start, end),
+    totalPages,
+    pageSize,
+    totalItems: activityList.length
+  };
+}
+
+function renderActivitiesPagination(totalPages, totalItems) {
+  const pagination = document.getElementById("activitiesPagination");
+
+  if (!pagination) {
+    return;
+  }
+
+  if (totalItems === 0 || totalPages <= 1) {
+    pagination.innerHTML = "";
+    return;
+  }
+
+  pagination.innerHTML = `
+    <button 
+      type="button" 
+      class="activities-page-button"
+      ${currentActivitiesPage === 1 ? "disabled" : ""}
+      onclick="changeActivitiesPage(${currentActivitiesPage - 1})"
+    >
+      <i class="fa-solid fa-chevron-left"></i>
+      Anterior
+    </button>
+
+    <span class="activities-page-info">
+      Página ${currentActivitiesPage} de ${totalPages}
+    </span>
+
+    <button 
+      type="button" 
+      class="activities-page-button"
+      ${currentActivitiesPage === totalPages ? "disabled" : ""}
+      onclick="changeActivitiesPage(${currentActivitiesPage + 1})"
+    >
+      Siguiente
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  `;
+}
+
+function changeActivitiesPage(page) {
+  currentActivitiesPage = page;
+  renderRemindersList();
+
+  const listPanel = document.querySelector(".reminders-list-panel");
+
+  if (listPanel) {
+    listPanel.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+}
+
+function setupActivitySearch() {
+  const searchInput = document.getElementById("activitySearchInput");
+
+  if (!searchInput) {
+    return;
+  }
+
+  searchInput.value = activitySearchText;
+
+  searchInput.addEventListener("input", () => {
+    activitySearchText = searchInput.value;
+    currentActivitiesPage = 1;
+    renderRemindersList();
+  });
+}
+
 function renderRemindersList() {
   const list = document.getElementById("remindersList");
 
@@ -212,8 +394,10 @@ function renderRemindersList() {
   }
 
   const sortedReminders = getFilteredReminders();
+  const paginatedActivities = getPaginatedActivities(sortedReminders);
 
   if (sortedReminders.length === 0) {
+    renderActivitiesPagination(1, 0);
     const emptyMessage = getEmptyRemindersMessage();
 
     list.innerHTML = `
@@ -228,7 +412,7 @@ function renderRemindersList() {
 
   list.innerHTML = "";
 
-  sortedReminders.forEach((reminder) => {
+  paginatedActivities.items.forEach((reminder) => {
     const card = document.createElement("div");
 
     const categoryClass = getReminderCategoryClass(reminder.category);
@@ -242,44 +426,59 @@ function renderRemindersList() {
     }
 
     card.innerHTML = `
-      <div class="reminder-date-badge">
-        <strong>${formatReminderDayNumber(reminder.reminder_date)}</strong>
-        <span>${formatReminderMonthShort(reminder.reminder_date)}</span>
+      <div class="activity-card-header">
+        <span class="activity-priority-pill ${getActivityPriorityClass(reminder.priority)}">
+          <i class="fa-solid fa-flag"></i>
+          ${getActivityPriorityLabel(reminder.priority)}
+        </span>
+
+        <span class="activity-status-pill ${getReminderStatusClass(reminder)}">
+          ${getReminderStatusLabel(reminder)}
+        </span>
       </div>
 
-      <div class="reminder-content">
-        <div class="reminder-top-row">
-          <div>
-            <span class="reminder-type-label">
-              <i class="fa-solid ${getReminderCategoryIcon(reminder.category)}"></i>
-              ${reminder.category || "Personal"}
-            </span>
-
-            <h3>${reminder.title}</h3>
-          </div>
-
-          <span class="reminder-status-pill ${getReminderStatusClass(reminder)}">
-            ${getReminderStatusLabel(reminder)}
+      <div class="activity-card-body">
+        <div class="activity-title-row">
+          <span class="activity-category-icon">
+            <i class="fa-solid ${getReminderCategoryIcon(reminder.category)}"></i>
           </span>
+
+          <div>
+            <h3>${reminder.title}</h3>
+            <span class="activity-category-label">
+              ${reminder.category || "Personal"} · ${formatRepeatType(reminder.repeat_type)}
+            </span>
+          </div>
         </div>
 
-        <p>${reminder.original_text}</p>
+        <p class="activity-description">
+          ${getActivityDescription(reminder)}
+        </p>
 
-        <div class="reminder-meta">
-          <span>
-            <i class="fa-solid fa-calendar-day"></i>
-            ${formatReminderDateLabel(reminder.reminder_date)}
-          </span>
+        <div class="activity-info-grid">
+          <div class="activity-info-item">
+            <span>Fecha límite</span>
+            <strong>
+              <i class="fa-solid fa-calendar-check"></i>
+              ${getActivityDueDateLabel(reminder)}
+            </strong>
+          </div>
 
-          <span>
-            <i class="fa-solid fa-clock"></i>
-            ${formatReminderTime(reminder.reminder_time)}
-          </span>
+          <div class="activity-info-item">
+            <span>Aviso</span>
+            <strong>
+              <i class="fa-solid fa-bell"></i>
+              ${getActivityReminderLabel(reminder)}
+            </strong>
+          </div>
 
-          <span class="repeat-type-pill ${getRepeatTypeClass(reminder.repeat_type)}">
-            <i class="fa-solid ${getRepeatTypeIcon(reminder.repeat_type)}"></i>
-            ${formatRepeatType(reminder.repeat_type)}
-          </span>
+          <div class="activity-info-item">
+            <span>Repetición</span>
+            <strong>
+              <i class="fa-solid ${getRepeatTypeIcon(reminder.repeat_type)}"></i>
+              ${formatRepeatType(reminder.repeat_type)}
+            </strong>
+          </div>
         </div>
       </div>
 
@@ -292,7 +491,13 @@ function renderRemindersList() {
       highlightReminderSearchTargetElement(card);
     }
   });
+
+  renderActivitiesPagination(
+    paginatedActivities.totalPages,
+    paginatedActivities.totalItems
+  );
 }
+
 
 function scrollToCreatedReminderCard(reminderId) {
   if (!reminderId) return;
@@ -306,19 +511,19 @@ function scrollToCreatedReminderCard(reminderId) {
     );
 
     if (card) {
-      card.classList.add("dashboard-search-highlight");
-
-      const y = card.getBoundingClientRect().top + window.scrollY - 120;
-
-      window.scrollTo({
-        top: y,
-        behavior: "smooth"
-      });
-
       setTimeout(() => {
-        card.classList.remove("dashboard-search-highlight");
-        pendingCreatedReminderId = null;
-      }, 4000);
+        card.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+
+        card.classList.add("dashboard-search-highlight");
+
+        setTimeout(() => {
+          card.classList.remove("dashboard-search-highlight");
+          pendingCreatedReminderId = null;
+        }, 4000);
+      }, 300);
 
       return;
     }
@@ -495,88 +700,119 @@ async function editReminder(reminderId) {
     return;
   }
 
-  const result = await Swal.fire({
-    title: "Editar recordatorio",
-    html: `
-      <div class="reminder-edit-modal">
-        <label for="editReminderTitle">Título</label>
-        <input 
-          id="editReminderTitle" 
-          class="swal2-input" 
-          value="${reminder.title || ""}"
-        >
+    const result = await Swal.fire({
+      title: "Editar actividad",
+      html: `
+        <div class="reminder-edit-modal">
+          <label for="editReminderTitle">Título</label>
+          <input 
+            id="editReminderTitle" 
+            class="swal2-input" 
+            value="${reminder.title || ""}"
+          >
 
-        <label for="editReminderDate">Fecha</label>
-        <input 
-          id="editReminderDate" 
-          type="date" 
-          class="swal2-input" 
-          value="${getReminderDateValue(reminder.reminder_date)}"
-        >
+          <label for="editReminderDescription">Descripción</label>
+          <textarea
+            id="editReminderDescription"
+            class="swal2-textarea"
+            placeholder="Agrega una descripción opcional"
+          >${reminder.description || ""}</textarea>
 
-        <label for="editReminderTime">Hora</label>
-        <input 
-          id="editReminderTime" 
-          type="time" 
-          class="swal2-input" 
-          value="${reminder.reminder_time ? reminder.reminder_time.substring(0, 5) : ""}"
-        >
+          <label for="editReminderPriority">Prioridad</label>
+          <select id="editReminderPriority" class="swal2-input">
+            <option value="baja" ${reminder.priority === "baja" ? "selected" : ""}>Baja</option>
+            <option value="media" ${!reminder.priority || reminder.priority === "media" ? "selected" : ""}>Media</option>
+            <option value="alta" ${reminder.priority === "alta" ? "selected" : ""}>Alta</option>
+          </select>
 
-        <label for="editReminderCategory">Categoría</label>
-        <select id="editReminderCategory" class="swal2-input">
-          <option value="Personal" ${reminder.category === "Personal" ? "selected" : ""}>Personal</option>
-          <option value="Finanzas" ${reminder.category === "Finanzas" ? "selected" : ""}>Finanzas</option>
-          <option value="Estudio" ${reminder.category === "Estudio" ? "selected" : ""}>Estudio</option>
-          <option value="Trabajo" ${reminder.category === "Trabajo" ? "selected" : ""}>Trabajo</option>
-          <option value="Salud" ${reminder.category === "Salud" ? "selected" : ""}>Salud</option>
-        </select>
+          <label for="editReminderDueDate">Fecha límite</label>
+          <input 
+            id="editReminderDueDate" 
+            type="date" 
+            class="swal2-input" 
+            value="${getReminderDateValue(reminder.due_date || reminder.reminder_date)}"
+          >
 
-        <label for="editReminderRepeat">Repetición</label>
-        <select id="editReminderRepeat" class="swal2-input">
-          <option value="una_vez" ${reminder.repeat_type === "una_vez" ? "selected" : ""}>Una vez</option>
-          <option value="diario" ${reminder.repeat_type === "diario" ? "selected" : ""}>Diario</option>
-          <option value="semanal" ${reminder.repeat_type === "semanal" ? "selected" : ""}>Semanal</option>
-          <option value="mensual" ${reminder.repeat_type === "mensual" ? "selected" : ""}>Mensual</option>
-          <option value="anual" ${reminder.repeat_type === "anual" ? "selected" : ""}>Anual</option>
-        </select>
+          <label for="editReminderDate">Fecha de aviso</label>
+          <input 
+            id="editReminderDate" 
+            type="date" 
+            class="swal2-input" 
+            value="${getReminderDateValue(reminder.reminder_date)}"
+          >
 
-        <label for="editReminderStatus">Estado</label>
-        <select id="editReminderStatus" class="swal2-input">
-          <option value="activo" ${reminder.status === "activo" ? "selected" : ""}>Activo</option>
-          <option value="completado" ${reminder.status === "completado" ? "selected" : ""}>Completado</option>
-        </select>
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: "Guardar cambios",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#960018",
-    cancelButtonColor: "#6b7280",
-    focusConfirm: false,
-    preConfirm: () => {
-      const title = document.getElementById("editReminderTitle").value.trim();
-      const reminderDate = document.getElementById("editReminderDate").value;
-      const reminderTime = document.getElementById("editReminderTime").value;
-      const category = document.getElementById("editReminderCategory").value;
-      const repeatType = document.getElementById("editReminderRepeat").value;
-      const status = document.getElementById("editReminderStatus").value;
+          <label for="editReminderTime">Hora de aviso</label>
+          <input 
+            id="editReminderTime" 
+            type="time" 
+            class="swal2-input" 
+            value="${reminder.reminder_time ? reminder.reminder_time.substring(0, 5) : ""}"
+          >
 
-      if (!title || !reminderDate) {
-        Swal.showValidationMessage("El título y la fecha son obligatorios.");
-        return false;
+          <label for="editReminderCategory">Categoría</label>
+          <select id="editReminderCategory" class="swal2-input">
+            <option value="personal" ${reminder.category === "personal" || reminder.category === "Personal" ? "selected" : ""}>Personal</option>
+            <option value="finanzas" ${reminder.category === "finanzas" || reminder.category === "Finanzas" ? "selected" : ""}>Finanzas</option>
+            <option value="estudio" ${reminder.category === "estudio" || reminder.category === "Estudio" ? "selected" : ""}>Estudio</option>
+            <option value="trabajo" ${reminder.category === "trabajo" || reminder.category === "Trabajo" ? "selected" : ""}>Trabajo</option>
+            <option value="salud" ${reminder.category === "salud" || reminder.category === "Salud" ? "selected" : ""}>Salud</option>
+            <option value="pagos" ${reminder.category === "pagos" ? "selected" : ""}>Pagos</option>
+            <option value="otro" ${reminder.category === "otro" ? "selected" : ""}>Otro</option>
+          </select>
+
+          <label for="editReminderRepeat">Repetición</label>
+          <select id="editReminderRepeat" class="swal2-input">
+            <option value="una_vez" ${reminder.repeat_type === "una_vez" ? "selected" : ""}>Una vez</option>
+            <option value="diario" ${reminder.repeat_type === "diario" ? "selected" : ""}>Diario</option>
+            <option value="semanal" ${reminder.repeat_type === "semanal" ? "selected" : ""}>Semanal</option>
+            <option value="mensual" ${reminder.repeat_type === "mensual" ? "selected" : ""}>Mensual</option>
+            <option value="anual" ${reminder.repeat_type === "anual" ? "selected" : ""}>Anual</option>
+          </select>
+
+          <label for="editReminderStatus">Estado</label>
+          <select id="editReminderStatus" class="swal2-input">
+            <option value="activo" ${reminder.status === "activo" ? "selected" : ""}>Activo</option>
+            <option value="completado" ${reminder.status === "completado" ? "selected" : ""}>Completado</option>
+            <option value="papelera" ${reminder.status === "papelera" ? "selected" : ""}>Papelera</option>
+          </select>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Guardar cambios",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#960018",
+      cancelButtonColor: "#6b7280",
+      focusConfirm: false,
+      preConfirm: () => {
+        const title = document.getElementById("editReminderTitle").value.trim();
+        const description = document.getElementById("editReminderDescription").value.trim();
+        const priority = document.getElementById("editReminderPriority").value;
+        const dueDate = document.getElementById("editReminderDueDate").value;
+        const reminderDate = document.getElementById("editReminderDate").value;
+        const reminderTime = document.getElementById("editReminderTime").value;
+        const category = document.getElementById("editReminderCategory").value;
+        const repeatType = document.getElementById("editReminderRepeat").value;
+        const status = document.getElementById("editReminderStatus").value;
+
+        if (!title || !reminderDate) {
+          Swal.showValidationMessage("El título y la fecha de aviso son obligatorios.");
+          return false;
+        }
+
+        return {
+          title,
+          original_text: reminder.original_text || title,
+          description: description || null,
+          reminder_date: reminderDate,
+          due_date: dueDate || reminderDate,
+          reminder_time: reminderTime ? `${reminderTime}:00` : null,
+          category,
+          priority,
+          repeat_type: repeatType,
+          status
+        };
       }
-
-     return {
-      title,
-      original_text: reminder.original_text || title,
-      reminder_date: reminderDate,
-      reminder_time: reminderTime ? `${reminderTime}:00` : null,
-      category,
-      repeat_type: repeatType,
-      status
-    };
-    }
-  });
+    });
 
   if (!result.isConfirmed) {
     return;
@@ -918,17 +1154,24 @@ async function toggleReminderStatus(reminderId) {
 async function completeReminder(reminder, showSuccessMessage = true) {
   const isRecurring = isRecurringReminder(reminder);
 
-  const updatedReminder = {
-    title: reminder.title,
-    original_text: reminder.original_text,
-    reminder_date: isRecurring
-      ? getNextReminderDate(reminder.reminder_date, reminder.repeat_type)
-      : getReminderDateValue(reminder.reminder_date),
-    reminder_time: reminder.reminder_time || null,
-    category: reminder.category || "Personal",
-    repeat_type: reminder.repeat_type || "una_vez",
-    status: isRecurring ? "activo" : "papelera"
-  };
+    const nextReminderDate = isRecurring
+    ? getNextReminderDate(reminder.reminder_date, reminder.repeat_type)
+    : getReminderDateValue(reminder.reminder_date);
+
+    const updatedReminder = {
+      title: reminder.title,
+      original_text: reminder.original_text || reminder.title,
+      description: reminder.description || null,
+      reminder_date: nextReminderDate,
+      due_date: reminder.due_date
+        ? getReminderDateValue(reminder.due_date)
+        : nextReminderDate,
+      reminder_time: reminder.reminder_time || null,
+      category: reminder.category || "personal",
+      priority: reminder.priority || "media",
+      repeat_type: reminder.repeat_type || "una_vez",
+      status: isRecurring ? "activo" : "papelera"
+    };
 
   try {
     const response = await fetch(`${REMINDERS_API_URL}/${reminder.id}`, {
@@ -990,10 +1233,10 @@ function renderRemindersSection() {
 
       <div class="voice-reminders-header">
         <div>
-          <span class="welcome-badge">Recordatorios</span>
-          <h2>Crea tus recordatorios</h2>
+          <span class="welcome-badge">Actividades</span>
+          <h2>Organiza tus actividades</h2>
           <p>
-            Puedes crear un recordatorio manualmente con fecha, hora y repetición.
+            Crea pendientes, avisos y recordatorios con prioridad, fecha límite y alertas opcionales.
           </p>
         </div>
 
@@ -1005,8 +1248,8 @@ function renderRemindersSection() {
 
       <div class="manual-reminder-panel">
         <div class="manual-reminder-header">
-          <span class="welcome-badge">Nuevo recordatorio</span>
-          <h3>Agregar recordatorio manual</h3>
+          <span class="welcome-badge">Nueva actividad</span>
+          <h3>Agregar actividad manual</h3>
         </div>
 
         <form id="manualReminderForm" class="manual-reminder-form">
@@ -1018,6 +1261,31 @@ function renderRemindersSection() {
                 id="manualReminderTitle" 
                 placeholder="Ej: Pagar internet"
                 required
+              >
+            </div>
+            <div class="manual-reminder-field manual-reminder-field-full">
+              <label for="manualReminderDescription">Descripción</label>
+              <textarea
+                id="manualReminderDescription"
+                placeholder="Ej: Pago mensual del servicio de internet"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="manual-reminder-field">
+              <label for="manualReminderPriority">Prioridad</label>
+              <select id="manualReminderPriority" required>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+                <option value="baja">Baja</option>
+              </select>
+            </div>
+
+            <div class="manual-reminder-field">
+              <label for="manualReminderDueDate">Fecha límite</label>
+              <input 
+                type="date" 
+                id="manualReminderDueDate"
               >
             </div>
 
@@ -1043,11 +1311,10 @@ function renderRemindersSection() {
             </div>
 
             <div class="manual-reminder-field">
-              <label for="manualReminderTime">Hora</label>
+              <label for="manualReminderTime">Hora de aviso</label>
               <input 
                 type="time" 
                 id="manualReminderTime" 
-                required
               >
             </div>
 
@@ -1065,7 +1332,7 @@ function renderRemindersSection() {
 
           <button type="submit" class="manual-reminder-submit">
             <i class="fa-solid fa-floppy-disk"></i>
-            Guardar recordatorio
+            Guardar actividad
           </button>
         </form>
       </div>
@@ -1087,30 +1354,59 @@ function renderRemindersSection() {
 
       <div class="reminders-list-panel">
         <div class="reminders-list-header">
-          <h3>Agenda de avisos</h3>
+          <h3>Mis actividades</h3>
         </div>
 
-        <div class="reminder-filters">
-          <button type="button" class="reminder-filter-button active" data-filter="activos">
-            Activos
-          </button>
+        <div class="activities-toolbar">
+  <div class="activity-search-box">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input 
+      type="search"
+      id="activitySearchInput"
+      placeholder="Buscar por título, descripción, categoría o prioridad..."
+      autocomplete="off"
+    >
+  </div>
 
-          <button type="button" class="reminder-filter-button" data-filter="hoy">
-            Hoy
-          </button>
+  <div class="reminder-filters">
+        <button type="button" class="reminder-filter-button active" data-filter="activos">
+          Activos
+        </button>
 
-          <button type="button" class="reminder-filter-button" data-filter="papelera">
-            Papelera
-          </button>
+        <button type="button" class="reminder-filter-button" data-filter="hoy">
+          Hoy
+        </button>
 
-          <button type="button" class="reminder-filter-button" data-filter="todos">
-            Todos
-          </button>
-        </div>
+        <button type="button" class="reminder-filter-button" data-filter="vencidos">
+          Vencidos
+        </button>
+
+        <button type="button" class="reminder-filter-button" data-filter="alta">
+          Alta
+        </button>
+
+        <button type="button" class="reminder-filter-button" data-filter="media">
+          Media
+        </button>
+
+        <button type="button" class="reminder-filter-button" data-filter="baja">
+          Baja
+        </button>
+
+        <button type="button" class="reminder-filter-button" data-filter="papelera">
+          Papelera
+        </button>
+
+        <button type="button" class="reminder-filter-button" data-filter="todos">
+          Todos
+        </button>
+      </div>
+    </div>
 
         <div id="remindersList" class="reminders-list">
           <p class="empty-reminders">Aún no tienes recordatorios registrados.</p>
         </div>
+        <div id="activitiesPagination" class="activities-pagination"></div>
       </div>
     </div>
   `;
@@ -1145,6 +1441,7 @@ function renderRemindersSection() {
   }
 
   setupReminderFilters();
+  setupActivitySearch();
   loadReminders();
 }
 
@@ -1152,15 +1449,18 @@ async function handleManualReminderSubmit(event) {
   event.preventDefault();
 
   const title = document.getElementById("manualReminderTitle").value.trim();
+  const description = document.getElementById("manualReminderDescription").value.trim();
   const category = document.getElementById("manualReminderCategory").value;
+  const priority = document.getElementById("manualReminderPriority").value;
+  const dueDate = document.getElementById("manualReminderDueDate").value;
   const reminderDate = document.getElementById("manualReminderDate").value;
   const reminderTime = document.getElementById("manualReminderTime").value;
   const repeatType = document.getElementById("manualReminderRepeat").value;
 
-  if (!title || !category || !reminderDate || !reminderTime || !repeatType) {
+  if (!title || !category || !priority || !reminderDate || !repeatType) {
     Swal.fire({
       title: "Datos incompletos",
-      text: "Completa todos los campos del recordatorio.",
+      text: "Completa los campos obligatorios de la actividad.",
       icon: "warning",
       confirmButtonColor: "#960018"
     });
@@ -1185,9 +1485,12 @@ async function handleManualReminderSubmit(event) {
     title,
     original_text: title,
     text_original: title,
+    description: description || null,
     category,
+    priority,
+    due_date: dueDate || reminderDate,
     reminder_date: reminderDate,
-    reminder_time: `${reminderTime}:00`,
+    reminder_time: reminderTime ? `${reminderTime}:00` : null,
     repeat_type: repeatType
   };
 
@@ -1251,7 +1554,7 @@ async function handleManualReminderSubmit(event) {
       await loadReminders();
     }
 
-      scrollToCreatedReminderCard(createdReminderId);
+    scrollToCreatedReminderCard(createdReminderId);
 
 
   } catch (error) {
@@ -1278,6 +1581,7 @@ function setupReminderFilters() {
 
     button.addEventListener("click", () => {
       currentReminderFilter = button.dataset.filter;
+      currentActivitiesPage = 1;
 
       filterButtons.forEach((item) => {
         item.classList.remove("active");
@@ -1348,6 +1652,33 @@ function getFilteredReminders() {
     });
   }
 
+  if (currentReminderFilter === "vencidos") {
+    filteredReminders = reminders.filter((reminder) => {
+      return isActivityOverdue(reminder);
+    });
+  }
+
+  if (currentReminderFilter === "alta") {
+    filteredReminders = reminders.filter((reminder) => {
+      return reminder.status === "activo"
+        && (reminder.priority || "media") === "alta";
+    });
+  }
+
+  if (currentReminderFilter === "media") {
+    filteredReminders = reminders.filter((reminder) => {
+      return reminder.status === "activo"
+        && (!reminder.priority || reminder.priority === "media");
+    });
+  }
+
+  if (currentReminderFilter === "baja") {
+    filteredReminders = reminders.filter((reminder) => {
+      return reminder.status === "activo"
+        && reminder.priority === "baja";
+    });
+  }
+
   if (currentReminderFilter === "papelera") {
     filteredReminders = reminders.filter((reminder) => {
       return isReminderInTrash(reminder);
@@ -1356,13 +1687,11 @@ function getFilteredReminders() {
 
   if (currentReminderFilter === "todos") {
     filteredReminders = reminders.filter((reminder) => {
-      return !isReminderInTrash(reminder)
-        && (
-          shouldShowReminderOnBoard(reminder, today) ||
-          isPendingCreatedReminder(reminder)
-        );
+      return !isReminderInTrash(reminder);
     });
   }
+
+  filteredReminders = filteredReminders.filter(matchesActivitySearch);
 
   return sortReminders(filteredReminders);
 }
@@ -1402,6 +1731,38 @@ function getEmptyRemindersMessage() {
       icon: "fa-trash-can",
       title: "La papelera está vacía",
       text: "Los recordatorios completados o eliminados aparecerán aquí durante 30 días."
+    };
+  }
+
+    if (currentReminderFilter === "vencidos") {
+    return {
+      icon: "fa-triangle-exclamation",
+      title: "No tienes actividades vencidas",
+      text: "Las actividades activas con fecha límite vencida aparecerán aquí."
+    };
+  }
+
+  if (currentReminderFilter === "alta") {
+    return {
+      icon: "fa-flag",
+      title: "No tienes actividades de alta prioridad",
+      text: "Las actividades marcadas como alta prioridad aparecerán aquí."
+    };
+  }
+
+  if (currentReminderFilter === "media") {
+    return {
+      icon: "fa-flag",
+      title: "No tienes actividades de prioridad media",
+      text: "Las actividades marcadas como prioridad media aparecerán aquí."
+    };
+  }
+
+  if (currentReminderFilter === "baja") {
+    return {
+      icon: "fa-flag",
+      title: "No tienes actividades de baja prioridad",
+      text: "Las actividades marcadas como baja prioridad aparecerán aquí."
     };
   }
 

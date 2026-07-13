@@ -60,9 +60,12 @@ router.get('/', (req, res) => {
         user_id,
         title,
         original_text,
+        description,
         reminder_date,
+        due_date,
         TIME_FORMAT(reminder_time, '%H:%i:%s') AS reminder_time,
         category,
+        priority,
         repeat_type,
         status,
         deleted_at,
@@ -99,9 +102,12 @@ router.post('/', (req, res) => {
   const {
     title,
     original_text,
+    description,
     reminder_date,
+    due_date,
     reminder_time,
     category,
+    priority,
     repeat_type,
     status
   } = req.body;
@@ -113,29 +119,36 @@ router.post('/', (req, res) => {
   }
 
   const reminderStatus = status || 'activo';
+  const reminderPriority = priority || 'media';
 
   const sql = `
     INSERT INTO reminders (
       user_id,
       title,
       original_text,
+      description,
       reminder_date,
+      due_date,
       reminder_time,
       category,
+      priority,
       repeat_type,
       status,
       deleted_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
     userId,
     title,
     original_text,
+    description || null,
     reminder_date,
+    due_date || reminder_date,
     reminder_time || null,
     category || 'Personal',
+    reminderPriority,
     repeat_type || 'una_vez',
     reminderStatus,
     reminderStatus === 'papelera' ? new Date() : null
@@ -167,9 +180,12 @@ router.put('/:id', (req, res) => {
   const {
     title,
     original_text,
+    description,
     reminder_date,
+    due_date,
     reminder_time,
     category,
+    priority,
     repeat_type,
     status
   } = req.body;
@@ -181,15 +197,19 @@ router.put('/:id', (req, res) => {
   }
 
   const reminderStatus = status || 'activo';
+  const reminderPriority = priority || 'media';
 
   const sql = `
     UPDATE reminders
     SET
       title = ?,
       original_text = ?,
+      description = ?,
       reminder_date = ?,
+      due_date = ?,
       reminder_time = ?,
       category = ?,
+      priority = ?,
       repeat_type = ?,
       status = ?,
       deleted_at = CASE
@@ -204,9 +224,12 @@ router.put('/:id', (req, res) => {
   const values = [
     title,
     original_text,
+    description || null,
     reminder_date,
+    due_date || reminder_date,
     reminder_time || null,
     category || 'Personal',
+    reminderPriority,
     repeat_type || 'una_vez',
     reminderStatus,
     reminderStatus,
