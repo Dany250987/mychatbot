@@ -63,7 +63,11 @@ function highlightReminderSearchTargetElement(element) {
 
     setTimeout(() => {
       element.classList.remove("dashboard-search-highlight");
-    }, 5000);
+      hasHighlightedReminderSearchResult = false;
+
+      const cleanUrl = `${window.location.pathname}${window.location.hash}`;
+      window.history.replaceState({}, "", cleanUrl);
+    }, 4000);
   }, 500);
 }
 
@@ -393,8 +397,31 @@ function renderRemindersList() {
     return;
   }
 
-  const sortedReminders = getFilteredReminders();
-  const paginatedActivities = getPaginatedActivities(sortedReminders);
+ const sortedReminders = getFilteredReminders();
+
+  const searchTarget = getReminderSearchTarget();
+
+  const targetReminderId =
+    searchTarget.type === "reminder" && searchTarget.id
+      ? searchTarget.id
+      : pendingCreatedReminderId;
+
+  if (targetReminderId) {
+    const targetIndex = sortedReminders.findIndex((reminder) => {
+      return Number(reminder.id) === Number(targetReminderId);
+    });
+
+    if (targetIndex >= 0) {
+      const pageSize = getActivitiesPageSize();
+      const targetPage = Math.floor(targetIndex / pageSize) + 1;
+
+      if (currentActivitiesPage !== targetPage) {
+        currentActivitiesPage = targetPage;
+      }
+    }
+  }
+
+const paginatedActivities = getPaginatedActivities(sortedReminders);
 
   if (sortedReminders.length === 0) {
     renderActivitiesPagination(1, 0);
@@ -1545,6 +1572,10 @@ async function handleManualReminderSubmit(event) {
 
     if (typeof currentReminderFilter !== "undefined") {
       currentReminderFilter = "activos";
+    }
+
+    if (typeof currentActivitiesPage !== "undefined") {
+      currentActivitiesPage = 1;
     }
 
     if (typeof showSection === "function") {

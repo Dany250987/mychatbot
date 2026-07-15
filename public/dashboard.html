@@ -121,7 +121,7 @@
           </div>
 
           <div class="card-info">
-            <h3>Avisos activos</h3>
+            <h3>Avisos programados</h3>
             <p id="activeRemindersCount">0</p>
           </div>
         </div>
@@ -169,10 +169,10 @@
           <div class="welcome-text">
             <span class="welcome-badge">Panel principal</span>
 
-            <h2>Organiza tu día con Agenda Personal Inteligente</h2>
+            <h2>Organiza tu día con tus actividades</h2>
 
             <p>
-              Consulta tus tareas, recordatorios y resumen financiero del mes desde un solo lugar.
+              Consulta tus actividades, avisos y resumen financiero del mes desde un solo lugar.
             </p>
 
             <div class="quick-actions">
@@ -181,14 +181,14 @@
                 Ver gastos
               </a>
 
-              <button type="button" class="quick-action" id="quickTaskButton">
+              <button type="button" class="quick-action" onclick="showSection('recordatorios')">
                 <i class="fa-solid fa-plus"></i>
-                Nueva tarea
+                Nueva actividad
               </button>
 
-              <button type="button" class="quick-action" id="quickReminderButton">
-                <i class="fa-solid fa-bell"></i>
-                Crear recordatorio
+              <button type="button" class="quick-action" onclick="showSection('calendario')">
+                <i class="fa-solid fa-calendar-days"></i>
+                Ver calendario
               </button>
             </div>
           </div>
@@ -210,7 +210,6 @@
   <script src="./src/js/dashboard/dashboard-state.js"></script>
   <script src="./src/js/dashboard/dashboard-helpers.js"></script>
   <script src="./src/js/dashboard/dashboard-summary.js"></script>
-  <script src="./src/js/dashboard/dashboard-tasks.js"></script>
   <script src="./src/js/dashboard/dashboard-reminders-voice.js"></script>
   <script src="./src/js/dashboard/dashboard-reminders.js"></script>
   <script src="./src/js/dashboard/dashboard-calendar.js"></script>

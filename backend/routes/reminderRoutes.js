@@ -307,7 +307,7 @@ router.delete('/:id/permanent', (req, res) => {
     DELETE FROM reminders
     WHERE id = ?
     AND user_id = ?
-    AND status = 'papelera'
+    AND status IN ('papelera', 'completado')
   `;
 
   connection.query(sql, [reminderId, userId], (error, result) => {

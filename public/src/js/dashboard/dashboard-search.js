@@ -30,7 +30,6 @@ async function handleGlobalSearchUnauthorized(data) {
 
 function getGlobalSearchTypeLabel(type) {
   const labels = {
-    task: "Actividad antigua",
     reminder: "Actividad",
     expense: "Gasto",
     monthly_income: "Ingreso mensual",
@@ -40,9 +39,9 @@ function getGlobalSearchTypeLabel(type) {
   return labels[type] || "Resultado";
 }
 
+
 function getGlobalSearchTypeIcon(type) {
   const icons = {
-    task: "fa-list-check",
     reminder: "fa-bell",
     expense: "fa-wallet",
     monthly_income: "fa-piggy-bank",
@@ -54,7 +53,6 @@ function getGlobalSearchTypeIcon(type) {
 
 function getGlobalSearchTypeClass(type) {
   const classes = {
-    task: "search-task",
     reminder: "search-reminder",
     expense: "search-expense",
     monthly_income: "search-income",
@@ -63,7 +61,6 @@ function getGlobalSearchTypeClass(type) {
 
   return classes[type] || "search-default";
 }
-
 function formatGlobalSearchDate(value) {
   if (!value) {
     return "";
@@ -170,11 +167,6 @@ function buildDashboardSearchUrl(result, section) {
 }
 
 function goToGlobalSearchResult(result) {
-  if (result.type === "task") {
-    window.location.href = buildDashboardSearchUrl(result, "tareas");
-    return;
-  }
-
   if (result.type === "reminder") {
     window.location.href = buildDashboardSearchUrl(result, "recordatorios");
     return;
@@ -199,7 +191,6 @@ function goToGlobalSearchResult(result) {
     window.location.href = `./gastos.html?${params.toString()}`;
   }
 }
-
 function renderGlobalSearchResults(data) {
   const resultsContainer = document.getElementById("globalSearchResults");
 

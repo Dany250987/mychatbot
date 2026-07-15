@@ -43,27 +43,6 @@ async function handleDashboardSummaryUnauthorizedSession(data) {
 }
 
 
-// ===============================
-// Contadores de tareas
-// ===============================
-
-function updateDashboardTasksCount() {
-  const totalTasksCount = document.getElementById("totalTasksCount");
-  const pendingTasksCount = document.getElementById("pendingTasksCount");
-
-  const pendingTasks = tasks.filter((task) => {
-    return task.status === "pendiente";
-  }).length;
-
-  if (totalTasksCount) {
-    totalTasksCount.textContent = tasks.length;
-  }
-
-  if (pendingTasksCount) {
-    pendingTasksCount.textContent = pendingTasks;
-  }
-}
-
 
 // ===============================
 // Contadores de recordatorios
@@ -72,18 +51,38 @@ function updateDashboardTasksCount() {
 function updateDashboardRemindersCount() {
   const totalActivitiesCount = document.getElementById("totalTasksCount");
   const pendingActivitiesCount = document.getElementById("pendingTasksCount");
-  const activeAlertsCount = document.getElementById("activeRemindersCount");
+  const scheduledAlertsCount = document.getElementById("activeRemindersCount");
 
-  const visibleActivities = reminders.filter((reminder) => {
-    return reminder.status !== "papelera" && reminder.status !== "completado";
-  });
+  const today = typeof getTodayDate === "function"
+    ? getTodayDate()
+    : new Date().toISOString().slice(0, 10);
 
-  const pendingActivities = reminders.filter((reminder) => {
+  const isVisibleActivity = (reminder) => {
+    if (!reminder) {
+      return false;
+    }
+
+    if (reminder.status === "papelera" || reminder.status === "completado") {
+      return false;
+    }
+
+    if (typeof shouldShowReminderOnBoard === "function") {
+      return shouldShowReminderOnBoard(reminder, today);
+    }
+
+    return true;
+  };
+
+  const visibleActivities = reminders.filter(isVisibleActivity);
+
+  const pendingActivities = visibleActivities.filter((reminder) => {
     return reminder.status === "activo";
   });
 
-  const activeAlerts = reminders.filter((reminder) => {
-    return reminder.status === "activo" && reminder.reminder_time;
+  const scheduledAlerts = visibleActivities.filter((reminder) => {
+    return reminder.status === "activo"
+      && reminder.reminder_date
+      && reminder.reminder_time;
   });
 
   if (totalActivitiesCount) {
@@ -94,8 +93,8 @@ function updateDashboardRemindersCount() {
     pendingActivitiesCount.textContent = pendingActivities.length;
   }
 
-  if (activeAlertsCount) {
-    activeAlertsCount.textContent = activeAlerts.length;
+  if (scheduledAlertsCount) {
+    scheduledAlertsCount.textContent = scheduledAlerts.length;
   }
 }
 
@@ -117,59 +116,6 @@ function updateDashboardTodayEventsCount() {
 }
 
 
-// ===============================
-// Cargar tareas del dashboard
-// ===============================
-
-async function loadDashboardTasksCount() {
-  const token = getDashboardSummaryAuthToken();
-
-  if (!token) {
-    await handleDashboardSummaryUnauthorizedSession({
-      mensaje: "No se encontró token de sesión."
-    });
-    return;
-  }
-
-  try {
-    const response = await fetch(TASKS_API_URL, {
-      headers: getDashboardSummaryAuthHeaders()
-    });
-
-    const data = await parseDashboardSummaryJsonResponse(response);
-
-    if (response.status === 401) {
-      await handleDashboardSummaryUnauthorizedSession(data);
-      return;
-    }
-
-    if (!response.ok) {
-      console.error("No se pudieron cargar las tareas del dashboard:", data);
-      updateDashboardTasksCount();
-      return;
-    }
-
-    tasks = (data.tareas || []).map((task) => {
-      return {
-        id: task.id,
-        user_id: task.user_id,
-        title: task.title,
-        description: task.description || "",
-        category: task.category,
-        priority: task.priority,
-        dueDate: task.due_date ? String(task.due_date).split("T")[0] : "",
-        status: task.status,
-        completedAt: task.completed_at || null
-      };
-    });
-
-    updateDashboardTasksCount();
-
-  } catch (error) {
-    console.error("Error al cargar el contador de tareas:", error);
-    updateDashboardTasksCount();
-  }
-}
 
 
 // ===============================

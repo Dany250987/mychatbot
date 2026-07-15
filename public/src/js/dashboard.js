@@ -87,7 +87,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   if (quickTaskButton) {
     quickTaskButton.addEventListener("click", () => {
-      window.location.hash = "tareas";
+      window.location.hash = "recordatorios";
     });
   }
 
@@ -97,6 +97,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  setupSidebarHashNavigation();
   setupDashboardCardNavigation();
 
   /*
@@ -189,7 +190,6 @@ function showSection(section, selectedLink = null) {
   toggleDashboardHomeCards(false);
 
   const sectionTitles = {
-    tareas: "Tus tareas pendientes",
     motivacion: "Motivación",
     recordatorios: "Tus actividades",
     calendario: "Tu calendario",
@@ -200,7 +200,6 @@ function showSection(section, selectedLink = null) {
   };
 
   const sectionIcons = {
-    tareas: "fa-list-check",
     motivacion: "fa-lightbulb",
     recordatorios: "fa-bell",
     calendario: "fa-calendar-days",
@@ -251,6 +250,39 @@ function showSection(section, selectedLink = null) {
       </div>
     </div>
   `;
+}
+
+function setupSidebarHashNavigation() {
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest(".sidebar-link");
+
+    if (!link) {
+      return;
+    }
+
+    const href = link.getAttribute("href") || "";
+
+    if (!href.includes("dashboard.html#")) {
+      return;
+    }
+
+    const section = href.split("#")[1];
+
+    const validSections = ["recordatorios", "calendario", "cuenta"];
+
+    if (!validSections.includes(section)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (window.location.hash === `#${section}`) {
+      showSection(section);
+      return;
+    }
+
+    window.location.hash = section;
+  });
 }
 
 
@@ -411,7 +443,7 @@ function renderAccountSection() {
           <h2>Eliminar cuenta</h2>
           <p>
             Esta acción eliminará permanentemente tu cuenta y todos los datos asociados:
-            tareas, recordatorios, gastos, ingresos y evidencias.
+            actividades, avisos, gastos, ingresos y evidencias.
           </p>
         </div>
 

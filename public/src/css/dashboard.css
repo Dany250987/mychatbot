@@ -5599,3 +5599,253 @@ body {
     font-size: 11.5px !important;
   }
 }
+
+/* ===============================
+   Actividades - formulario uniforme
+================================ */
+
+.manual-reminder-panel {
+  background: linear-gradient(180deg, #fffafa, #fff4f4) !important;
+}
+
+.manual-reminder-header {
+  margin-bottom: 22px !important;
+}
+
+.manual-reminder-header h3 {
+  margin: 18px 0 0 !important;
+  color: #3c0000 !important;
+  font-size: 26px !important;
+  line-height: 1.15 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.4px !important;
+}
+
+.manual-reminder-grid {
+  gap: 18px 24px !important;
+  align-items: start !important;
+}
+
+.manual-reminder-field {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.manual-reminder-field label {
+  margin: 0 !important;
+  color: #3c0000 !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+}
+
+/* Base uniforme para todos los campos */
+.manual-reminder-field input,
+.manual-reminder-field select,
+.manual-reminder-field textarea {
+  width: 100% !important;
+  border: 1px solid rgba(150, 0, 24, 0.18) !important;
+  background: #ffffff !important;
+  color: #3c0000 !important;
+  font-family: inherit !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  outline: none !important;
+  box-shadow: 0 10px 22px rgba(60, 0, 0, 0.03) !important;
+}
+
+/* Inputs y selects con la misma altura */
+.manual-reminder-field input,
+.manual-reminder-field select {
+  height: 52px !important;
+  min-height: 52px !important;
+  padding: 0 18px !important;
+  border-radius: 18px !important;
+}
+
+/* Textarea uniforme, sin verse más tosco */
+.manual-reminder-field textarea {
+  min-height: 96px !important;
+  padding: 16px 18px !important;
+  border-radius: 18px !important;
+  resize: vertical !important;
+}
+
+/* Placeholder igual para todos */
+.manual-reminder-field input::placeholder,
+.manual-reminder-field textarea::placeholder {
+  color: #8b6f75 !important;
+  opacity: 0.72 !important;
+  font-weight: 600 !important;
+}
+
+/* Date/time suelen verse diferentes: los normalizamos */
+.manual-reminder-field input[type="date"],
+.manual-reminder-field input[type="time"] {
+  color: #3c0000 !important;
+  font-weight: 700 !important;
+}
+
+.manual-reminder-field input[type="date"]:invalid,
+.manual-reminder-field input[type="time"]:invalid {
+  color: #8b6f75 !important;
+}
+
+/* Selects uniformes */
+.manual-reminder-field select {
+  appearance: auto !important;
+  -webkit-appearance: menulist !important;
+  cursor: pointer !important;
+}
+
+/* Focus más fino */
+.manual-reminder-field input:focus,
+.manual-reminder-field select:focus,
+.manual-reminder-field textarea:focus {
+  border-color: rgba(150, 0, 24, 0.45) !important;
+  box-shadow: 0 0 0 4px rgba(150, 0, 24, 0.08) !important;
+}
+
+/* Botón más pulido */
+.manual-reminder-submit {
+  height: 50px !important;
+  min-height: 50px !important;
+  padding: 0 34px !important;
+  border-radius: 999px !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+}
+
+/* ===============================
+   Actividades - formulario móvil uniforme
+================================ */
+
+@media (max-width: 768px) {
+  .danybot-mobile-app .manual-reminder-panel {
+    padding: 16px !important;
+    border-radius: 22px !important;
+  }
+
+  .danybot-mobile-app .manual-reminder-header {
+    margin-bottom: 16px !important;
+  }
+
+  .danybot-mobile-app .manual-reminder-header h3 {
+    font-size: 18px !important;
+    line-height: 1.18 !important;
+    margin-top: 12px !important;
+  }
+
+  .danybot-mobile-app .manual-reminder-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .danybot-mobile-app .manual-reminder-field {
+    gap: 6px !important;
+  }
+
+  .danybot-mobile-app .manual-reminder-field label {
+    font-size: 12.5px !important;
+    line-height: 1.2 !important;
+  }
+
+  .danybot-mobile-app .manual-reminder-field input,
+  .danybot-mobile-app .manual-reminder-field select {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 13px !important;
+    border-radius: 15px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+  }
+
+  .danybot-mobile-app .manual-reminder-field textarea {
+    min-height: 76px !important;
+    padding: 10px 13px !important;
+    border-radius: 15px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+  }
+
+  .danybot-mobile-app .manual-reminder-field input::placeholder,
+  .danybot-mobile-app .manual-reminder-field textarea::placeholder {
+    color: #8b6f75 !important;
+    opacity: 0.68 !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+  }
+
+  .danybot-mobile-app .manual-reminder-submit {
+    width: 100% !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 14px !important;
+    margin-top: 12px !important;
+    border-radius: 16px !important;
+    font-size: 13.5px !important;
+  }
+}
+
+/* ===============================
+   Actividades - filtros compactos móvil
+================================ */
+
+@media (max-width: 768px) {
+  .danybot-mobile-app .activities-toolbar {
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .danybot-mobile-app .reminder-filters {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  .danybot-mobile-app .reminder-filter-button {
+    width: 100% !important;
+    min-height: 38px !important;
+    padding: 8px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(150, 0, 24, 0.08) !important;
+    background: #fff1f1 !important;
+    color: #960018 !important;
+    font-size: 12.5px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+  }
+
+  .danybot-mobile-app .reminder-filter-button.active {
+    border-color: transparent !important;
+    background: linear-gradient(135deg, #b00020, #d64545) !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 18px rgba(176, 0, 32, 0.18) !important;
+  }
+
+  .danybot-mobile-app .reminder-filter-button:hover {
+    transform: none !important;
+  }
+}
+
+/* Celulares muy angostos */
+@media (max-width: 390px) {
+  .danybot-mobile-app .reminder-filters {
+    gap: 7px !important;
+  }
+
+  .danybot-mobile-app .reminder-filter-button {
+    min-height: 36px !important;
+    padding: 7px 8px !important;
+    font-size: 12px !important;
+  }
+}

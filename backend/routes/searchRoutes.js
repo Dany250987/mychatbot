@@ -39,43 +39,18 @@ router.get('/', async (req, res) => {
   const searchLike = `%${searchText}%`;
 
   try {
-    const tasksSql = `
-      SELECT
-        id,
-        'task' AS type,
-        title,
-        description,
-        category,
-        priority,
-        due_date AS date_value,
-        NULL AS time_value,
-        status,
-        NULL AS amount,
-        created_at
-      FROM tasks
-      WHERE user_id = ?
-        AND (
-          title LIKE ?
-          OR description LIKE ?
-          OR category LIKE ?
-          OR priority LIKE ?
-          OR status LIKE ?
-          OR DATE_FORMAT(due_date, '%Y-%m-%d') LIKE ?
-          OR DATE_FORMAT(due_date, '%d/%m/%Y') LIKE ?
-        )
-      ORDER BY due_date ASC
-      LIMIT 10
-    `;
+    
 
     const remindersSql = `
       SELECT
         id,
         'reminder' AS type,
         title,
-        original_text AS description,
+        COALESCE(description, original_text) AS description,
         category,
+        priority,
         repeat_type,
-        reminder_date AS date_value,
+        due_date AS date_value,
         reminder_time AS time_value,
         status,
         NULL AS amount,
@@ -85,15 +60,20 @@ router.get('/', async (req, res) => {
         AND (
           title LIKE ?
           OR original_text LIKE ?
+          OR description LIKE ?
           OR category LIKE ?
+          OR priority LIKE ?
           OR repeat_type LIKE ?
           OR status LIKE ?
           OR DATE_FORMAT(reminder_date, '%Y-%m-%d') LIKE ?
           OR DATE_FORMAT(reminder_date, '%d/%m/%Y') LIKE ?
+          OR DATE_FORMAT(due_date, '%Y-%m-%d') LIKE ?
+          OR DATE_FORMAT(due_date, '%d/%m/%Y') LIKE ?
         )
-      ORDER BY reminder_date ASC, reminder_time ASC
+      ORDER BY COALESCE(due_date, reminder_date) ASC, reminder_time ASC
       LIMIT 10
     `;
+    
 
     const expensesSql = `
       SELECT
@@ -174,25 +154,17 @@ router.get('/', async (req, res) => {
     `;
 
     const [
-      tasks,
       reminders,
       expenses,
       monthlyIncomes,
       additionalIncomes
     ] = await Promise.all([
-      runQuery(tasksSql, [
-        userId,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike
-      ]),
-
       runQuery(remindersSql, [
         userId,
+        searchLike,
+        searchLike,
+        searchLike,
+        searchLike,
         searchLike,
         searchLike,
         searchLike,
@@ -231,7 +203,6 @@ router.get('/', async (req, res) => {
     ]);
 
     const results = [
-      ...tasks,
       ...reminders,
       ...expenses,
       ...monthlyIncomes,
@@ -242,7 +213,6 @@ router.get('/', async (req, res) => {
       query: searchText,
       total: results.length,
       resultsByType: {
-        tasks,
         reminders,
         expenses,
         monthlyIncomes,

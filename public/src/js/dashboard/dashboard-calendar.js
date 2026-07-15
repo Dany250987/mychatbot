@@ -466,7 +466,7 @@ function renderCalendarSection() {
           <span class="welcome-badge">Calendario interno</span>
           <h2>Tu agenda del mes</h2>
           <p>
-            Aquí verás tus recordatorios organizados por fecha.
+            Aquí verás tus actividades organizadas por fecha.
           </p>
         </div>
       </div>
@@ -518,7 +518,7 @@ function renderCalendarSection() {
 
           <div id="calendarEventsList" class="calendar-events-list">
             <p class="empty-calendar-events">
-              No hay recordatorios para este mes.
+              No hay actividades para este mes.
             </p>
           </div>
         </div>
@@ -572,7 +572,13 @@ function renderCalendarSection() {
     });
   }
 
-  loadCalendarReminders();
+  renderCalendarView();
+
+  if (typeof loadReminders === "function") {
+    loadReminders().then(() => {
+      renderCalendarView();
+    });
+  }
 }
 
 async function loadCalendarTasks() {
@@ -692,6 +698,29 @@ function renderCalendarGrid() {
   }
 }
 
+function goToCalendarReminderActivity(reminder) {
+  if (!reminder || !reminder.id) {
+    return;
+  }
+
+  const params = new URLSearchParams();
+
+  params.set("type", "reminder");
+  params.set("id", reminder.id);
+
+  if (reminder.status) {
+    params.set("status", reminder.status);
+  }
+
+  const activityDate = getReminderDateValue(reminder.reminder_date);
+
+  if (activityDate) {
+    params.set("date", activityDate);
+  }
+
+  window.location.href = `./dashboard.html?${params.toString()}#recordatorios`;
+}
+
 function renderCalendarEventsList() {
   const list = document.getElementById("calendarEventsList");
   const title = document.getElementById("calendarEventsTitle");
@@ -720,13 +749,13 @@ function renderCalendarEventsList() {
   });
 
   if (title) {
-    title.textContent = selectedCalendarDate ? "Eventos del día" : "Eventos del mes";
+    title.textContent = selectedCalendarDate ? "Actividades del día" : "Actividades del mes";
   }
 
   if (subtitle) {
     subtitle.textContent = selectedCalendarDate
       ? formatReminderDateLabel(selectedCalendarDate)
-      : `${calendarEvents.length} evento(s) programado(s) este mes.`;
+      : `${calendarEvents.length} actividad${calendarEvents.length === 1 ? "" : "es"} programada${calendarEvents.length === 1 ? "" : "s"} este mes.`;
   }
 
   if (calendarEvents.length === 0) {
@@ -734,8 +763,8 @@ function renderCalendarEventsList() {
       <p class="empty-calendar-events">
         ${
           selectedCalendarDate
-            ? "No hay eventos para este día."
-            : "No hay eventos para este mes."
+            ? "No hay actividades para este día."
+            : "No hay actividades para este mes."
         }
       </p>
     `;
@@ -751,12 +780,22 @@ function renderCalendarEventsList() {
       getCalendarEventCategoryClass(event.category)
     );
 
-    if (event.type === "task") {
-      eventCard.classList.add("calendar-event-task");
-      eventCard.innerHTML = renderCalendarTaskEvent(event.data);
-    } else {
-      eventCard.innerHTML = renderCalendarReminderEvent(event.data);
-    }
+        eventCard.innerHTML = renderCalendarReminderEvent(event.data);
+    eventCard.dataset.reminderId = event.data.id;
+    eventCard.setAttribute("role", "button");
+    eventCard.setAttribute("tabindex", "0");
+    eventCard.title = "Ver actividad";
+
+    eventCard.addEventListener("click", () => {
+      goToCalendarReminderActivity(event.data);
+    });
+
+    eventCard.addEventListener("keydown", (eventKey) => {
+      if (eventKey.key === "Enter" || eventKey.key === " ") {
+        eventKey.preventDefault();
+        goToCalendarReminderActivity(event.data);
+      }
+    });
 
     list.appendChild(eventCard);
   });
@@ -805,7 +844,7 @@ function getCalendarEventsForMonth(year, month) {
       };
     });
 
-  return [...reminderEvents, ...taskEvents];
+    return reminderEvents;
 }
 
 function getCalendarEventsByDate(dateKey) {

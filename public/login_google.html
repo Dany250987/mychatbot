@@ -11,6 +11,10 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link 
+    rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -117,14 +121,26 @@
           >
 
           <label for="password">Contraseña</label>
-          <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            placeholder="Ingresa tu contraseña"
-            autocomplete="current-password"
-            required
-          >
+
+          <div class="login-password-group">
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              placeholder="Ingresa tu contraseña"
+              autocomplete="current-password"
+              required
+            >
+
+            <button 
+              type="button" 
+              class="login-toggle-password" 
+              onclick="toggleLoginPassword('password', this)"
+              aria-label="Mostrar u ocultar contraseña"
+            >
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
         </div>
 
         <button type="submit">Iniciar sesión</button>
@@ -150,6 +166,28 @@
     </section>
 
   </main>
+  <script>
+    function toggleLoginPassword(inputId, button) {
+      const input = document.getElementById(inputId);
+      const icon = button.querySelector("i");
+
+      if (!input || !icon) {
+        return;
+      }
+
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+        button.setAttribute("aria-label", "Ocultar contraseña");
+      } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+        button.setAttribute("aria-label", "Mostrar contraseña");
+      }
+    }
+</script>
 </body>
 </html>
 
