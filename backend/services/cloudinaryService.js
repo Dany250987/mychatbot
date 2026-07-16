@@ -154,9 +154,136 @@ async function deleteEvidenceFromCloudinary({
   );
 }
 
+function createEvidenceDownloadUrl({
+  publicId,
+  format,
+  resourceType,
+  deliveryType = 'authenticated',
+  expiresInSeconds = 60
+}) {
+  if (typeof publicId !== 'string' || publicId.trim() === '') {
+    throw new TypeError(
+      'El public_id de Cloudinary es obligatorio.'
+    );
+  }
+
+  if (typeof format !== 'string' || format.trim() === '') {
+    throw new TypeError(
+      'El formato de la evidencia es obligatorio.'
+    );
+  }
+
+  if (
+    typeof resourceType !== 'string' ||
+    resourceType.trim() === ''
+  ) {
+    throw new TypeError(
+      'El resource_type de Cloudinary es obligatorio.'
+    );
+  }
+
+  const parsedExpiration = Number.parseInt(
+    expiresInSeconds,
+    10
+  );
+
+  if (
+    !Number.isInteger(parsedExpiration) ||
+    parsedExpiration < 1 ||
+    parsedExpiration > 300
+  ) {
+    throw new TypeError(
+      'La vigencia de descarga debe estar entre 1 y 300 segundos.'
+    );
+  }
+
+  const cloudinaryClient = configureCloudinary();
+
+  const expiresAt =
+    Math.floor(Date.now() / 1000) + parsedExpiration;
+
+  return cloudinaryClient.utils.private_download_url(
+    publicId.trim(),
+    format.trim(),
+    {
+      resource_type: resourceType.trim(),
+      type: deliveryType.trim(),
+      expires_at: expiresAt,
+      attachment: false
+    }
+  );
+}
+
+async function downloadEvidenceFromCloudinary({
+  publicId,
+  format,
+  resourceType,
+  deliveryType = 'authenticated'
+}) {
+  const signedDownloadUrl = createEvidenceDownloadUrl({
+    publicId,
+    format,
+    resourceType,
+    deliveryType,
+    expiresInSeconds: 60
+  });
+
+  const abortController = new AbortController();
+
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, 15000);
+
+  try {
+    const response = await fetch(
+      signedDownloadUrl,
+      {
+        method: 'GET',
+        redirect: 'follow',
+        signal: abortController.signal
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Cloudinary respondió con estado ${response.status}.`
+      );
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    if (buffer.length === 0) {
+      throw new Error(
+        'Cloudinary devolvió una evidencia vacía.'
+      );
+    }
+
+    return {
+      buffer,
+      contentType:
+        response.headers.get('content-type') ||
+        'application/octet-stream',
+      bytes: buffer.length
+    };
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error(
+        'La descarga desde Cloudinary superó el tiempo permitido.'
+      );
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 module.exports = {
   configureCloudinary,
   pingCloudinary,
   uploadEvidenceBuffer,
-  deleteEvidenceFromCloudinary
+  deleteEvidenceFromCloudinary,
+  createEvidenceDownloadUrl,
+  downloadEvidenceFromCloudinary
 };
