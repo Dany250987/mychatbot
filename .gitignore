@@ -17,3 +17,5 @@ Thumbs.db
 
 # Variables de entorno y credenciales privadas
 .env
+# Evidencias cargadas por usuarios
+backend/uploads/
