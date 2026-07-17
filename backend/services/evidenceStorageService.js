@@ -10,6 +10,13 @@ const {
 const backendRoot = path.resolve(__dirname, '..');
 const projectRoot = path.resolve(__dirname, '../..');
 
+const evidenceExtensionByMimeType = Object.freeze({
+  'application/pdf': 'pdf',
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp'
+});
+
 function isPathInsideRoot(candidatePath, rootPath) {
   const relativePath = path.relative(
     rootPath,
@@ -105,6 +112,37 @@ function sanitizeEvidenceFileName(originalName) {
     fallbackName;
 }
 
+function getEvidenceFileExtension(file = {}) {
+  const mimeType = String(
+    file.mimetype || ''
+  ).toLowerCase();
+
+  const extensionFromMime =
+    evidenceExtensionByMimeType[mimeType];
+
+  if (extensionFromMime) {
+    return extensionFromMime;
+  }
+
+  const safeFileName =
+    sanitizeEvidenceFileName(file.originalname);
+
+  const extensionFromName = path
+    .extname(safeFileName)
+    .slice(1)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+
+  if (!extensionFromName) {
+    throw new TypeError(
+      'No se pudo determinar la extensi?n de la evidencia.'
+    );
+  }
+
+  return extensionFromName;
+}
+
+
 async function uploadEvidenceToCloudinary({
   file,
   userId
@@ -119,9 +157,13 @@ async function uploadEvidenceToCloudinary({
     );
   }
 
+  const fileExtension =
+    getEvidenceFileExtension(file);
+
   const uploadResult = await uploadEvidenceBuffer({
     buffer: file.buffer,
-    userId
+    userId,
+    fileExtension
   });
 
   return {
@@ -154,7 +196,7 @@ async function uploadEvidenceToCloudinary({
       uploadResult.type,
 
     evidence_cloudinary_format:
-      uploadResult.format
+      uploadResult.format || fileExtension
   };
 }
 

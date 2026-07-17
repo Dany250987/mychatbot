@@ -13,6 +13,10 @@ const router = express.Router();
 const connection = require('../db/connection');
 const authMiddleware = require('../middlewares/authMiddleware');
 
+const {
+  deleteStoredEvidenceCollection
+} = require('../services/evidenceStorageService');
+
 // ===============================
 // Helpers de autenticación
 // ===============================
@@ -868,10 +872,19 @@ router.delete('/account', authMiddleware, async (req, res) => {
 
     evidenceFiles = await queryAsync(
       `
-        SELECT evidence_file_path
+        SELECT
+          evidence_file_path,
+          evidence_storage_provider,
+          evidence_cloudinary_public_id,
+          evidence_cloudinary_resource_type,
+          evidence_cloudinary_delivery_type,
+          evidence_cloudinary_format
         FROM expenses
         WHERE user_id = ?
-          AND evidence_file_path IS NOT NULL
+          AND (
+            evidence_file_path IS NOT NULL
+            OR evidence_cloudinary_public_id IS NOT NULL
+          )
       `,
       [userId]
     );
@@ -923,8 +936,28 @@ router.delete('/account', authMiddleware, async (req, res) => {
     );
 
     await commitAsync();
+    transactionStarted = false;
 
-    deleteEvidenceFiles(evidenceFiles);
+    const evidenceDeletionResults =
+      await deleteStoredEvidenceCollection(
+        evidenceFiles
+      );
+
+    evidenceDeletionResults.forEach(
+      (result, index) => {
+        if (result.status === 'rejected') {
+          console.error(
+            '?? No se pudo eliminar una evidencia al borrar la cuenta:',
+            {
+              evidenceIndex: index,
+              error:
+                result.reason?.message ||
+                result.reason
+            }
+          );
+        }
+      }
+    );
 
     return res.json({
       mensaje: 'Cuenta eliminada correctamente.'

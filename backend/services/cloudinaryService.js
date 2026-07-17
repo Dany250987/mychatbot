@@ -56,7 +56,8 @@ async function pingCloudinary() {
 
 function uploadEvidenceBuffer({
   buffer,
-  userId
+  userId,
+  fileExtension
 }) {
   if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
     return Promise.reject(
@@ -72,20 +73,35 @@ function uploadEvidenceBuffer({
     );
   }
 
+  const normalizedExtension = String(
+    fileExtension || ''
+  )
+    .trim()
+    .toLowerCase()
+    .replace(/^\./, '');
+
+  if (!/^[a-z0-9]{1,10}$/.test(normalizedExtension)) {
+    return Promise.reject(
+      new TypeError(
+        'La extensi?n de la evidencia no es v?lida.'
+      )
+    );
+  }
+
   const cloudinaryClient = configureCloudinary();
 
   const publicId = [
     'danybot',
     'evidencias',
     `usuario-${parsedUserId}`,
-    randomUUID()
+    `${randomUUID()}.${normalizedExtension}`
   ].join('/');
 
   return new Promise((resolve, reject) => {
     const uploadStream =
       cloudinaryClient.uploader.upload_stream(
         {
-          resource_type: 'auto',
+          resource_type: 'raw',
           type: 'authenticated',
           public_id: publicId,
           overwrite: false,
@@ -113,7 +129,10 @@ function uploadEvidenceBuffer({
             return;
           }
 
-          resolve(result);
+          resolve({
+            ...result,
+            format: normalizedExtension
+          });
         }
       );
 

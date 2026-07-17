@@ -1,18 +1,21 @@
 // Importamos Express para crear rutas
 const express = require('express');
 
-// Importamos módulos para manejar rutas y archivos
-const path = require('path');
-const fs = require('fs');
-
 // Importamos multer para recibir archivos
 const multer = require('multer');
 
-// Importamos la conexión a MySQL
+// Importamos la conexión a la base de datos
 const connection = require('../db/connection');
 
 // Importamos el middleware de autenticación
 const authMiddleware = require('../middlewares/authMiddleware');
+
+// Importamos el servicio unificado de evidencias
+const {
+  uploadEvidenceToCloudinary,
+  readStoredEvidence,
+  deleteStoredEvidence
+} = require('../services/evidenceStorageService');
 
 // Creamos el router de Express
 const router = express.Router();
@@ -22,12 +25,6 @@ const router = express.Router();
 // Configuración de evidencias
 // ===============================
 
-const evidenceUploadDirectory = path.join(__dirname, '..', 'uploads', 'expenses');
-
-if (!fs.existsSync(evidenceUploadDirectory)) {
-  fs.mkdirSync(evidenceUploadDirectory, { recursive: true });
-}
-
 const allowedEvidenceMimeTypes = [
   'application/pdf',
   'image/jpeg',
@@ -35,26 +32,20 @@ const allowedEvidenceMimeTypes = [
   'image/webp'
 ];
 
-const evidenceStorage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, evidenceUploadDirectory);
-  },
-  filename: (req, file, callback) => {
-    const fileExtension = path.extname(file.originalname).toLowerCase();
-    const uniqueName = `expense-${Date.now()}-${Math.round(Math.random() * 1E9)}${fileExtension}`;
-
-    callback(null, uniqueName);
-  }
-});
-
 const evidenceUpload = multer({
-  storage: evidenceStorage,
+  storage: multer.memoryStorage(),
+
   limits: {
     fileSize: 5 * 1024 * 1024
   },
+
   fileFilter: (req, file, callback) => {
     if (!allowedEvidenceMimeTypes.includes(file.mimetype)) {
-      return callback(new Error('Tipo de archivo no permitido. Solo se permite PDF, JPG, PNG o WEBP.'));
+      return callback(
+        new Error(
+          'Tipo de archivo no permitido. Solo se permite PDF, JPG, PNG o WEBP.'
+        )
+      );
     }
 
     callback(null, true);
@@ -62,53 +53,100 @@ const evidenceUpload = multer({
 });
 
 function handleEvidenceUpload(req, res, next) {
-  evidenceUpload.single('evidence')(req, res, (error) => {
-    if (!error) {
-      return next();
-    }
+  evidenceUpload.single('evidence')(
+    req,
+    res,
+    (error) => {
+      if (!error) {
+        return next();
+      }
 
-    if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
+      if (
+        error instanceof multer.MulterError &&
+        error.code === 'LIMIT_FILE_SIZE'
+      ) {
+        return res.status(400).json({
+          mensaje:
+            'La evidencia no puede superar los 5 MB'
+        });
+      }
+
       return res.status(400).json({
-        mensaje: 'La evidencia no puede superar los 5 MB'
+        mensaje:
+          error.message ||
+          'No se pudo cargar la evidencia'
       });
     }
-
-    return res.status(400).json({
-      mensaje: error.message || 'No se pudo cargar la evidencia'
-    });
-  });
+  );
 }
 
-function getEvidenceData(file) {
-  if (!file) {
-    return {
-      evidence_file_name: null,
-      evidence_file_path: null,
-      evidence_mime_type: null,
-      evidence_size_bytes: null
-    };
-  }
-
+function createEmptyEvidenceData() {
   return {
-    evidence_file_name: file.filename,
-    evidence_file_path: path.join('uploads', 'expenses', file.filename).replace(/\\/g, '/'),
-    evidence_mime_type: file.mimetype,
-    evidence_size_bytes: file.size
+    evidence_file_name: null,
+    evidence_file_path: null,
+    evidence_mime_type: null,
+    evidence_size_bytes: null,
+    evidence_storage_provider: null,
+    evidence_cloudinary_asset_id: null,
+    evidence_cloudinary_public_id: null,
+    evidence_cloudinary_resource_type: null,
+    evidence_cloudinary_delivery_type: null,
+    evidence_cloudinary_format: null
   };
 }
 
-function deleteEvidenceFile(evidenceFilePath) {
-  if (!evidenceFilePath) {
+function hasStoredEvidence(evidence = {}) {
+  return Boolean(
+    evidence.evidence_file_path ||
+    evidence.evidence_cloudinary_public_id
+  );
+}
+
+function queryAsync(sql, values = []) {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      sql,
+      values,
+      (error, results) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve(results);
+      }
+    );
+  });
+}
+
+async function safelyDeleteStoredEvidence(
+  evidence,
+  context
+) {
+  if (!evidence || !hasStoredEvidence(evidence)) {
     return;
   }
 
-  const fullPath = path.join(__dirname, '..', evidenceFilePath);
+  try {
+    const deletionResult =
+      await deleteStoredEvidence(evidence);
 
-  fs.unlink(fullPath, (error) => {
-    if (error && error.code !== 'ENOENT') {
-      console.error('⚠️ No se pudo eliminar la evidencia:', error);
+    if (
+      deletionResult.result !== 'ok' &&
+      deletionResult.result !== 'not_found' &&
+      deletionResult.result !== 'skipped'
+    ) {
+      console.warn(
+        `⚠️ Resultado de eliminación de evidencia (${context}):`,
+        deletionResult
+      );
     }
-  });
+  } catch (error) {
+    console.error(
+      `⚠️ No se pudo eliminar la evidencia (${context}):`,
+      error
+    );
+  }
 }
 
 
@@ -118,12 +156,13 @@ function deleteEvidenceFile(evidenceFilePath) {
 
 router.get('/test', (req, res) => {
   res.json({
-    mensaje: '✅ Ruta de gastos funcionando correctamente'
+    mensaje:
+      '✅ Ruta de gastos funcionando correctamente'
   });
 });
 
 
-// A partir de aquí, todas las rutas de gastos requieren token
+// A partir de aquí todas las rutas requieren token
 router.use(authMiddleware);
 
 
@@ -132,11 +171,11 @@ router.use(authMiddleware);
 // GET http://localhost:3000/api/expenses
 // ===============================
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const userId = req.user.id;
 
   const sql = `
-    SELECT 
+    SELECT
       id,
       user_id,
       expense_date,
@@ -155,20 +194,28 @@ router.get('/', (req, res) => {
     ORDER BY expense_date DESC, id DESC
   `;
 
-  connection.query(sql, [userId], (err, results) => {
-    if (err) {
-      console.error('❌ Error al consultar gastos:', err);
+  try {
+    const results = await queryAsync(
+      sql,
+      [userId]
+    );
 
-      return res.status(500).json({
-        mensaje: 'Error al consultar los gastos'
-      });
-    }
-
-    res.json({
-      mensaje: 'Gastos consultados correctamente',
+    return res.json({
+      mensaje:
+        'Gastos consultados correctamente',
       gastos: results
     });
-  });
+  } catch (error) {
+    console.error(
+      '❌ Error al consultar gastos:',
+      error
+    );
+
+    return res.status(500).json({
+      mensaje:
+        'Error al consultar los gastos'
+    });
+  }
 });
 
 
@@ -177,53 +224,110 @@ router.get('/', (req, res) => {
 // GET http://localhost:3000/api/expenses/3/evidence
 // ===============================
 
-router.get('/:id/evidence', (req, res) => {
+router.get('/:id/evidence', async (req, res) => {
   const userId = req.user.id;
   const expenseId = req.params.id;
 
   const sql = `
-    SELECT 
+    SELECT
       evidence_file_name,
       evidence_file_path,
-      evidence_mime_type
+      evidence_mime_type,
+      evidence_size_bytes,
+      evidence_storage_provider,
+      evidence_cloudinary_public_id,
+      evidence_cloudinary_resource_type,
+      evidence_cloudinary_delivery_type,
+      evidence_cloudinary_format
     FROM expenses
     WHERE id = ? AND user_id = ?
   `;
 
-  connection.query(sql, [expenseId, userId], (err, results) => {
-    if (err) {
-      console.error('❌ Error al consultar evidencia:', err);
+  let results;
 
-      return res.status(500).json({
-        mensaje: 'Error al consultar la evidencia'
-      });
-    }
+  try {
+    results = await queryAsync(
+      sql,
+      [expenseId, userId]
+    );
+  } catch (error) {
+    console.error(
+      '❌ Error al consultar evidencia:',
+      error
+    );
 
-    if (results.length === 0) {
+    return res.status(500).json({
+      mensaje:
+        'Error al consultar la evidencia'
+    });
+  }
+
+  if (results.length === 0) {
+    return res.status(404).json({
+      mensaje:
+        'No se encontró el gasto'
+    });
+  }
+
+  const expense = results[0];
+
+  if (!hasStoredEvidence(expense)) {
+    return res.status(404).json({
+      mensaje:
+        'Este gasto no tiene evidencia registrada'
+    });
+  }
+
+  try {
+    const storedEvidence =
+      await readStoredEvidence(expense);
+
+    res.setHeader(
+      'Content-Type',
+      expense.evidence_mime_type ||
+      storedEvidence.contentType ||
+      'application/octet-stream'
+    );
+
+    res.setHeader(
+      'Content-Length',
+      storedEvidence.buffer.length
+    );
+
+    res.setHeader(
+      'Cache-Control',
+      'private, no-store'
+    );
+
+    res.setHeader(
+      'X-Content-Type-Options',
+      'nosniff'
+    );
+
+    return res
+      .status(200)
+      .send(storedEvidence.buffer);
+  } catch (error) {
+    if (
+      error.code === 'EVIDENCE_NOT_FOUND' ||
+      error.code === 'EVIDENCE_LOCATION_MISSING'
+    ) {
       return res.status(404).json({
-        mensaje: 'No se encontró el gasto'
+        mensaje:
+          'El archivo de evidencia no existe en el servidor'
       });
     }
 
-    const expense = results[0];
+    console.error(
+      '❌ Error al recuperar evidencia:',
+      error
+    );
 
-    if (!expense.evidence_file_path) {
-      return res.status(404).json({
-        mensaje: 'Este gasto no tiene evidencia registrada'
-      });
-    }
-
-    const fullPath = path.join(__dirname, '..', expense.evidence_file_path);
-
-    if (!fs.existsSync(fullPath)) {
-      return res.status(404).json({
-        mensaje: 'El archivo de evidencia no existe en el servidor'
-      });
-    }
-
-    res.setHeader('Content-Type', expense.evidence_mime_type || 'application/octet-stream');
-    res.sendFile(fullPath);
-  });
+    return res.status(502).json({
+      mensaje:
+        'No se pudo recuperar la evidencia almacenada'
+    });
+  }
 });
 
 
@@ -233,138 +337,232 @@ router.get('/:id/evidence', (req, res) => {
 // Campo archivo opcional: evidence
 // ===============================
 
-router.post('/', handleEvidenceUpload, (req, res) => {
-  const userId = req.user.id;
+router.post(
+  '/',
+  handleEvidenceUpload,
+  async (req, res) => {
+    const userId = req.user.id;
 
-  const {
-    expense_date,
-    category,
-    description,
-    amount,
-    source
-  } = req.body;
-
-  if (!expense_date || !category || !description || !amount) {
-    if (req.file) {
-      deleteEvidenceFile(req.file.path);
-    }
-
-    return res.status(400).json({
-      mensaje: 'Faltan datos obligatorios para registrar el gasto'
-    });
-  }
-
-  const evidenceData = getEvidenceData(req.file);
-
-  const sql = `
-    INSERT INTO expenses (
-      user_id,
+    const {
       expense_date,
       category,
       description,
       amount,
-      source,
-      evidence_file_name,
-      evidence_file_path,
-      evidence_mime_type,
-      evidence_size_bytes
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+      source
+    } = req.body;
 
-  const values = [
-    userId,
-    expense_date,
-    category,
-    description,
-    amount,
-    source || 'manual',
-    evidenceData.evidence_file_name,
-    evidenceData.evidence_file_path,
-    evidenceData.evidence_mime_type,
-    evidenceData.evidence_size_bytes
-  ];
-
-  connection.query(sql, values, (err, result) => {
-    if (err) {
-      console.error('❌ Error al registrar gasto:', err);
-
-      if (req.file) {
-        deleteEvidenceFile(req.file.path);
-      }
-
-      return res.status(500).json({
-        mensaje: 'Error al registrar el gasto'
+    if (
+      !expense_date ||
+      !category ||
+      !description ||
+      !amount
+    ) {
+      return res.status(400).json({
+        mensaje:
+          'Faltan datos obligatorios para registrar el gasto'
       });
     }
 
-    res.status(201).json({
-      mensaje: 'Gasto registrado correctamente',
-      gastoId: result.insertId
-    });
-  });
-});
+    let evidenceData =
+      createEmptyEvidenceData();
+
+    if (req.file) {
+      try {
+        evidenceData =
+          await uploadEvidenceToCloudinary({
+            file: req.file,
+            userId
+          });
+      } catch (error) {
+        console.error(
+          '❌ Error al almacenar evidencia en Cloudinary:',
+          error
+        );
+
+        return res.status(502).json({
+          mensaje:
+            'No se pudo almacenar la evidencia del gasto'
+        });
+      }
+    }
+
+    const sql = `
+      INSERT INTO expenses (
+        user_id,
+        expense_date,
+        category,
+        description,
+        amount,
+        source,
+        evidence_file_name,
+        evidence_file_path,
+        evidence_mime_type,
+        evidence_size_bytes,
+        evidence_storage_provider,
+        evidence_cloudinary_asset_id,
+        evidence_cloudinary_public_id,
+        evidence_cloudinary_resource_type,
+        evidence_cloudinary_delivery_type,
+        evidence_cloudinary_format
+      )
+      VALUES (
+        ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?
+      )
+    `;
+
+    const values = [
+      userId,
+      expense_date,
+      category,
+      description,
+      amount,
+      source || 'manual',
+      evidenceData.evidence_file_name,
+      evidenceData.evidence_file_path,
+      evidenceData.evidence_mime_type,
+      evidenceData.evidence_size_bytes,
+      evidenceData.evidence_storage_provider,
+      evidenceData.evidence_cloudinary_asset_id,
+      evidenceData.evidence_cloudinary_public_id,
+      evidenceData.evidence_cloudinary_resource_type,
+      evidenceData.evidence_cloudinary_delivery_type,
+      evidenceData.evidence_cloudinary_format
+    ];
+
+    try {
+      const result = await queryAsync(
+        sql,
+        values
+      );
+
+      return res.status(201).json({
+        mensaje:
+          'Gasto registrado correctamente',
+        gastoId: result.insertId
+      });
+    } catch (error) {
+      console.error(
+        '❌ Error al registrar gasto:',
+        error
+      );
+
+      if (req.file) {
+        await safelyDeleteStoredEvidence(
+          evidenceData,
+          'registro de gasto fallido'
+        );
+      }
+
+      return res.status(500).json({
+        mensaje:
+          'Error al registrar el gasto'
+      });
+    }
+  }
+);
 
 
 // ===============================
 // Editar gasto con evidencia opcional
 // PUT http://localhost:3000/api/expenses/3
-// Si no se envía evidencia, conserva la evidencia anterior
+// Si no se envía evidencia, conserva la anterior
 // ===============================
 
-router.put('/:id', handleEvidenceUpload, (req, res) => {
-  const userId = req.user.id;
-  const expenseId = req.params.id;
+router.put(
+  '/:id',
+  handleEvidenceUpload,
+  async (req, res) => {
+    const userId = req.user.id;
+    const expenseId = req.params.id;
 
-  const {
-    expense_date,
-    category,
-    description,
-    amount,
-    source
-  } = req.body;
+    const {
+      expense_date,
+      category,
+      description,
+      amount,
+      source
+    } = req.body;
 
-  if (!expense_date || !category || !description || !amount) {
-    if (req.file) {
-      deleteEvidenceFile(req.file.path);
+    if (
+      !expense_date ||
+      !category ||
+      !description ||
+      !amount
+    ) {
+      return res.status(400).json({
+        mensaje:
+          'Faltan datos obligatorios para actualizar el gasto'
+      });
     }
 
-    return res.status(400).json({
-      mensaje: 'Faltan datos obligatorios para actualizar el gasto'
-    });
-  }
+    const selectSql = `
+      SELECT
+        evidence_file_name,
+        evidence_file_path,
+        evidence_mime_type,
+        evidence_size_bytes,
+        evidence_storage_provider,
+        evidence_cloudinary_asset_id,
+        evidence_cloudinary_public_id,
+        evidence_cloudinary_resource_type,
+        evidence_cloudinary_delivery_type,
+        evidence_cloudinary_format
+      FROM expenses
+      WHERE id = ? AND user_id = ?
+    `;
 
-  const selectSql = `
-    SELECT evidence_file_path
-    FROM expenses
-    WHERE id = ? AND user_id = ?
-  `;
+    let selectResults;
 
-  connection.query(selectSql, [expenseId, userId], (selectErr, selectResults) => {
-    if (selectErr) {
-      console.error('❌ Error al consultar gasto antes de actualizar:', selectErr);
-
-      if (req.file) {
-        deleteEvidenceFile(req.file.path);
-      }
+    try {
+      selectResults = await queryAsync(
+        selectSql,
+        [expenseId, userId]
+      );
+    } catch (error) {
+      console.error(
+        '❌ Error al consultar gasto antes de actualizar:',
+        error
+      );
 
       return res.status(500).json({
-        mensaje: 'Error al consultar el gasto'
+        mensaje:
+          'Error al consultar el gasto'
       });
     }
 
     if (selectResults.length === 0) {
-      if (req.file) {
-        deleteEvidenceFile(req.file.path);
-      }
-
       return res.status(404).json({
-        mensaje: 'No se encontró el gasto para actualizar'
+        mensaje:
+          'No se encontró el gasto para actualizar'
       });
     }
 
-    const previousEvidencePath = selectResults[0].evidence_file_path;
-    const evidenceData = getEvidenceData(req.file);
+    const previousEvidence =
+      selectResults[0];
+
+    let newEvidence = null;
+
+    if (req.file) {
+      try {
+        newEvidence =
+          await uploadEvidenceToCloudinary({
+            file: req.file,
+            userId
+          });
+      } catch (error) {
+        console.error(
+          '❌ Error al almacenar nueva evidencia:',
+          error
+        );
+
+        return res.status(502).json({
+          mensaje:
+            'No se pudo almacenar la nueva evidencia'
+        });
+      }
+    }
 
     let sql = `
       UPDATE expenses
@@ -384,19 +582,31 @@ router.put('/:id', handleEvidenceUpload, (req, res) => {
       source || 'manual'
     ];
 
-    if (req.file) {
+    if (newEvidence) {
       sql += `,
         evidence_file_name = ?,
         evidence_file_path = ?,
         evidence_mime_type = ?,
-        evidence_size_bytes = ?
+        evidence_size_bytes = ?,
+        evidence_storage_provider = ?,
+        evidence_cloudinary_asset_id = ?,
+        evidence_cloudinary_public_id = ?,
+        evidence_cloudinary_resource_type = ?,
+        evidence_cloudinary_delivery_type = ?,
+        evidence_cloudinary_format = ?
       `;
 
       values.push(
-        evidenceData.evidence_file_name,
-        evidenceData.evidence_file_path,
-        evidenceData.evidence_mime_type,
-        evidenceData.evidence_size_bytes
+        newEvidence.evidence_file_name,
+        newEvidence.evidence_file_path,
+        newEvidence.evidence_mime_type,
+        newEvidence.evidence_size_bytes,
+        newEvidence.evidence_storage_provider,
+        newEvidence.evidence_cloudinary_asset_id,
+        newEvidence.evidence_cloudinary_public_id,
+        newEvidence.evidence_cloudinary_resource_type,
+        newEvidence.evidence_cloudinary_delivery_type,
+        newEvidence.evidence_cloudinary_format
       );
     }
 
@@ -404,105 +614,168 @@ router.put('/:id', handleEvidenceUpload, (req, res) => {
       WHERE id = ? AND user_id = ?
     `;
 
-    values.push(expenseId, userId);
+    values.push(
+      expenseId,
+      userId
+    );
 
-    connection.query(sql, values, (updateErr, result) => {
-      if (updateErr) {
-        console.error('❌ Error al actualizar gasto:', updateErr);
+    let result;
 
-        if (req.file) {
-          deleteEvidenceFile(req.file.path);
-        }
+    try {
+      result = await queryAsync(
+        sql,
+        values
+      );
+    } catch (error) {
+      console.error(
+        '❌ Error al actualizar gasto:',
+        error
+      );
 
-        return res.status(500).json({
-          mensaje: 'Error al actualizar el gasto'
-        });
+      if (newEvidence) {
+        await safelyDeleteStoredEvidence(
+          newEvidence,
+          'actualización de gasto fallida'
+        );
       }
 
-      if (result.affectedRows === 0) {
-        if (req.file) {
-          deleteEvidenceFile(req.file.path);
-        }
-
-        return res.status(404).json({
-          mensaje: 'No se encontró el gasto para actualizar'
-        });
-      }
-
-      if (req.file && previousEvidencePath) {
-        deleteEvidenceFile(previousEvidencePath);
-      }
-
-      res.json({
-        mensaje: 'Gasto actualizado correctamente'
+      return res.status(500).json({
+        mensaje:
+          'Error al actualizar el gasto'
       });
+    }
+
+    if (result.affectedRows === 0) {
+      if (newEvidence) {
+        await safelyDeleteStoredEvidence(
+          newEvidence,
+          'gasto no encontrado al actualizar'
+        );
+      }
+
+      return res.status(404).json({
+        mensaje:
+          'No se encontró el gasto para actualizar'
+      });
+    }
+
+    if (
+      newEvidence &&
+      hasStoredEvidence(previousEvidence)
+    ) {
+      await safelyDeleteStoredEvidence(
+        previousEvidence,
+        'reemplazo de evidencia'
+      );
+    }
+
+    return res.json({
+      mensaje:
+        'Gasto actualizado correctamente'
     });
-  });
-});
+  }
+);
 
 
 // ===============================
 // Eliminar gasto
 // DELETE http://localhost:3000/api/expenses/3
-// También elimina la evidencia física si existe
+// También elimina la evidencia almacenada
 // ===============================
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const userId = req.user.id;
   const expenseId = req.params.id;
 
   const selectSql = `
-    SELECT evidence_file_path
+    SELECT
+      evidence_file_name,
+      evidence_file_path,
+      evidence_mime_type,
+      evidence_size_bytes,
+      evidence_storage_provider,
+      evidence_cloudinary_asset_id,
+      evidence_cloudinary_public_id,
+      evidence_cloudinary_resource_type,
+      evidence_cloudinary_delivery_type,
+      evidence_cloudinary_format
     FROM expenses
     WHERE id = ? AND user_id = ?
   `;
 
-  connection.query(selectSql, [expenseId, userId], (selectErr, selectResults) => {
-    if (selectErr) {
-      console.error('❌ Error al consultar gasto antes de eliminar:', selectErr);
+  let selectResults;
 
-      return res.status(500).json({
-        mensaje: 'Error al consultar el gasto'
-      });
-    }
+  try {
+    selectResults = await queryAsync(
+      selectSql,
+      [expenseId, userId]
+    );
+  } catch (error) {
+    console.error(
+      '❌ Error al consultar gasto antes de eliminar:',
+      error
+    );
 
-    if (selectResults.length === 0) {
-      return res.status(404).json({
-        mensaje: 'No se encontró el gasto para eliminar'
-      });
-    }
-
-    const evidenceFilePath = selectResults[0].evidence_file_path;
-
-    const deleteSql = `
-      DELETE FROM expenses
-      WHERE id = ? AND user_id = ?
-    `;
-
-    connection.query(deleteSql, [expenseId, userId], (deleteErr, result) => {
-      if (deleteErr) {
-        console.error('❌ Error al eliminar gasto:', deleteErr);
-
-        return res.status(500).json({
-          mensaje: 'Error al eliminar el gasto'
-        });
-      }
-
-      if (result.affectedRows === 0) {
-        return res.status(404).json({
-          mensaje: 'No se encontró el gasto para eliminar'
-        });
-      }
-
-      deleteEvidenceFile(evidenceFilePath);
-
-      res.json({
-        mensaje: 'Gasto eliminado correctamente'
-      });
+    return res.status(500).json({
+      mensaje:
+        'Error al consultar el gasto'
     });
+  }
+
+  if (selectResults.length === 0) {
+    return res.status(404).json({
+      mensaje:
+        'No se encontró el gasto para eliminar'
+    });
+  }
+
+  const storedEvidence =
+    selectResults[0];
+
+  const deleteSql = `
+    DELETE FROM expenses
+    WHERE id = ? AND user_id = ?
+  `;
+
+  let result;
+
+  try {
+    result = await queryAsync(
+      deleteSql,
+      [expenseId, userId]
+    );
+  } catch (error) {
+    console.error(
+      '❌ Error al eliminar gasto:',
+      error
+    );
+
+    return res.status(500).json({
+      mensaje:
+        'Error al eliminar el gasto'
+    });
+  }
+
+  if (result.affectedRows === 0) {
+    return res.status(404).json({
+      mensaje:
+        'No se encontró el gasto para eliminar'
+    });
+  }
+
+  if (hasStoredEvidence(storedEvidence)) {
+    await safelyDeleteStoredEvidence(
+      storedEvidence,
+      'eliminación de gasto'
+    );
+  }
+
+  return res.json({
+    mensaje:
+      'Gasto eliminado correctamente'
   });
 });
 
 
-// Exportamos el router para poder usarlo en server.js
+// Exportamos el router para usarlo en server.js
 module.exports = router;
