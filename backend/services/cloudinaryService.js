@@ -97,6 +97,12 @@ function uploadEvidenceBuffer({
     `${randomUUID()}.${normalizedExtension}`
   ].join('/');
 
+  const assetFolder = [
+    'danybot',
+    'evidencias',
+    `usuario-${parsedUserId}`
+  ].join('/');
+
   return new Promise((resolve, reject) => {
     const uploadStream =
       cloudinaryClient.uploader.upload_stream(
@@ -104,6 +110,7 @@ function uploadEvidenceBuffer({
           resource_type: 'raw',
           type: 'authenticated',
           public_id: publicId,
+          asset_folder: assetFolder,
           overwrite: false,
           use_filename: false,
           unique_filename: false
