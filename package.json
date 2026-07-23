@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^7.6.7"
+  },
+  "scripts": {
+    "start": "node backend/server.js"
   }
 }
