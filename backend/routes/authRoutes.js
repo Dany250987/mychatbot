@@ -132,35 +132,60 @@ async function verifyGoogleCredential(credential) {
 // ===============================
 
 
-function beginTransactionAsync() {
+function getConnectionAsync() {
   return new Promise((resolve, reject) => {
-    connection.beginTransaction((error) => {
-      if (error) {
-        reject(error);
-        return;
-      }
+    connection.getConnection(
+      (error, poolConnection) => {
+        if (error) {
+          reject(error);
+          return;
+        }
 
-      resolve();
-    });
+        resolve(poolConnection);
+      }
+    );
   });
 }
 
-function commitAsync() {
+function beginTransactionAsync(
+  transactionConnection
+) {
   return new Promise((resolve, reject) => {
-    connection.commit((error) => {
-      if (error) {
-        reject(error);
-        return;
-      }
+    transactionConnection.beginTransaction(
+      (error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
 
-      resolve();
-    });
+        resolve();
+      }
+    );
   });
 }
 
-function rollbackAsync() {
+function commitAsync(
+  transactionConnection
+) {
+  return new Promise((resolve, reject) => {
+    transactionConnection.commit(
+      (error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve();
+      }
+    );
+  });
+}
+
+function rollbackAsync(
+  transactionConnection
+) {
   return new Promise((resolve) => {
-    connection.rollback(() => {
+    transactionConnection.rollback(() => {
       resolve();
     });
   });
@@ -210,16 +235,24 @@ function deleteEvidenceFiles(evidenceFiles = []) {
 // ===============================
 // Registro clásico
 // ===============================
-function queryAsync(sql, params = []) {
+function queryAsync(
+  sql,
+  params = [],
+  queryExecutor = connection
+) {
   return new Promise((resolve, reject) => {
-    connection.query(sql, params, (error, results) => {
-      if (error) {
-        reject(error);
-        return;
-      }
+    queryExecutor.query(
+      sql,
+      params,
+      (error, results) => {
+        if (error) {
+          reject(error);
+          return;
+        }
 
-      resolve(results);
-    });
+        resolve(results);
+      }
+    );
   });
 }
 
@@ -838,6 +871,7 @@ router.delete('/account', authMiddleware, async (req, res) => {
   }
 
   let transactionStarted = false;
+  let transactionConnection = null;
   let evidenceFiles = [];
 
   try {
@@ -889,9 +923,16 @@ router.delete('/account', authMiddleware, async (req, res) => {
       [userId]
     );
 
-    await beginTransactionAsync();
+    transactionConnection =
+      await getConnectionAsync();
+
+    await beginTransactionAsync(
+      transactionConnection
+    );
+
     transactionStarted = true;
-        await queryAsync(
+
+    await queryAsync(
       `
         INSERT INTO deleted_accounts (email_hash, reason)
         VALUES (?, ?)
@@ -902,41 +943,54 @@ router.delete('/account', authMiddleware, async (req, res) => {
       [
         getEmailHash(user.email),
         'user_deleted_account'
-      ]
+      ],
+      transactionConnection
     );
 
     await queryAsync(
       'DELETE FROM additional_incomes WHERE user_id = ?',
-      [userId]
+      [userId],
+      transactionConnection
     );
 
     await queryAsync(
       'DELETE FROM monthly_incomes WHERE user_id = ?',
-      [userId]
+      [userId],
+      transactionConnection
     );
 
     await queryAsync(
       'DELETE FROM expenses WHERE user_id = ?',
-      [userId]
+      [userId],
+      transactionConnection
     );
 
     await queryAsync(
       'DELETE FROM reminders WHERE user_id = ?',
-      [userId]
+      [userId],
+      transactionConnection
     );
 
     await queryAsync(
       'DELETE FROM tasks WHERE user_id = ?',
-      [userId]
+      [userId],
+      transactionConnection
     );
 
     await queryAsync(
       'DELETE FROM users WHERE id = ?',
-      [userId]
+      [userId],
+      transactionConnection
     );
 
-    await commitAsync();
+    await commitAsync(
+      transactionConnection
+    );
+
     transactionStarted = false;
+
+    transactionConnection.release();
+    transactionConnection = null;
 
     const evidenceDeletionResults =
       await deleteStoredEvidenceCollection(
@@ -966,8 +1020,20 @@ router.delete('/account', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('❌ Error al eliminar cuenta:', error);
 
-    if (transactionStarted) {
-      await rollbackAsync();
+    if (
+      transactionStarted &&
+      transactionConnection
+    ) {
+      await rollbackAsync(
+        transactionConnection
+      );
+
+      transactionStarted = false;
+    }
+
+    if (transactionConnection) {
+      transactionConnection.release();
+      transactionConnection = null;
     }
 
     return res.status(500).json({
