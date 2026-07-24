@@ -581,50 +581,6 @@ function renderCalendarSection() {
   }
 }
 
-async function loadCalendarTasks() {
-  const token = getDashboardReminderAuthToken();
-
-  if (!token) {
-    return;
-  }
-
-  try {
-    const response = await fetch(TASKS_API_URL, {
-      headers: getDashboardReminderAuthHeaders()
-    });
-
-    const data = await parseJsonResponse(response);
-
-    if (response.status === 401) {
-      await handleDashboardReminderUnauthorizedSession(data);
-      return;
-    }
-
-    if (!response.ok) {
-      console.error("No se pudieron cargar las tareas para el calendario:", data);
-      tasks = [];
-      return;
-    }
-
-    tasks = (data.tareas || []).map((task) => {
-      return {
-        id: task.id,
-        user_id: task.user_id,
-        title: task.title,
-        description: task.description || "",
-        category: task.category || "Personal",
-        priority: task.priority || "Media",
-        dueDate: task.due_date ? String(task.due_date).split("T")[0] : "",
-        status: task.status,
-        completedAt: task.completed_at || null
-      };
-    });
-
-  } catch (error) {
-    console.error("Error al cargar tareas para el calendario:", error);
-    tasks = [];
-  }
-}
 
 function renderCalendarView() {
   renderCalendarGrid();
@@ -804,47 +760,25 @@ function renderCalendarEventsList() {
 function getCalendarEventsForMonth(year, month) {
   const reminderEvents = reminders
     .filter((reminder) => {
-      if (!shouldShowReminderInCalendar(reminder)) {
-        return false;
-      }
-
       const reminderDate = getReminderDateValue(reminder.reminder_date);
       const date = new Date(`${reminderDate}T00:00:00`);
 
-      return date.getFullYear() === year && date.getMonth() === month;
+      return reminder.status === "activo"
+        && reminderDate
+        && date.getFullYear() === year
+        && date.getMonth() === month;
     })
     .map((reminder) => {
       return {
         type: "reminder",
         date: getReminderDateValue(reminder.reminder_date),
-        time: reminder.reminder_time || "00:00:00",
+        time: reminder.reminder_time || "23:59:00",
         category: reminder.category || "Personal",
         data: reminder
       };
     });
 
-  const taskEvents = tasks
-    .filter((task) => {
-      if (!shouldShowTaskInCalendar(task)) {
-        return false;
-      }
-
-      const taskDate = getTaskCalendarDate(task);
-      const date = new Date(`${taskDate}T00:00:00`);
-
-      return date.getFullYear() === year && date.getMonth() === month;
-    })
-    .map((task) => {
-      return {
-        type: "task",
-        date: getTaskCalendarDate(task),
-        time: "23:59:00",
-        category: task.category || "Personal",
-        data: task
-      };
-    });
-
-    return reminderEvents;
+  return reminderEvents;
 }
 
 function getCalendarEventsByDate(dateKey) {
@@ -858,41 +792,9 @@ function getCalendarEventsByDate(dateKey) {
     };
   });
 
-  const taskEvents = tasks
-    .filter((task) => {
-      return shouldShowTaskInCalendar(task)
-        && getTaskCalendarDate(task) === dateKey;
-    })
-    .map((task) => {
-      return {
-        type: "task",
-        date: getTaskCalendarDate(task),
-        time: "23:59:00",
-        category: task.category || "Personal",
-        data: task
-      };
-    });
-
-  return [...reminderEvents, ...taskEvents];
+  return reminderEvents;
 }
 
-function shouldShowTaskInCalendar(task) {
-  const status = String(task.status || "").toLowerCase();
-
-  return status === "pendiente" && Boolean(getTaskCalendarDate(task));
-}
-
-function getTaskCalendarDate(task) {
-  if (task.dueDate) {
-    return String(task.dueDate).split("T")[0];
-  }
-
-  if (task.due_date) {
-    return String(task.due_date).split("T")[0];
-  }
-
-  return "";
-}
 
 function renderCalendarReminderEvent(reminder) {
   return `
@@ -924,40 +826,6 @@ function renderCalendarReminderEvent(reminder) {
     </div>
   `;
 }
-
-function renderCalendarTaskEvent(task) {
-  const taskDate = getTaskCalendarDate(task);
-
-  return `
-    <div class="calendar-event-date">
-      <strong>${formatCalendarDay(taskDate)}</strong>
-      <span>${formatCalendarMonth(taskDate)}</span>
-    </div>
-
-    <div class="calendar-event-info">
-      <span class="calendar-event-category">
-        <i class="fa-solid fa-list-check"></i>
-        Tarea · ${task.category || "Personal"}
-      </span>
-
-      <h4>${task.title}</h4>
-      <p>${task.description || "Tarea pendiente por completar."}</p>
-
-      <div class="calendar-event-meta">
-        <span>
-          <i class="fa-solid fa-flag"></i>
-          Prioridad ${task.priority || "Media"}
-        </span>
-
-        <span class="repeat-type-pill">
-          <i class="fa-solid fa-hourglass-half"></i>
-          Pendiente
-        </span>
-      </div>
-    </div>
-  `;
-}
-
 
 function renderCalendarDayIndicators(dayReminders) {
   if (dayReminders.length === 0) {
