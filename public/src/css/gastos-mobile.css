@@ -1,0 +1,23 @@
+/* ==================================================
+   DANYBOT - GASTOS MÓVIL
+   ==================================================
+
+   Este archivo contendrá únicamente la presentación
+   móvil del módulo de gastos.
+
+   La lógica y la interfaz web permanecen en:
+
+   - gastos.js
+   - gastos.css
+
+   Orden previsto:
+
+   1. Estructura móvil
+   2. Encabezado Movimientos
+   3. Filtros
+   4. Listado compacto
+   5. Botón flotante
+   6. Modal de gasto
+   7. Menú inferior
+   8. Pantallas muy pequeñas
+   ================================================== */

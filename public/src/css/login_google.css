@@ -217,7 +217,7 @@ body {
 .visual-mini-cards span {
   display: block;
   color: rgba(255, 255, 255, 0.76);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 /* ===============================
@@ -266,7 +266,7 @@ body {
   border-radius: 999px;
   background: #fff1ef;
   color: var(--deep-red);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -470,7 +470,7 @@ button[type="submit"]:hover {
   }
 
   .visual-badge {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .visual-content {

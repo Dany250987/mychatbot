@@ -57,13 +57,13 @@
 }
 
 .sidebar-brand-text strong {
-  font-size: 19px;
+  font-size: 11px;
   font-weight: 800;
   color: #ffffff;
 }
 
 .sidebar-brand-text small {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   color: #ffc7c1;
 }
@@ -98,7 +98,7 @@
   background: linear-gradient(135deg, #ff8478, #cb4c46);
   border: 3px solid #ffc7c1;
   color: #ffffff;
-  font-size: 22px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 1px;
   line-height: 1;
@@ -164,7 +164,7 @@
 }
 
 /* =========================
-   TABLET Y MÓVIL
+   TABLET Y MÃ“VIL
 ========================= */
 
 @media (max-width: 900px) {
@@ -203,7 +203,7 @@
   }
 
   .sidebar-user-initial {
-    font-size: 17px;
+    font-size: 11px;
     border-width: 2px;
   }
 
@@ -212,7 +212,7 @@
   }
 
   .sidebar-brand-text strong {
-    font-size: 16px;
+    font-size: 11px;
   }
 
   .sidebar-brand-text small {
@@ -241,7 +241,7 @@
     justify-content: center;
     padding: 11px 14px;
     border-radius: 999px;
-    font-size: 13px;
+    font-size: 11px;
     gap: 8px;
     flex-shrink: 0;
   }
@@ -254,7 +254,7 @@
   .sidebar-link i,
   .sidebar-logout i {
     width: auto;
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .sidebar-logout {
@@ -263,7 +263,7 @@
 }
 
 /* =========================
-   CELULARES PEQUEÑOS
+   CELULARES PEQUEÃ‘OS
 ========================= */
 
 @media (max-width: 480px) {
@@ -285,11 +285,11 @@
   }
 
   .sidebar-brand-text strong {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .sidebar-brand-text small {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .sidebar-menu {
@@ -300,13 +300,13 @@
   .sidebar-logout {
     min-height: 42px;
     padding: 10px 12px;
-    font-size: 12px;
+    font-size: 11px;
   }
 }
 
 /* ===============================
-   AJUSTE FINAL SIDEBAR MÓVIL
-   Muestra todos los módulos sin cortar botones
+   AJUSTE FINAL SIDEBAR MÃ“VIL
+   Muestra todos los mÃ³dulos sin cortar botones
 ================================ */
 
 @media (max-width: 900px) {
@@ -326,7 +326,7 @@
     justify-content: center;
     padding: 10px 8px;
     border-radius: 16px;
-    font-size: 12px;
+    font-size: 11px;
     gap: 7px;
   }
 
@@ -350,7 +350,7 @@
   }
 }
 
-/* Ajuste móvil Android/Capacitor: zona segura compacta */
+/* Ajuste mÃ³vil Android/Capacitor: zona segura compacta */
 @media (max-width: 900px) {
   .app-layout {
     min-height: 100dvh;
@@ -382,11 +382,11 @@
   }
 
   .sidebar-brand-text strong {
-    font-size: 15px;
+    font-size: 11px;
   }
 
   .sidebar-brand-text small {
-    font-size: 10.5px;
+    font-size: 11px;
   }
 
   .sidebar-menu {
@@ -397,13 +397,13 @@
   .sidebar-logout {
     min-height: 42px;
     padding: 9px 8px;
-    font-size: 13px;
+    font-size: 11px;
     border-radius: 15px;
   }
 
   .sidebar-link i,
   .sidebar-logout i {
-    font-size: 13px;
+    font-size: 11px;
   }
 }
 
@@ -431,6 +431,6 @@
   .sidebar-logout {
     min-height: 40px;
     padding: 8px 7px;
-    font-size: 12.5px;
+    font-size: 11px;
   }
 }

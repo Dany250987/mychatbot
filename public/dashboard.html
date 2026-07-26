@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -11,6 +11,8 @@
 
   <link rel="stylesheet" href="./src/css/sidebar.css">
   <link rel="stylesheet" href="./src/css/dashboard.css">
+<link rel="stylesheet" href="./src/css/dashboard-mobile.css">
+  <link rel="stylesheet" href="./src/css/dashboard-mobile-home.css">
   <script src="src/js/api-config.js"></script>
   <script src="src/js/mobile-notifications.js"></script>
   <script src="src/js/mobile-speech.js"></script>
@@ -42,7 +44,7 @@
       <header class="main-header">
         <div class="user-info">
           <img id="user-avatar" class="avatar" src="" alt="Avatar" style="display: none;">
-          <h1 id="section-title">Bienvenida ðŸ’«</h1>
+          <h1 id="section-title">Bienvenid@</h1>
         </div>
 
         <div class="date-time" id="datetime"></div>
@@ -82,7 +84,7 @@
       <!-- Resumen principal -->
       <section class="cards-overview">
 
-        <div class="card dashboard-card">
+        <div class="card dashboard-card mobile-card-hidden mobile-card-total">
           <div class="card-icon tasks-icon">
             <i class="fa-solid fa-list-check"></i>
           </div>
@@ -93,7 +95,7 @@
           </div>
         </div>
 
-        <div class="card dashboard-card">
+        <div class="card dashboard-card mobile-card-featured mobile-card-pending">
           <div class="card-icon pending-icon">
             <i class="fa-solid fa-clock"></i>
           </div>
@@ -104,7 +106,7 @@
           </div>
         </div>
 
-        <div class="card dashboard-card">
+        <div class="card dashboard-card mobile-card-featured mobile-card-events">
           <div class="card-icon events-icon">
             <i class="fa-solid fa-calendar-check"></i>
           </div>
@@ -115,7 +117,7 @@
           </div>
         </div>
 
-        <div class="card dashboard-card">
+        <div class="card dashboard-card mobile-card-hidden mobile-card-reminders">
           <div class="card-icon reminders-icon">
             <i class="fa-solid fa-bell"></i>
           </div>
@@ -126,7 +128,7 @@
           </div>
         </div>
 
-        <div class="card dashboard-card">
+        <div class="card dashboard-card mobile-card-featured mobile-card-expenses">
           <div class="card-icon expenses-icon">
             <i class="fa-solid fa-wallet"></i>
           </div>
@@ -137,7 +139,7 @@
           </div>
         </div>
 
-        <div class="card dashboard-card">
+        <div class="card dashboard-card mobile-card-hidden mobile-card-income">
           <div class="card-icon income-icon">
             <i class="fa-solid fa-piggy-bank"></i>
           </div>
@@ -148,7 +150,7 @@
           </div>
         </div>
 
-        <div class="card dashboard-card savings-card">
+        <div class="card dashboard-card savings-card mobile-card-featured mobile-card-savings">
           <div class="card-icon savings-icon">
             <i class="fa-solid fa-sack-dollar"></i>
           </div>
@@ -164,34 +166,78 @@
       <!-- Contenido principal -->
       <section id="section-content" class="section-content">
 
-        <div class="welcome-panel">
+        <!-- Inicio principal -->
+        <div class="dashboard-home">
 
-          <div class="welcome-text">
-            <span class="welcome-badge">Panel principal</span>
+          <!-- Próximas actividades -->
+          <section class="upcoming-activities-section">
 
-            <h2>Organiza tu día con tus actividades</h2>
+            <div class="dashboard-section-heading">
+              <div>
+                <span class="dashboard-section-eyebrow">Agenda</span>
+                <h2>Próximas actividades</h2>
+              </div>
 
-            <p>
-              Consulta tus actividades, avisos y resumen financiero del mes desde un solo lugar.
-            </p>
-
-            <div class="quick-actions">
-              <a href="./gastos.html" class="quick-action primary-action">
-                <i class="fa-solid fa-wallet"></i>
-                Ver gastos
-              </a>
-
-              <button type="button" class="quick-action" onclick="showSection('recordatorios')">
-                <i class="fa-solid fa-plus"></i>
-                Nueva actividad
-              </button>
-
-              <button type="button" class="quick-action" onclick="showSection('calendario')">
-                <i class="fa-solid fa-calendar-days"></i>
-                Ver calendario
+              <button
+                type="button"
+                class="dashboard-section-link"
+                onclick="showSection('recordatorios')"
+              >
+                Ver todas
               </button>
             </div>
-          </div>
+
+            <div
+              id="dashboardUpcomingActivities"
+              class="dashboard-upcoming-list"
+            >
+              <div class="dashboard-empty-state">
+                <div class="dashboard-empty-icon">
+                  <i class="fa-solid fa-calendar-check"></i>
+                </div>
+
+                <div>
+                  <h3>Tu agenda aparecerá aquí</h3>
+                  <p>Las actividades más próximas se mostrarán en esta sección.</p>
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- Resumen del día -->
+          <section class="daily-summary-section">
+
+            <div class="dashboard-section-heading">
+              <div>
+                <span class="dashboard-section-eyebrow">Hoy</span>
+                <h2>Resumen del día</h2>
+              </div>
+            </div>
+
+            <div class="daily-summary-grid">
+
+              <article class="daily-summary-item">
+                <i class="fa-solid fa-list-check daily-summary-icon"></i>
+                <span>Actividades</span>
+                <strong id="dailyTasksCount">0</strong>
+              </article>
+
+              <article class="daily-summary-item">
+                <i class="fa-solid fa-calendar-days daily-summary-icon"></i>
+                <span>Eventos</span>
+                <strong id="dailyEventsCount">0</strong>
+              </article>
+
+              <article class="daily-summary-item">
+                <i class="fa-solid fa-bell daily-summary-icon"></i>
+                <span>Avisos</span>
+                <strong id="dailyRemindersCount">0</strong>
+              </article>
+
+            </div>
+
+          </section>
 
         </div>
 

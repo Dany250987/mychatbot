@@ -19,3 +19,5 @@ Thumbs.db
 .env
 # Evidencias cargadas por usuarios
 backend/uploads/
+_respaldos_fuera_de_public/
+*.bak

@@ -64,7 +64,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const quickReminderButton = document.getElementById("quickReminderButton");
 
   if (title) {
-    title.textContent = `Bienvenida, ${user.name || user.email || "Usuario"}`;
+    title.textContent = `Hola, ${user.name || user.email || "Usuario"}`;
   }
 
   if (user.picture && avatar) {
@@ -157,8 +157,8 @@ function openSectionFromHash() {
       }
 
       title.textContent = user
-        ? `Bienvenida, ${user.name || user.email || "Usuario"}`
-        : "Bienvenida 💫";
+        ? `Hola, ${user.name || user.email || "Usuario"}`
+        : "Hola 👋";
     }
 
     return;
