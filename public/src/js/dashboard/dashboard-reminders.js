@@ -257,7 +257,11 @@ function getActivitiesPageSize() {
   const isNativeMobile =
     document.documentElement.classList.contains("danybot-mobile-app");
 
-  if (isNativeMobile || window.innerWidth <= 768) {
+  if (isNativeMobile) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  if (window.innerWidth <= 768) {
     return ACTIVITIES_PAGE_SIZE_MOBILE;
   }
 
@@ -328,14 +332,22 @@ function renderActivitiesPagination(totalPages, totalItems) {
     return;
   }
 
+  const isNativeMobile =
+    document.documentElement.classList.contains("danybot-mobile-app");
+
+  if (isNativeMobile) {
+    pagination.innerHTML = "";
+    return;
+  }
+
   if (totalItems === 0 || totalPages <= 1) {
     pagination.innerHTML = "";
     return;
   }
 
   pagination.innerHTML = `
-    <button 
-      type="button" 
+    <button
+      type="button"
       class="activities-page-button"
       ${currentActivitiesPage === 1 ? "disabled" : ""}
       onclick="changeActivitiesPage(${currentActivitiesPage - 1})"
@@ -348,8 +360,8 @@ function renderActivitiesPagination(totalPages, totalItems) {
       Página ${currentActivitiesPage} de ${totalPages}
     </span>
 
-    <button 
-      type="button" 
+    <button
+      type="button"
       class="activities-page-button"
       ${currentActivitiesPage === totalPages ? "disabled" : ""}
       onclick="changeActivitiesPage(${currentActivitiesPage + 1})"
@@ -440,6 +452,24 @@ const paginatedActivities = getPaginatedActivities(sortedReminders);
   list.innerHTML = "";
 
   paginatedActivities.items.forEach((reminder) => {
+        if (
+      typeof isDanyBotActivitiesMobileApp ===
+        "function" &&
+      isDanyBotActivitiesMobileApp()
+    ) {
+      const mobileCard =
+        createMobileActivityCard(reminder);
+
+      list.appendChild(mobileCard);
+
+      if (isReminderSearchTarget(reminder.id)) {
+        highlightReminderSearchTargetElement(
+          mobileCard
+        );
+      }
+
+      return;
+    }
     const card = document.createElement("div");
 
     const categoryClass = getReminderCategoryClass(reminder.category);
