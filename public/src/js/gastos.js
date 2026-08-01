@@ -80,6 +80,7 @@ const expenseId = document.getElementById('expenseId');
 const submitExpenseButton = document.getElementById('submitExpenseButton');
 const cancelEditButton = document.getElementById('cancelEditButton');
 const voiceButton = document.getElementById('voiceButton');
+const incomeVoiceButton = document.getElementById('incomeVoiceButton');
 const voiceText = document.getElementById('voiceText');
 const downloadExcelButton = document.getElementById('downloadExcelButton');
 const monthlyIncome = document.getElementById('monthlyIncome');
@@ -109,11 +110,13 @@ let currentExpensesTotal = 0;
 let currentAdditionalIncomeTotal = 0;
 let currentAdditionalIncomes = [];
 let editingAdditionalIncomeId = null;
+let currentMobileMovementFilter = 'all';
 
 let categoryExpensesChart = null;
 let financeSummaryChart = null;
 let dailyExpensesChart = null;
 
+let pendingIncomeCardToOpen = null;
 let hasHighlightedSearchResult = false;
 
 
@@ -136,6 +139,7 @@ async function loadExpenses() {
     currentExpenses = data.gastos || [];
 
     applyMonthFilter();
+    renderActiveMobileMovementFilter();
 
   } catch (error) {
     console.error('Error al cargar gastos:', error);
@@ -210,26 +214,100 @@ async function saveExpense(event) {
       return;
     }
 
-    await Swal.fire({
-      title: editingId ? 'Gasto actualizado' : 'Gasto registrado',
-      text: editingId
-        ? 'La información del gasto fue actualizada correctamente.'
-        : 'El gasto fue guardado correctamente.',
-      icon: 'success',
-      confirmButtonColor: '#3c0000'
-    });
+    const editedExpenseId = editingId;
 
-    expenseMessage.textContent = '';
+    const isMobileApp =
+      document.documentElement.classList.contains(
+        "danybot-mobile-app"
+      ) ||
+      document.body.classList.contains(
+        "danybot-mobile-app"
+      );
+
+    /*
+    * En Android, al editar:
+    * - no muestra el Swal;
+    * - cierra el modal;
+    * - actualiza la lista;
+    * - lleva al usuario a la card modificada.
+    */
+    if (editedExpenseId && isMobileApp) {
+      expenseMessage.textContent = "";
+
+      resetFormMode();
+
+      document.dispatchEvent(
+        new CustomEvent(
+          "danybot:close-movement-modal"
+        )
+      );
+
+      await loadExpenses();
+
+      requestAnimationFrame(() => {
+        focusExpenseCard(editedExpenseId);
+      });
+
+      return;
+    }
+
+    /*
+ * En Android:
+ * - al editar conserva el flujo existente;
+ * - al crear no muestra Swal, cierra el modal y enfoca
+ *   el gasto recién creado.
+ */
+  if (isMobileApp && !editedExpenseId) {
+
+    const createdExpenseId = data.gastoId;
+
+    expenseMessage.textContent = "";
 
     resetFormMode();
 
-    loadExpenses();
+    document.dispatchEvent(
+      new CustomEvent("danybot:close-movement-modal")
+    );
 
-  } catch (error) {
-    console.error('Error al guardar gasto:', error);
-    expenseMessage.textContent = 'Ocurrió un error al guardar el gasto.';
+    await loadExpenses();
+
+    requestAnimationFrame(() => {
+      if (createdExpenseId) {
+        focusExpenseCard(createdExpenseId);
+      }
+    });
+
+    return;
   }
-}
+
+  /*
+  * Escritorio:
+  * conserva exactamente el comportamiento actual.
+  */
+  await Swal.fire({
+    title: editedExpenseId
+      ? "Gasto actualizado"
+      : "Gasto registrado",
+
+    text: editedExpenseId
+      ? "La información del gasto fue actualizada correctamente."
+      : "El gasto fue guardado correctamente.",
+
+    icon: "success",
+    confirmButtonColor: "#3c0000"
+  });
+
+  expenseMessage.textContent = "";
+
+  resetFormMode();
+
+  await loadExpenses();
+
+    } catch (error) {
+      console.error('Error al guardar gasto:', error);
+      expenseMessage.textContent = 'Ocurrió un error al guardar el gasto.';
+    }
+  }
 
 
 function validateExpenseEvidenceFile(file) {
@@ -579,30 +657,268 @@ function highlightMonthlyIncomeTarget() {
   highlightSearchTargetElement(incomePanel);
 }
 
+// Devuelve un icono visual según la categoría.
+// Solo se usa para la presentación móvil.
+function getExpenseIcon(category) {
+  const icons = {
+    Factura: 'bi-arrow-left-circle',
+    Alimentación: 'bi-arrow-left-circle',
+    Pasajes: 'bi-arrow-left-circle',
+    Salud: 'bi-arrow-left-circle',
+    Entretenimiento: 'bi-arrow-left-circle',
+    Otro: 'bi-arrow-left-circle'
+  };
 
+  return icons[category] || 'bi-arrow-left-circle';
+}
 
-// Esta función pinta los gastos en la tabla.
+function createMobileExpenseRow(expense) {
+  const row = document.createElement('tr');
+
+  row.dataset.expenseId = expense.id;
+  row.classList.add('mobile-expense-row');
+  row.dataset.movementType = 'expense';
+
+  if (isSearchTarget('expense', expense.id)) {
+    row.classList.add('search-result-row');
+  }
+
+  const detailId = `expenseDetails-${expense.id}`;
+  const categoryClass = getCategoryClass(
+    expense.category
+  );
+  const expenseIcon = getExpenseIcon(
+    expense.category
+  );
+
+  row.innerHTML = `
+    <td colspan="7">
+      <article
+        class="mobile-expense-card"
+        data-expense-id="${expense.id}"
+      >
+
+        <button
+          type="button"
+          class="mobile-expense-summary"
+          aria-expanded="false"
+          aria-controls="${detailId}"
+        >
+          <span class="mobile-expense-icon movement-expense-icon">
+            <i class="bi ${expenseIcon}"></i>
+          </span>
+
+          <span class="mobile-expense-main">
+            <strong class="mobile-expense-description">
+              ${expense.description}
+            </strong>
+
+            <span class="mobile-expense-meta">
+              <span class="mobile-expense-category">
+                ${expense.category}
+              </span>
+
+              <span class="mobile-expense-date">
+                ${formatDate(expense.expense_date)}
+              </span>
+            </span>
+          </span>
+
+          <span class="mobile-expense-value">
+            −${formatMoney(expense.amount)}
+          </span>
+
+          <i
+            class="bi bi-chevron-down mobile-expense-chevron"
+            aria-hidden="true"
+          ></i>
+        </button>
+
+        <div
+          id="${detailId}"
+          class="mobile-expense-details"
+          hidden
+        >
+          <div class="mobile-expense-detail-grid">
+
+            <div class="mobile-expense-detail">
+              <span>Fecha</span>
+              <strong>
+                ${formatDate(expense.expense_date)}
+              </strong>
+            </div>
+
+            <div class="mobile-expense-detail">
+              <span>Categoría</span>
+              <strong>${expense.category}</strong>
+            </div>
+
+            <div class="mobile-expense-detail">
+              <span>Origen</span>
+              <strong>
+                ${getSourceLabel(expense.source)}
+              </strong>
+            </div>
+
+            <div class="mobile-expense-detail">
+              <span>Evidencia</span>
+
+              <div class="mobile-expense-evidence">
+                ${renderEvidenceCell(expense)}
+              </div>
+            </div>
+
+          </div>
+
+          <div class="mobile-expense-actions">
+            <button
+              type="button"
+              class="mobile-expense-action edit"
+              data-edit-expense="${expense.id}"
+            >
+              <i class="bi bi-pencil-square"></i>
+              <span>Editar</span>
+            </button>
+
+            <button
+              type="button"
+              class="mobile-expense-action delete"
+              data-delete-expense="${expense.id}"
+            >
+              <i class="bi bi-trash3"></i>
+              <span>Eliminar</span>
+            </button>
+          </div>
+        </div>
+
+      </article>
+    </td>
+  `;
+
+  const summaryButton = row.querySelector(
+    '.mobile-expense-summary'
+  );
+
+  const details = row.querySelector(
+    '.mobile-expense-details'
+  );
+
+  const chevron = row.querySelector(
+    '.mobile-expense-chevron'
+  );
+
+  const card = row.querySelector(
+    '.mobile-expense-card'
+  );
+
+  const editButton = row.querySelector(
+    `[data-edit-expense="${expense.id}"]`
+  );
+
+  const deleteButton = row.querySelector(
+    `[data-delete-expense="${expense.id}"]`
+  );
+
+  summaryButton.addEventListener('click', () => {
+    const isExpanded =
+      summaryButton.getAttribute(
+        'aria-expanded'
+      ) === 'true';
+
+    summaryButton.setAttribute(
+      'aria-expanded',
+      String(!isExpanded)
+    );
+
+    details.hidden = isExpanded;
+
+    chevron.className = isExpanded
+      ? 'bi bi-chevron-down mobile-expense-chevron'
+      : 'bi bi-chevron-up mobile-expense-chevron';
+
+    card.classList.toggle(
+      'is-expanded',
+      !isExpanded
+    );
+
+    requestAnimationFrame(
+      refreshExpensesListHeight
+    );
+  });
+
+  editButton.addEventListener(
+    'click',
+    (event) => {
+      event.stopPropagation();
+      startEditExpense(expense.id);
+    }
+  );
+
+  deleteButton.addEventListener(
+    'click',
+    (event) => {
+      event.stopPropagation();
+      deleteExpense(expense.id);
+    }
+  );
+
+  if (isSearchTarget('expense', expense.id)) {
+    highlightSearchTargetElement(row);
+  }
+
+  return row;
+}
+
 function showExpenses(expenses) {
   expensesTableBody.innerHTML = '';
 
+  const isMobileApp =
+    document.documentElement.classList.contains(
+      'danybot-mobile-app'
+    ) ||
+    document.body.classList.contains(
+      'danybot-mobile-app'
+    );
+
   if (expenses.length === 0) {
     expensesTableBody.innerHTML = `
-        <tr>
-            <td colspan="7">
-            <div class="empty-state">
-                <i class="bi bi-inbox"></i>
-                <h3>No hay gastos para este mes</h3>
-                <p>Cuando registres un gasto, aparecerá listado en esta sección.</p>
-            </div>
-            </td>
-        </tr>
-        `;
+      <tr class="${isMobileApp ? 'mobile-expense-empty-row' : ''}">
+        <td colspan="7">
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+
+            <h3>No hay gastos para este mes</h3>
+
+            <p>
+              Cuando registres un gasto,
+              aparecerá listado en esta sección.
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
 
     refreshExpensesListHeight();
     return;
   }
 
-   expenses.forEach((expense) => {
+  expenses.forEach((expense) => {
+    /*
+     * ANDROID
+     * Reutiliza la tarjeta móvil extraída.
+     */
+    if (isMobileApp) {
+      expensesTableBody.appendChild(
+        createMobileExpenseRow(expense)
+      );
+
+      return;
+    }
+
+    /*
+     * ESCRITORIO
+     * Conserva la tabla original.
+     */
     const row = document.createElement('tr');
 
     row.dataset.expenseId = expense.id;
@@ -612,58 +928,70 @@ function showExpenses(expenses) {
     }
 
     row.innerHTML = `
-    <td>
+      <td>
         <span class="date-pill">
-        <i class="bi bi-calendar-event"></i>
-        ${formatDate(expense.expense_date)}
+          <i class="bi bi-calendar-event"></i>
+          ${formatDate(expense.expense_date)}
         </span>
-    </td>
+      </td>
 
-    <td>
-        <span class="category-badge ${getCategoryClass(expense.category)}">
-        ${expense.category}
-        </span>
-    </td>
-
-    <td>
-        <strong class="expense-description">${expense.description}</strong>
-    </td>
-
-    <td>
-        <strong class="amount-cell">${formatMoney(expense.amount)}</strong>
-    </td>
-
-    <td>
-        ${renderEvidenceCell(expense)}
-    </td>
-
-    <td>
-        <span class="source-badge ${getSourceClass(expense.source)}">
-        ${getSourceLabel(expense.source)}
-        </span>
-    </td>
-
-    <td>
-        <div class="action-buttons">
-        <button 
-            type="button" 
-            class="action-btn edit-btn" 
-            onclick="startEditExpense(${expense.id})"
+      <td>
+        <span
+          class="category-badge ${getCategoryClass(
+            expense.category
+          )}"
         >
+          ${expense.category}
+        </span>
+      </td>
+
+      <td>
+        <strong class="expense-description">
+          ${expense.description}
+        </strong>
+      </td>
+
+      <td>
+        <strong class="amount-cell">
+          ${formatMoney(expense.amount)}
+        </strong>
+      </td>
+
+      <td>
+        ${renderEvidenceCell(expense)}
+      </td>
+
+      <td>
+        <span
+          class="source-badge ${getSourceClass(
+            expense.source
+          )}"
+        >
+          ${getSourceLabel(expense.source)}
+        </span>
+      </td>
+
+      <td>
+        <div class="action-buttons">
+          <button
+            type="button"
+            class="action-btn edit-btn"
+            onclick="startEditExpense(${expense.id})"
+          >
             <i class="bi bi-pencil-square"></i>
             Editar
-        </button>
+          </button>
 
-        <button 
-            type="button" 
-            class="action-btn delete-btn" 
+          <button
+            type="button"
+            class="action-btn delete-btn"
             onclick="deleteExpense(${expense.id})"
-        >
+          >
             <i class="bi bi-trash3"></i>
             Eliminar
-        </button>
+          </button>
         </div>
-    </td>
+      </td>
     `;
 
     expensesTableBody.appendChild(row);
@@ -708,7 +1036,6 @@ function getCategoryClass(category) {
     Factura: 'badge-purple',
     Alimentación: 'badge-green',
     Transporte: 'badge-blue',
-    Pasajes: 'badge-cyan',
     Salud: 'badge-red',
     Entretenimiento: 'badge-pink',
     Otro: 'badge-gray'
@@ -817,6 +1144,64 @@ function setCurrentMonthFilter() {
   monthFilter.value = getLocalMonth();
 }
 
+function focusExpenseCard(expenseId) {
+  const card = document.querySelector(
+    `.mobile-expense-card[data-expense-id="${expenseId}"]`
+  );
+
+  if (!card) {
+    return;
+  }
+
+  const summaryButton = card.querySelector(
+    ".mobile-expense-summary"
+  );
+
+  const details = card.querySelector(
+    ".mobile-expense-details"
+  );
+
+  const chevron = card.querySelector(
+    ".mobile-expense-chevron"
+  );
+
+  if (summaryButton && details) {
+    summaryButton.setAttribute(
+      "aria-expanded",
+      "true"
+    );
+
+    details.hidden = false;
+    card.classList.add("is-expanded");
+
+    if (chevron) {
+      chevron.className =
+        "bi bi-chevron-up mobile-expense-chevron";
+    }
+  }
+
+    requestAnimationFrame(() => {
+      card.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+      if (typeof refreshExpensesListHeight === "function") {
+        refreshExpensesListHeight();
+      }
+
+      card.classList.remove("focus-highlight");
+
+      requestAnimationFrame(() => {
+        card.classList.add("focus-highlight");
+
+        setTimeout(() => {
+          card.classList.remove("focus-highlight");
+        }, 900);
+      });
+    });
+}
+
 // Esta función carga un gasto en el formulario para poder editarlo.
 function startEditExpense(id) {
   const expense = currentExpenses.find((item) => item.id === id);
@@ -840,17 +1225,33 @@ function startEditExpense(id) {
   submitExpenseButton.innerHTML = '<i class="bi bi-check2-circle"></i> Actualizar gasto';
   cancelEditButton.style.display = 'block';
 
-  expenseMessage.textContent = expense.evidence_file_name
-    ? 'Editando gasto seleccionado. Si adjuntas una nueva evidencia, reemplazará la anterior.'
-    : 'Editando gasto seleccionado. Puedes adjuntar una evidencia opcional.';
+  expenseMessage.textContent = '';
 
-  const expenseForm = document.getElementById('expenseForm') || document.querySelector('.expense-form');
+  const isMobileApp =
+    document.documentElement.classList.contains(
+      "danybot-mobile-app"
+    ) ||
+    document.body.classList.contains(
+      "danybot-mobile-app"
+    );
 
-  if (expenseForm) {
-    expenseForm.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
+  if (isMobileApp) {
+    document.dispatchEvent(
+      new CustomEvent(
+        "danybot:open-expense-edit-modal"
+      )
+    );
+  } else {
+    const expenseForm =
+      document.getElementById("expenseForm") ||
+      document.querySelector(".expense-form");
+
+    if (expenseForm) {
+      expenseForm.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
   }
 
   setTimeout(() => {
@@ -862,20 +1263,6 @@ function startEditExpense(id) {
 
 // Esta función elimina un gasto desde la pantalla.
 async function deleteExpense(expenseId) {
-  const result = await Swal.fire({
-    title: '¿Eliminar gasto?',
-    text: 'Esta acción no se puede deshacer.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#3c0000',
-    cancelButtonColor: '#6b7280'
-  });
-
-  if (!result.isConfirmed) {
-    return;
-  }
 
   try {
     const response = await fetch(`${API_URL}/${expenseId}`, {
@@ -935,6 +1322,7 @@ function resetFormMode() {
   cancelEditButton.style.display = 'none';
 
   setTodayDate();
+  setupMobileExpenseDate();
 }
 
 async function startVoiceExpense() {
@@ -977,7 +1365,7 @@ async function startVoiceExpense() {
 
       const transcript = result.text.toLowerCase();
 
-      voiceText.textContent = `Texto detectado: "${transcript}"`;
+      console.log('INGRESO VOZ - texto:', transcript);
 
       await fillExpenseFromVoice(transcript);
 
@@ -1045,8 +1433,6 @@ async function startVoiceExpense() {
     clearTimeout(voiceTimeout);
 
     const transcript = event.results[0][0].transcript.toLowerCase();
-
-    voiceText.textContent = `Texto detectado: "${transcript}"`;
 
     await fillExpenseFromVoice(transcript);
   };
@@ -1151,6 +1537,39 @@ async function saveVoiceExpenseAuto(expenseData) {
       await loadAdditionalIncomes();
     }
 
+    if (isDanyBotMobileApp()) {
+      const createdExpenseId = data.gastoId;
+
+      resetFormMode();
+
+      document.dispatchEvent(
+        new CustomEvent(
+          'danybot:close-movement-modal'
+        )
+      );
+
+      currentMobileMovementFilter = 'expense';
+
+      document
+        .querySelectorAll('.mobile-movement-filter')
+        .forEach((button) => {
+          button.classList.toggle(
+            'is-active',
+            button.dataset.movementFilter === 'expense'
+          );
+        });
+
+      await loadExpenses();
+
+      requestAnimationFrame(() => {
+        if (createdExpenseId) {
+          focusExpenseCard(createdExpenseId);
+        }
+      });
+
+      return;
+    }
+
     await loadExpenses();
 
     resetFormMode();
@@ -1232,20 +1651,20 @@ function extractAmount(text) {
     return thousands + extra;
   }
 
+  const spokenAmount = 
+    extractSpokenAmount(normalizedDigitsText);
+
+  if (spokenAmount) {
+    return spokenAmount;
+  }
+
   // Caso 7: millón / millones
   const numericMillionMatch = normalizedDigitsText.match(/\b(\d+)\s*(millon|millones)\b/);
 
   if (numericMillionMatch) {
     return Number(numericMillionMatch[1]) * 1000000;
   }
-
-  // Caso 8: valores dictados en palabras
-  // Ej: "doscientos cincuenta y dos mil"
-  const spokenAmount = extractSpokenAmount(normalizedDigitsText);
-
-  if (spokenAmount) {
-    return spokenAmount;
-  }
+  
 
   // Caso 9: último número disponible
   // En gastos normalmente el valor suele decirse al final.
@@ -1301,18 +1720,61 @@ function extractSpokenAmount(text) {
   });
 
   if (millionIndex !== -1) {
-    const beforeMillion = getNumberWordsBefore(tokens, millionIndex);
-    const afterMillion = getNumberWordsAfter(tokens, millionIndex);
+    const previousToken = tokens[millionIndex - 1];
+    const nextToken = tokens[millionIndex + 1];
 
-    const millionValue = beforeMillion.length > 0
-      ? parseSmallSpanishNumber(beforeMillion)
-      : 1;
+    const beforeMillion = getNumberWordsBefore(
+      tokens,
+      millionIndex
+    );
 
-    const extraValue = afterMillion.length > 0
-      ? parseSmallSpanishNumber(afterMillion)
-      : 0;
+    const afterMillion = getNumberWordsAfter(
+      tokens,
+      millionIndex
+    );
 
-    return (millionValue * 1000000) + extraValue;
+    let millionValue = 1;
+
+    if (
+      previousToken &&
+      /^\d+$/.test(previousToken)
+    ) {
+      millionValue = Number(previousToken);
+    } else if (beforeMillion.length > 0) {
+      millionValue = parseSmallSpanishNumber(
+        beforeMillion
+      );
+    }
+
+    let extraValue = 0;
+
+    if (
+      nextToken &&
+      /^\d{1,3}$/.test(nextToken)
+    ) {
+      /*
+      * Android suele convertir:
+      * "un millón quinientos mil"
+      * en:
+      * "millón 500"
+      */
+      extraValue = Number(nextToken) * 1000;
+    } else if (afterMillion.length > 0) {
+      extraValue = parseSmallSpanishNumber(
+        afterMillion
+      );
+
+      if (
+        extraValue > 0 &&
+        extraValue < 1000
+      ) {
+        extraValue *= 1000;
+      }
+    }
+
+    return (
+      millionValue * 1000000
+    ) + extraValue;
   }
 
   const thousandIndex = tokens.findIndex((token) => token === 'mil');
@@ -1524,12 +1986,17 @@ function extractCategory(text) {
     return 'Alimentación';
   }
 
-  if (text.includes('transporte') || text.includes('taxi') || text.includes('uber')) {
-    return 'Transporte';
-  }
-
-  if (text.includes('pasaje') || text.includes('pasajes') || text.includes('tu llave') || text.includes('bus') || text.includes('transmilenio')) {
-    return 'Pasajes';
+  if (
+      text.includes('transporte') ||
+      text.includes('taxi') ||
+      text.includes('uber') ||
+      text.includes('pasaje') ||
+      text.includes('pasajes') ||
+      text.includes('tu llave') ||
+      text.includes('bus') ||
+      text.includes('transmilenio')
+  ) {
+      return 'Transporte';
   }
 
   if (text.includes('salud') || text.includes('medicina') || text.includes('doctor') || text.includes('cita médica')) {
@@ -1927,6 +2394,7 @@ async function loadMonthlyIncome() {
     if (!response.ok) {
       currentIncomeAmount = 0;
       updateIncomePanel();
+      renderActiveMobileMovementFilter();
       return;
     }
 
@@ -1935,6 +2403,7 @@ async function loadMonthlyIncome() {
       incomeAmount.value = '';
       incomeDescription.value = '';
       updateIncomePanel();
+      renderActiveMobileMovementFilter();
       return;
     }
 
@@ -2024,16 +2493,26 @@ function updateIncomePanel() {
 
 
 function updateSavings() {
-  const savings = currentIncomeAmount + currentAdditionalIncomeTotal - currentExpensesTotal;
+  const savings =
+    currentAdditionalIncomeTotal -
+    currentExpensesTotal;
 
-  monthlySavings.textContent = formatMoney(savings);
+  monthlySavings.textContent =
+    formatMoney(savings);
 
-  monthlySavings.classList.remove('positive-saving', 'negative-saving');
+  monthlySavings.classList.remove(
+    'positive-saving',
+    'negative-saving'
+  );
 
   if (savings >= 0) {
-    monthlySavings.classList.add('positive-saving');
+    monthlySavings.classList.add(
+      'positive-saving'
+    );
   } else {
-    monthlySavings.classList.add('negative-saving');
+    monthlySavings.classList.add(
+      'negative-saving'
+    );
   }
 }
 
@@ -2057,6 +2536,7 @@ async function loadAdditionalIncomes() {
       currentAdditionalIncomeTotal = 0;
       renderAdditionalIncomes();
       updateIncomePanel();
+      renderActiveMobileMovementFilter();
       return;
     }
 
@@ -2068,13 +2548,178 @@ async function loadAdditionalIncomes() {
 
     renderAdditionalIncomes();
     updateIncomePanel();
+    renderActiveMobileMovementFilter();
 
   } catch (error) {
     console.error('Error al consultar ingresos adicionales:', error);
+      renderActiveMobileMovementFilter();
   }
 }
 
-async function saveAdditionalIncome() {
+async function startVoiceIncome() {
+  const isMobileApp =
+    typeof window.isDanyBotRunningInMobileApp === 'function' &&
+    window.isDanyBotRunningInMobileApp();
+
+  if (!isMobileApp) {
+    Swal.fire({
+      title: 'Voz no disponible',
+      text: 'El dictado de ingresos está disponible en la aplicación móvil.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+
+    return;
+  }
+
+  if (
+    typeof window.startDanyBotNativeSpeech !== 'function'
+  ) {
+    Swal.fire({
+      title: 'Voz no disponible',
+      text: 'No se encontró la configuración de voz nativa.',
+      icon: 'warning',
+      confirmButtonColor: '#3c0000'
+    });
+
+    return;
+  }
+
+  try {
+    incomeVoiceButton.classList.add('listening');
+
+    incomeVoiceButton.innerHTML = `
+      <i class="bi bi-mic-fill"></i>
+      Escuchando...
+    `;
+
+    const result = await window.startDanyBotNativeSpeech({
+      language: 'es-CO',
+      prompt: 'Di el ingreso que quieres registrar'
+    });
+
+    incomeVoiceButton.classList.remove('listening');
+
+    incomeVoiceButton.innerHTML = `
+      <i class="bi bi-mic-fill"></i>
+      Dictar ingreso por voz
+    `;
+
+    if (!result.success) {
+      Swal.fire({
+        title: 'No se pudo escuchar',
+        text:
+          result.reason ||
+          'No se detectó ningún texto.',
+        icon: 'warning',
+        confirmButtonColor: '#3c0000'
+      });
+
+      return;
+    }
+
+    const transcript = result.text.toLowerCase();
+
+    const detectedAmount = extractAmount(transcript);
+    const detectedDate = extractDate(transcript);
+    const detectedDescription =
+      extractIncomeDescription(transcript);
+
+    console.log(
+      'INGRESO VOZ - TEXTO EXACTO:',
+      JSON.stringify(transcript)
+    );
+
+    console.log(
+      'INGRESO VOZ - DATOS EXACTOS:',
+      JSON.stringify({
+        amount: detectedAmount,
+        date: detectedDate,
+        description: detectedDescription
+      })
+    );
+
+    additionalIncomeDate.value =
+      detectedDate || getLocalDate();
+
+    additionalIncomeDescription.value =
+      detectedDescription;
+
+    additionalIncomeAmount.value =
+      detectedAmount || '';
+
+    if (!detectedAmount || detectedAmount <= 0) {
+      Swal.fire({
+        title: 'No detecté el valor',
+        text: 'Revisa el ingreso y completa el valor manualmente.',
+        icon: 'warning',
+        confirmButtonColor: '#3c0000'
+      });
+
+      return;
+    }
+
+await saveAdditionalIncome('voice');
+
+  } catch (error) {
+    console.error(
+      'Error en voz nativa de ingresos:',
+      error
+    );
+
+    incomeVoiceButton.classList.remove('listening');
+
+    incomeVoiceButton.innerHTML = `
+      <i class="bi bi-mic-fill"></i>
+      Dictar ingreso por voz
+    `;
+
+    Swal.fire({
+      title: 'Error de voz',
+      text: 'No fue posible usar el micrófono del celular.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
+  }
+}
+
+function extractIncomeDescription(text) {
+  let descriptionText = text.toLowerCase();
+
+  descriptionText = descriptionText
+    .replace(
+      /\b(agrega|añade|registra|guarda|anota)\b/g,
+      ''
+    )
+    .replace(
+      /\b(recibí|recibi|gané|gane|cobré|cobre)\b/g,
+      ''
+    )
+    .replace(/\bun ingreso\b/g, '')
+    .replace(/\bingreso\b/g, '')
+    .replace(/\bpor valor de\b/g, '')
+    .replace(/\bpor un valor de\b/g, '')
+    .replace(/\bvalor de\b/g, '')
+    .replace(/\b\d{1,3}(?:[\s.,]\d{3})+\b/g, '')
+    .replace(/\b\d+\s*mil\b/g, '')
+    .replace(/\b\d+\b/g, '')
+    .replace(/\b(pesos|peso|cop)\b/g, '')
+    .replace(/\b(hoy|ayer)\b/g, '')
+    .replace(/\b(de|por|para)\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!descriptionText) {
+    return 'Ingreso registrado por voz';
+  }
+
+  return (
+    descriptionText.charAt(0).toUpperCase() +
+    descriptionText.slice(1)
+  );
+}
+
+async function saveAdditionalIncome(incomeSource = 'manual') {
   const selectedMonth = monthFilter.value || getLocalMonth();
 
   const additionalIncomeData = {
@@ -2082,7 +2727,7 @@ async function saveAdditionalIncome() {
     income_date: additionalIncomeDate.value || getLocalDate(),
     description: additionalIncomeDescription.value.trim(),
     amount: Number(additionalIncomeAmount.value),
-    source: 'manual'
+    source: incomeSource
   };
 
   if (
@@ -2117,6 +2762,10 @@ async function saveAdditionalIncome() {
 
     const data = await response.json();
 
+    const savedIncomeId = isEditing
+      ? editingAdditionalIncomeId
+      : data.additionalIncomeId;
+    
     if (response.status === 401) {
       await handleUnauthorizedSession(data);
       return;
@@ -2137,15 +2786,43 @@ async function saveAdditionalIncome() {
     additionalIncomeDate.value = getLocalDate();
 
     editingAdditionalIncomeId = null;
+
     saveAdditionalIncomeButton.innerHTML = `
       <i class="bi bi-plus-circle"></i>
       Agregar ingreso adicional
     `;
 
-    await loadAdditionalIncomes();
+    if (isDanyBotMobileApp()) {
+      pendingIncomeCardToOpen = savedIncomeId;
+
+      currentMobileMovementFilter = 'income';
+
+      document
+        .querySelectorAll('.mobile-movement-filter')
+        .forEach((button) => {
+          button.classList.toggle(
+            'is-active',
+            button.dataset.movementFilter === 'income'
+          );
+        });
+
+      document.dispatchEvent(
+        new CustomEvent(
+          'danybot:close-movement-modal'
+        )
+      );
+
+      await loadAdditionalIncomes();
+
+      return;
+    }
+
+await loadAdditionalIncomes();
 
     Swal.fire({
-      title: isEditing ? 'Ingreso adicional actualizado' : 'Ingreso adicional guardado',
+      title: isEditing
+        ? 'Ingreso adicional actualizado'
+        : 'Ingreso adicional guardado',
       text: isEditing
         ? 'El ingreso adicional fue actualizado correctamente.'
         : 'El ingreso adicional fue registrado correctamente.',
@@ -2166,21 +2843,6 @@ async function saveAdditionalIncome() {
 }
 
 async function deleteAdditionalIncome(additionalIncomeId) {
-  const result = await Swal.fire({
-    title: '¿Eliminar ingreso adicional?',
-    text: 'Esta acción no se puede deshacer.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#3c0000',
-    cancelButtonColor: '#6b7280'
-  });
-
-  if (!result.isConfirmed) {
-    return;
-  }
-
   try {
     const response = await fetch(`${INCOME_API_URL}/additional/${additionalIncomeId}`, {
       method: 'DELETE',
@@ -2219,12 +2881,21 @@ async function deleteAdditionalIncome(additionalIncomeId) {
 
     await loadAdditionalIncomes();
 
-    Swal.fire({
-      title: 'Ingreso adicional eliminado',
-      text: 'El ingreso adicional fue eliminado correctamente.',
-      icon: 'success',
-      confirmButtonColor: '#3c0000'
-    });
+    if (isDanyBotMobileApp()) {
+      currentMobileMovementFilter = 'income';
+
+      document
+        .querySelectorAll('.mobile-movement-filter')
+        .forEach((button) => {
+          button.classList.toggle(
+            'is-active',
+            button.dataset.movementFilter === 'income'
+          );
+        });
+
+      renderActiveMobileMovementFilter();
+      return;
+    }
 
   } catch (error) {
     console.error('Error al eliminar ingreso adicional:', error);
@@ -2236,6 +2907,476 @@ async function deleteAdditionalIncome(additionalIncomeId) {
       confirmButtonColor: '#3c0000'
     });
   }
+}
+
+/* ==================================================
+   ANDROID: FILTRO Y CARDS DE INGRESOS
+   Reutiliza la lista visual de movimientos
+   ================================================== */
+
+function isDanyBotMobileApp() {
+  return (
+    document.documentElement.classList.contains('danybot-mobile-app') ||
+    document.body.classList.contains('danybot-mobile-app')
+  );
+}
+
+function escapeMovementText(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function getSelectedMonthLabel() {
+  const selectedMonth = monthFilter.value || getLocalMonth();
+
+  if (!selectedMonth) {
+    return 'Mes seleccionado';
+  }
+
+  const [year, month] = selectedMonth.split('-');
+
+  const date = new Date(
+    Number(year),
+    Number(month) - 1,
+    1
+  );
+
+  return new Intl.DateTimeFormat('es-CO', {
+    month: 'long',
+    year: 'numeric'
+  }).format(date);
+}
+
+function createMobileIncomeRow(income) {
+  const description = escapeMovementText(
+    income.description || 'Ingreso'
+  );
+
+  const category = 'Ingreso';
+
+  const dateLabel = formatDate(
+    income.income_date
+  );
+
+  const sourceLabel = getSourceLabel(
+    income.source
+  );
+
+  const incomeId = income.id;
+
+  const row = document.createElement('tr');
+
+  row.dataset.additionalIncomeId = income.id;
+
+
+  row.className = 'mobile-expense-row mobile-income-row';
+  row.dataset.movementType = 'income';
+  row.dataset.incomeId = incomeId;
+
+  row.innerHTML = `
+    <td colspan="7">
+      <article class="mobile-expense-card mobile-income-card">
+
+        <button
+          type="button"
+          class="mobile-expense-summary"
+          aria-expanded="false"
+        >
+          <span class="mobile-expense-icon movement-income-icon">
+            <i class="bi bi-arrow-right-circle"></i>
+          </span>
+
+          <span class="mobile-expense-main">
+            <strong class="mobile-expense-description">
+              ${description}
+            </strong>
+
+            <span class="mobile-expense-meta">
+              <span class="mobile-expense-category">
+                ${category}
+              </span>
+
+              <span class="mobile-expense-date">
+                ${dateLabel}
+              </span>
+            </span>
+          </span>
+
+          <strong class="mobile-expense-value">
+            ${formatMoney(income.amount)}
+          </strong>
+
+          <i
+            class="bi bi-chevron-down mobile-expense-chevron"
+            aria-hidden="true"
+          ></i>
+        </button>
+
+        <div
+          class="mobile-expense-details"
+          hidden
+        >
+          <div class="mobile-expense-detail-grid">
+
+            <div class="mobile-expense-detail">
+              <span>Tipo</span>
+              <strong>${category}</strong>
+            </div>
+
+            <div class="mobile-expense-detail">
+              <span>Fecha</span>
+              <strong>${dateLabel}</strong>
+            </div>
+
+            <div class="mobile-expense-detail">
+              <span>Origen</span>
+              <strong>${escapeMovementText(sourceLabel)}</strong>
+            </div>
+
+            <div class="mobile-expense-detail">
+              <span>Valor</span>
+              <strong>${formatMoney(income.amount)}</strong>
+            </div>
+
+            </div>
+
+            <div class="mobile-expense-actions">
+              <button
+                type="button"
+                class="mobile-expense-action edit mobile-income-edit-button"
+              >
+                <i class="bi bi-pencil"></i>
+                Editar
+              </button>
+
+              <button
+                type="button"
+                class="mobile-expense-action delete mobile-income-delete-button"
+              >
+                <i class="bi bi-trash"></i>
+                Eliminar
+              </button>
+            </div>
+
+          </div>
+
+        </article>
+    </td>
+  `;
+
+  const card = row.querySelector('.mobile-expense-card');
+  const summary = row.querySelector('.mobile-expense-summary');
+  const details = row.querySelector('.mobile-expense-details');
+  const chevron = row.querySelector('.mobile-expense-chevron');
+
+  const editButton = row.querySelector(
+    '.mobile-income-edit-button'
+  );
+
+  const deleteButton = row.querySelector(
+    '.mobile-income-delete-button'
+  );
+
+  summary.addEventListener('click', () => {
+    const willExpand = details.hidden;
+
+    details.hidden = !willExpand;
+    card.classList.toggle('is-expanded', willExpand);
+
+    summary.setAttribute(
+      'aria-expanded',
+      String(willExpand)
+    );
+
+    chevron.classList.toggle(
+      'bi-chevron-down',
+      !willExpand
+    );
+
+    chevron.classList.toggle(
+      'bi-chevron-up',
+      willExpand
+    );
+  });
+
+  editButton.addEventListener('click', () => {
+    editingAdditionalIncomeId = income.id;
+
+    additionalIncomeDate.value =
+      income.income_date.split('T')[0];
+
+    additionalIncomeDescription.value =
+      income.description;
+
+    additionalIncomeAmount.value =
+      income.amount;
+
+    saveAdditionalIncomeButton.innerHTML = `
+      <i class="bi bi-check-circle"></i>
+      Actualizar ingreso
+    `;
+
+    document.dispatchEvent(
+      new CustomEvent(
+        'danybot:open-income-edit-modal'
+      )
+    );
+  });
+
+  deleteButton.addEventListener('click', () => {
+    deleteAdditionalIncome(income.id);
+  });
+
+  return row;
+}
+
+function focusMobileIncomeCard(incomeId) {
+  if (!incomeId) {
+    return;
+  }
+
+  const row = document.querySelector(
+    `[data-additional-income-id="${incomeId}"]`
+  );
+
+  if (!row) {
+    return;
+  }
+
+  const card = row.querySelector(
+    '.mobile-expense-card'
+  );
+
+  if (!card) {
+    return;
+  }
+
+  const summaryButton = card.querySelector(
+    '.mobile-expense-summary'
+  );
+
+  const details = card.querySelector(
+    '.mobile-expense-details'
+  );
+
+  const chevron = card.querySelector(
+    '.mobile-expense-chevron'
+  );
+
+  if (summaryButton && details) {
+    summaryButton.setAttribute(
+      'aria-expanded',
+      'true'
+    );
+
+    details.hidden = false;
+    card.classList.add('is-expanded');
+
+    if (chevron) {
+      chevron.className =
+        'bi bi-chevron-up mobile-expense-chevron';
+    }
+  }
+
+  requestAnimationFrame(() => {
+    row.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+
+    card.classList.remove('search-result-row');
+
+    requestAnimationFrame(() => {
+      card.classList.add('search-result-row');
+
+      setTimeout(() => {
+        card.classList.remove(
+          'search-result-row'
+        );
+      }, 2200);
+    });
+
+    if (
+      typeof refreshExpensesListHeight ===
+      'function'
+    ) {
+      refreshExpensesListHeight();
+    }
+  });
+}
+
+function renderMobileIncomes() {
+  if (!isDanyBotMobileApp()) {
+    return;
+  }
+
+  expensesTableBody.innerHTML = '';
+
+  const incomes = [...currentAdditionalIncomes];
+
+  incomes.sort((firstIncome, secondIncome) => {
+    return new Date(secondIncome.income_date) -
+      new Date(firstIncome.income_date);
+  });
+
+  if (incomes.length === 0) {
+    expensesTableBody.innerHTML = `
+      <tr class="mobile-expense-empty-row">
+        <td colspan="7">
+          <div class="empty-state">
+            <i class="bi bi-arrow-left-circle"></i>
+
+            <h3>No hay ingresos para este mes</h3>
+
+            <p>
+              Cuando registres un ingreso,
+              aparecerá listado en esta sección.
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  incomes.forEach((income) => {
+    expensesTableBody.appendChild(
+      createMobileIncomeRow(income)
+    );
+  });
+}
+
+if (pendingIncomeCardToOpen) {
+  requestAnimationFrame(() => {
+    focusMobileIncomeCard(
+      pendingIncomeCardToOpen
+    );
+
+    pendingIncomeCardToOpen = null;
+  });
+}
+
+function renderAllMobileMovements() {
+  if (!isDanyBotMobileApp()) {
+    return;
+  }
+
+  expensesTableBody.innerHTML = '';
+
+  const expenses = Array.isArray(filteredExpenses)
+    ? filteredExpenses
+    : [];
+
+  const incomes = Array.isArray(currentAdditionalIncomes)
+    ? currentAdditionalIncomes
+    : [];
+
+  const movements = [
+    ...expenses.map((expense) => ({
+      type: 'expense',
+      date: expense.expense_date,
+      data: expense
+    })),
+
+    ...incomes.map((income) => ({
+      type: 'income',
+      date: income.income_date,
+      data: income
+    }))
+  ];
+
+  movements.sort((firstMovement, secondMovement) => {
+    return (
+      new Date(secondMovement.date) -
+      new Date(firstMovement.date)
+    );
+  });
+
+  if (movements.length === 0) {
+    expensesTableBody.innerHTML = `
+      <tr class="mobile-expense-empty-row">
+        <td colspan="7">
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+
+            <h3>No hay movimientos para este mes</h3>
+
+            <p>
+              Cuando registres un ingreso o gasto,
+              aparecerá listado en esta sección.
+            </p>
+          </div>
+        </td>
+      </tr>
+    `;
+
+    refreshExpensesListHeight();
+    return;
+  }
+
+  movements.forEach((movement) => {
+    const row =
+      movement.type === 'income'
+        ? createMobileIncomeRow(movement.data)
+        : createMobileExpenseRow(movement.data);
+
+    expensesTableBody.appendChild(row);
+  });
+
+  refreshExpensesListHeight();
+}
+
+function renderActiveMobileMovementFilter() {
+  if (!isDanyBotMobileApp()) {
+    return;
+  }
+
+  if (currentMobileMovementFilter === 'income') {
+    renderMobileIncomes();
+    return;
+  }
+
+  if (currentMobileMovementFilter === 'expense') {
+    showExpenses(filteredExpenses);
+    return;
+  }
+
+  renderAllMobileMovements();
+}
+
+function setupMobileMovementFilters() {
+  if (!isDanyBotMobileApp()) {
+    return;
+  }
+
+  const filterButtons = document.querySelectorAll(
+    '.mobile-movement-filter'
+  );
+
+  if (!filterButtons.length) {
+    return;
+  }
+
+  filterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      currentMobileMovementFilter =
+        button.dataset.movementFilter || 'all';
+
+      filterButtons.forEach((currentButton) => {
+        currentButton.classList.toggle(
+          'is-active',
+          currentButton === button
+        );
+      });
+
+      renderActiveMobileMovementFilter();
+    });
+  });
 }
 
 
@@ -2304,13 +3445,6 @@ function renderAdditionalIncomes() {
          <i class="bi bi-check-circle"></i>
          Actualizar ingreso
         `;
-
-        Swal.fire({
-            icon: 'info',
-            title: 'Editar ingreso adicional',
-            text: 'Los datos se cargaron en el formulario. Modifica la información y presiona Actualizar ingreso.',
-            confirmButtonText: 'Entendido'
-    });
     });
 
     deleteButton.addEventListener('click', () => {
@@ -2589,6 +3723,61 @@ function setupCollapsibleSections() {
   });
 }
 
+function setupMobileExpenseDate() {
+  const isMobileApp =
+    document.documentElement.classList.contains(
+      'danybot-mobile-app'
+    ) ||
+    document.body.classList.contains(
+      'danybot-mobile-app'
+    );
+
+  if (!isMobileApp) {
+    return;
+  }
+
+  const toggleButton = document.getElementById(
+    'toggleExpenseDateButton'
+  );
+
+  const dateControl = document.getElementById(
+    'expenseDateControl'
+  );
+
+  const dateInput = document.getElementById(
+    'expenseDate'
+  );
+
+  if (
+    !toggleButton ||
+    !dateControl ||
+    !dateInput
+  ) {
+    return;
+  }
+
+  dateControl.hidden = true;
+
+  toggleButton.addEventListener('click', () => {
+    const willOpen = dateControl.hidden;
+
+    dateControl.hidden = !willOpen;
+
+    toggleButton.setAttribute(
+      'aria-expanded',
+      String(willOpen)
+    );
+
+    toggleButton.textContent = willOpen
+      ? 'Usar fecha de hoy'
+      : 'Cambiar fecha';
+
+    if (!willOpen) {
+      dateInput.value = getLocalDate();
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   setTodayDate();
   setCurrentMonthFilter();
@@ -2623,7 +3812,317 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   voiceButton.addEventListener('click', startVoiceExpense);
+  incomeVoiceButton.addEventListener(
+    'click',
+    startVoiceIncome
+  );
+
   downloadExcelButton.addEventListener('click', downloadExpensesExcel);
-  saveIncomeButton.addEventListener('click', saveMonthlyIncome);
-  saveAdditionalIncomeButton.addEventListener('click', saveAdditionalIncome);
+  saveIncomeButton.addEventListener(
+    'click',
+    saveMonthlyIncome
+  );
+
+  saveAdditionalIncomeButton.addEventListener(
+    'click',
+    () => saveAdditionalIncome('manual')
+  );
+
+  setupMobileMovementFilters();
+  });
+
+/* ==================================================
+   MODAL MÓVIL: NUEVO MOVIMIENTO
+   Reutiliza los formularios existentes
+   ================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const openButton = document.getElementById("openMovementOptionsButton");
+  const modal = document.getElementById("movementOptionsModal");
+  const modalHeader = modal?.querySelector(".movement-options-header");
+  const optionsGrid = modal?.querySelector(".movement-options-grid");
+
+  const formView = document.getElementById("movementFormView");
+  const formHost = document.getElementById("movementFormHost");
+  const formTitle = document.getElementById("movementFormTitle");
+  const backButton = document.getElementById("backToMovementOptionsButton");
+  const incomeTypeSelector = document.getElementById(
+    "mobileIncomeTypeSelector"
+  );
+
+  const incomeTypeButtons = document.querySelectorAll(
+    "[data-income-form-type]"
+  );
+
+  const closeButtons = document.querySelectorAll(
+    "[data-close-movement-modal]"
+  );
+
+  const optionButtons = document.querySelectorAll(
+    "[data-movement-option]"
+  );
+
+  let currentForm = null;
+  let currentPlaceholder = null;
+
+  if (
+    !openButton ||
+    !modal ||
+    !modalHeader ||
+    !optionsGrid ||
+    !formView ||
+    !formHost
+  ) {
+    return;
+  }
+
+  function getMovementForm(option) {
+    if (option === "expense") {
+      return {
+        title: "Agregar gasto",
+        element: document.querySelector(".expenses-form-section")
+      };
+    }
+
+    if (option === "income") {
+      return {
+        title: "Agregar ingreso",
+        element: document
+          .getElementById("additionalIncomeDate")
+          ?.closest(".income-form-box")
+      };
+    }
+
+    return null;
+  }
+
+  function restoreCurrentForm() {
+    if (
+      !currentForm ||
+      !currentPlaceholder ||
+      !currentPlaceholder.parentNode
+    ) {
+      currentForm = null;
+      currentPlaceholder = null;
+      return;
+    }
+
+    currentPlaceholder.parentNode.insertBefore(
+      currentForm,
+      currentPlaceholder
+    );
+
+    currentPlaceholder.remove();
+    currentForm.classList.remove("is-in-movement-modal");
+
+    currentForm = null;
+    currentPlaceholder = null;
+  }
+  
+  function setActiveIncomeType(type) {
+    const option =
+      type === "additional"
+        ? "additional-income"
+        : "income";
+
+    showMovementForm(option, {
+      keepIncomeSelector: true
+    });
+
+    incomeTypeButtons.forEach((button) => {
+      button.classList.toggle(
+        "is-active",
+        button.dataset.incomeFormType === type
+      );
+    });
+  }
+
+  function showOptions() {
+    restoreCurrentForm();
+
+    modalHeader.classList.remove("is-hidden");
+    optionsGrid.classList.remove("is-hidden");
+
+    formView.hidden = true;
+    formHost.innerHTML = "";
+       if (incomeTypeSelector) {
+        incomeTypeSelector.hidden = true;
+      }
+  }
+
+  function showMovementForm(option, settings = {}) {
+    const movementForm = getMovementForm(option);
+
+    if (!movementForm?.element) {
+      console.error(
+        `No se encontró el formulario para la opción: ${option}`
+      );
+
+      return;
+    }
+
+    restoreCurrentForm();
+
+    currentForm = movementForm.element;
+
+    currentPlaceholder = document.createComment(
+      `Posición original: ${option}`
+    );
+
+    currentForm.parentNode.insertBefore(
+      currentPlaceholder,
+      currentForm
+    );
+
+    currentForm.classList.add("is-in-movement-modal");
+    formHost.appendChild(currentForm);
+
+    if (option === "expense") {
+      const expenseContent =
+        document.getElementById("expenseFormContent");
+
+      if (expenseContent) {
+        expenseContent.classList.remove("is-collapsed");
+      }
+    }
+
+    formTitle.textContent = movementForm.title;
+
+    modalHeader.classList.add("is-hidden");
+    optionsGrid.classList.add("is-hidden");
+
+    formView.hidden = false;
+
+    const isIncomeOption =
+      option === "income" ||
+      option === "additional-income";
+
+    if (incomeTypeSelector) {
+      incomeTypeSelector.hidden =
+        isDanyBotMobileApp()
+          ? true
+          : !isIncomeOption;
+    }
+
+    if (
+      isDanyBotMobileApp() &&
+      option === "income"
+    ) {
+      const incomeHeading =
+        movementForm.element.querySelector("h3");
+
+      if (incomeHeading) {
+        incomeHeading.textContent = "Ingreso";
+      }
+
+      saveAdditionalIncomeButton.innerHTML = `
+        <i class="bi bi-plus-circle"></i>
+        Agregar ingreso
+      `;
+    }
+
+    if (
+        (option === "income" ||
+        option === "additional-income") &&
+        !settings.keepIncomeSelector
+    ) {
+      incomeTypeButtons.forEach((button) => {
+        button.classList.toggle(
+          "is-active",
+          button.dataset.incomeFormType === "principal"
+        );
+      });
+    }
+  }
+
+  function openMovementModal() {
+    showOptions();
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("movement-modal-open");
+  }
+
+  function openMovementFormModal(option, title) {
+    showMovementForm(option);
+
+    if (title) {
+      formTitle.textContent = title;
+    }
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("movement-modal-open");
+  }
+
+  function closeMovementModal() {
+    restoreCurrentForm();
+
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("movement-modal-open");
+
+    modalHeader.classList.remove("is-hidden");
+    optionsGrid.classList.remove("is-hidden");
+    formView.hidden = true;
+    formHost.innerHTML = "";
+    if (incomeTypeSelector) {
+      incomeTypeSelector.hidden = true;
+    }
+  }
+
+  document.addEventListener(
+    "danybot:open-expense-edit-modal",
+    () => {
+      openMovementFormModal("expense", "Editar gasto");
+    }
+  );
+
+  document.addEventListener(
+    "danybot:open-income-edit-modal",
+    () => {
+      openMovementFormModal(
+        "income",
+        "Editar ingreso"
+      );
+    }
+  );
+
+  document.addEventListener(
+    "danybot:close-movement-modal",
+    closeMovementModal
+  );
+
+  openButton.addEventListener("click", openMovementModal);
+
+  optionButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      showMovementForm(button.dataset.movementOption);
+    });
+  });
+
+  incomeTypeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setActiveIncomeType(
+        button.dataset.incomeFormType
+      );
+    });
+  });
+
+  closeButtons.forEach((button) => {
+    button.addEventListener("click", closeMovementModal);
+  });
+
+  backButton?.addEventListener("click", showOptions);
+
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      modal.classList.contains("is-open")
+    ) {
+      closeMovementModal();
+    }
+  });
 });
+
+

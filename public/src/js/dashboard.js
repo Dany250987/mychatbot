@@ -67,8 +67,47 @@ window.addEventListener("DOMContentLoaded", async () => {
     title.textContent = `Hola, ${user.name || user.email || "Usuario"}`;
   }
 
-  if (user.picture && avatar) {
-    avatar.src = user.picture;
+  if (avatar) {
+    const userName = user.name || user.email || "Usuario";
+
+    if (user.picture) {
+      avatar.src = user.picture;
+      avatar.alt = userName;
+    } else {
+      const nameParts = userName
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+      const initials =
+        nameParts.length >= 2
+          ? `${nameParts[0][0]}${nameParts[1][0]}`
+          : userName.charAt(0);
+
+      const initialsSvg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+          <rect width="100%" height="100%" rx="50" fill="#cb4c46"/>
+          <text
+            x="50%"
+            y="54%"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            fill="#ffffff"
+            font-family="Arial, sans-serif"
+            font-size="36"
+            font-weight="700"
+          >
+            ${initials.toUpperCase()}
+          </text>
+        </svg>
+      `;
+
+      avatar.src =
+        `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(initialsSvg)}`;
+
+      avatar.alt = `Iniciales de ${userName}`;
+    }
+
     avatar.style.display = "block";
   }
 
@@ -437,15 +476,24 @@ function renderAccountSection() {
         </div>
       </div>
 
-      <div class="danger-zone-card">
+      <div class="account-logout-card">
         <div>
-          <span class="welcome-badge danger-badge">Zona de peligro</span>
-          <h2>Eliminar cuenta</h2>
+          <span class="welcome-badge">Sesión</span>
+          <h2>Cerrar sesión</h2>
           <p>
-            Esta acción eliminará permanentemente tu cuenta y todos los datos asociados:
-            actividades, avisos, gastos, ingresos y evidencias.
+            Sal de tu cuenta actual para ingresar con otro usuario.
           </p>
         </div>
+
+        <button
+          type="button"
+          class="account-logout-button"
+          onclick="logoutFromSidebar()"
+        >
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Cerrar sesión
+        </button>
+      </div>
 
         <button type="button" class="delete-account-button" onclick="confirmDeleteAccount()">
           <i class="fa-solid fa-trash-can"></i>

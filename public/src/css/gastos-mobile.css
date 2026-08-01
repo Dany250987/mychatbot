@@ -1,23 +1,1832 @@
-/* ==================================================
-   DANYBOT - GASTOS MÓVIL
-   ==================================================
-
-   Este archivo contendrá únicamente la presentación
-   móvil del módulo de gastos.
-
-   La lógica y la interfaz web permanecen en:
-
-   - gastos.js
-   - gastos.css
-
-   Orden previsto:
-
-   1. Estructura móvil
-   2. Encabezado Movimientos
-   3. Filtros
-   4. Listado compacto
-   5. Botón flotante
-   6. Modal de gasto
-   7. Menú inferior
-   8. Pantallas muy pequeñas
+﻿/* ==================================================
+   PASO 1 - ESTRUCTURA MÃ“VIL
    ================================================== */
+
+
+/* ==================================================
+   ENCABEZADO MÃ“VIL - MOVIMIENTOS
+   ================================================== */
+
+.mobile-movements-header {
+  display: none;
+}
+
+
+/* ==================================================
+   MENÃš INFERIOR ANDROID
+   Reutiliza el sidebar existente
+   ================================================== */
+
+
+/* ==================================================
+   MODAL DE OPCIONES - NUEVO MOVIMIENTO
+   ================================================== */
+
+.movement-options-modal {
+  display: none;
+}
+
+
+/* ==================================================
+   MODAL NUEVO MOVIMIENTO - COLORES DE INICIO
+   ================================================== */
+
+
+/* ==================================================
+   FORMULARIOS DENTRO DEL MODAL
+   MISMA PALETA VISUAL DE INICIO
+   ================================================== */
+
+
+/* ==================================================
+   LISTA DE MOVIMIENTOS COMPACTA
+   ESTILO ANDROID / PALETA DE INICIO
+   ================================================== */
+
+
+/* ==================================================
+   ANDROID: RESALTADO DE MOVIMIENTO MODIFICADO
+   ================================================== */
+
+.danybot-mobile-app
+.mobile-expense-card.focus-highlight {
+  animation: expense-card-highlight 0.9s ease;
+}
+
+@keyframes expense-card-highlight {
+  0% {
+    transform: scale(1);
+    box-shadow: inherit;
+  }
+
+  35% {
+    transform: scale(1.018);
+    box-shadow:
+      0 10px 24px rgba(103, 0, 16, 0.22),
+      0 0 0 3px rgba(203, 76, 70, 0.14);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: inherit;
+  }
+}
+/* =========================================================
+   DANYBOT ANDROID - CABECERA Y MES COMPACTO
+   Solo afecta la aplicación móvil instalada
+========================================================= */
+
+
+/* ==================================================
+   MOVIMIENTOS - LIMPIEZA PANTALLA ANDROID
+   ================================================== */
+
+
+/* ==================================================
+   ANDROID - SELECTOR DE MES Y FILTROS DE MOVIMIENTOS
+   ================================================== */
+
+.mobile-movement-filters {
+  display: none;
+}
+
+
+/* ==================================================
+   ANDROID - BLOQUE DE MOVIMIENTOS
+   Cards pegadas, fondo vino e información visible
+   ================================================== */
+
+
+/* ==================================================
+   ANDROID - CORRECCIÓN FINAL DE ESPACIOS EN MOVIMIENTOS
+   ================================================== */
+
+
+/* ==================================================
+   ANDROID - LISTA DE MOVIMIENTOS SIN MÁRGENES LATERALES
+   ================================================== */
+
+
+/* ==========================================
+   ANDROID - OCULTAR GRÁFICAS
+   ========================================== */
+
+
+/* ==========================================
+   ANDROID - REPORTE (AJUSTE FINAL)
+   ========================================== */
+
+
+/* ==========================================
+   ANDROID - REPORTE COMPACTO
+   ========================================== */
+
+/* ==================================================
+   DANYBOT ANDROID - ESTILOS MÓVILES UNIFICADOS
+   Un único breakpoint para evitar bloques repetidos.
+   Se conserva el orden original de las reglas.
+   ================================================== */
+
+@media (max-width: 900px) {
+
+.danybot-mobile-app .expenses-header {
+    display: none !important;
+  }
+
+  .danybot-mobile-app .expenses-summary-grid {
+    display: none !important;
+  }
+
+  .danybot-mobile-app .expenses-container {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 18px 16px 100px !important;
+  }
+
+.danybot-mobile-app .mobile-movements-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0 0 14px;
+    padding: 4px 6px 0;
+  }
+
+  .danybot-mobile-app .mobile-movements-header h1 {
+    margin: 0;
+    color: #3c0000;
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .danybot-mobile-app .mobile-add-expense-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    color: #ffffff;
+    background: #960018;
+    text-decoration: none;
+    box-shadow: 0 10px 22px rgba(150, 0, 24, 0.22);
+  }
+
+  .danybot-mobile-app .mobile-add-expense-button i {
+    font-size: 24px;
+  }
+
+.danybot-mobile-app .app-sidebar {
+    position: fixed !important;
+    z-index: 1000 !important;
+    top: auto !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    background: rgba(45, 0, 8, 0.99) !important;
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .danybot-mobile-app .sidebar-brand,
+  .danybot-mobile-app .sidebar-logout {
+    display: none !important;
+  }
+
+  .danybot-mobile-app .sidebar-menu {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+
+    width: 100% !important;
+    margin: 0 !important;
+
+    padding:
+      8px 8px
+      calc(8px + env(safe-area-inset-bottom)) !important;
+
+    overflow: visible !important;
+  }
+
+  .danybot-mobile-app .sidebar-link {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 56px !important;
+
+    margin: 0 !important;
+    padding: 7px 2px !important;
+    gap: 5px !important;
+
+    border: 0 !important;
+    border-radius: 11px !important;
+
+    background: transparent !important;
+    color: #ffc7c1 !important;
+
+    font-size: 8.5px !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+    text-decoration: none !important;
+
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  .danybot-mobile-app .sidebar-link i {
+    display: block !important;
+    width: auto !important;
+    margin: 0 !important;
+
+    color: inherit !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+
+  .danybot-mobile-app .sidebar-link span {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    overflow: hidden !important;
+
+    color: inherit !important;
+    font-size: inherit !important;
+    line-height: 1.05 !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .danybot-mobile-app .sidebar-link.active {
+    background: #b00020 !important;
+    color: #ffffff !important;
+  }
+
+  .danybot-mobile-app .expenses-container {
+    padding-bottom: 96px !important;
+  }
+
+.movement-options-modal {
+    position: fixed;
+    z-index: 3000;
+    inset: 0;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .movement-options-modal.is-open {
+    display: flex;
+  }
+
+  .movement-options-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 0, 5, 0.58);
+    backdrop-filter: blur(3px);
+  }
+
+  .movement-options-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 520px;
+    padding: 20px 18px calc(22px + env(safe-area-inset-bottom));
+    border-radius: 28px 28px 0 0;
+    background: #fff1ef;
+    box-shadow: 0 -18px 45px rgba(60, 0, 0, 0.26);
+    animation: movementModalUp 0.25s ease;
+  }
+
+  .movement-options-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .movement-options-header span {
+    display: block;
+    margin-bottom: 4px;
+    color: #960018;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .movement-options-header h2 {
+    margin: 0;
+    color: #3c0000;
+    font-size: 22px;
+    line-height: 1.15;
+    font-weight: 900;
+  }
+
+  .movement-options-close {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 14px;
+    color: #ffffff;
+    background: #960018;
+    font-size: 18px;
+  }
+
+  .movement-options-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .movement-option-button {
+    width: 100%;
+    min-height: 72px;
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid rgba(150, 0, 24, 0.12);
+    border-radius: 18px;
+    color: #3c0000;
+    background: #ffffff;
+    text-align: left;
+    box-shadow: 0 8px 20px rgba(60, 0, 0, 0.06);
+  }
+
+  .movement-option-button > i:first-child {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 15px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #670010, #b00020);
+    font-size: 18px;
+  }
+
+  .movement-option-button span {
+    display: grid;
+    gap: 4px;
+  }
+
+  .movement-option-button strong {
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  .movement-option-button small {
+    color: #8a4b4b;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .movement-option-button > i:last-child {
+    color: #960018;
+    font-size: 13px;
+  }
+
+  body.movement-modal-open {
+    overflow: hidden;
+  }
+
+  @keyframes movementModalUp {
+    from {
+      opacity: 0;
+      transform: translateY(35px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+.movement-options-backdrop {
+    background: rgba(33, 0, 3, 0.72) !important;
+  }
+
+  .movement-options-content {
+    background:
+      linear-gradient(
+        180deg,
+        #670010 0%,
+        #3c0000 100%
+      ) !important;
+
+    border-top: 1px solid rgba(255, 199, 193, 0.18) !important;
+    box-shadow: 0 -18px 45px rgba(0, 0, 0, 0.32) !important;
+  }
+
+  .movement-options-header span {
+    color: #ff9a90 !important;
+  }
+
+  .movement-options-header h2 {
+    color: #ffffff !important;
+  }
+
+  .movement-options-close {
+    color: #ffffff !important;
+    background: #960018 !important;
+    box-shadow: none !important;
+  }
+
+  .movement-option-button {
+    color: #ffffff !important;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(150, 0, 24, 0.96),
+        rgba(103, 0, 16, 0.98)
+      ) !important;
+
+    border: 1px solid rgba(255, 176, 168, 0.15) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  .movement-option-button > i:first-child {
+    color: #ffffff !important;
+    background: #b00020 !important;
+  }
+
+  .movement-option-button strong {
+    color: #ffffff !important;
+  }
+
+  .movement-option-button small {
+    color: #ffc7c1 !important;
+  }
+
+  .movement-option-button > i:last-child {
+    color: #ff9a90 !important;
+  }
+
+  .movement-option-button:active {
+    transform: scale(0.98);
+    background:
+      linear-gradient(
+        145deg,
+        #cb4c46,
+        #960018
+      ) !important;
+  }
+
+.danybot-mobile-app .movement-form-view{
+    display: block;
+  }
+
+  .danybot-mobile-app .movement-form-view[hidden] {
+    display: none !important;
+  }
+
+  .danybot-mobile-app .movement-options-grid.is-hidden,
+  .danybot-mobile-app .movement-options-header.is-hidden {
+    display: none !important;
+  }
+
+  .danybot-mobile-app .movement-form-header {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .danybot-mobile-app .movement-form-header > div {
+    min-width: 0;
+  }
+
+  .danybot-mobile-app .movement-form-header span {
+    display: block;
+    margin-bottom: 3px;
+    color: #ff9a90;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .danybot-mobile-app .movement-form-header h2 {
+    margin: 0;
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 19px;
+    line-height: 1.15;
+    font-weight: 900;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .danybot-mobile-app .movement-form-back {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 199, 193, 0.18);
+    border-radius: 13px;
+    color: #ffffff;
+    background: #960018;
+    font-size: 15px;
+  }
+
+  .danybot-mobile-app .movement-form-host {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 3px;
+  }
+
+  .danybot-mobile-app .movement-form-host::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .danybot-mobile-app .movement-form-host::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: #cb4c46;
+  }
+
+  /* Formulario de gasto dentro del modal */
+
+  .danybot-mobile-app .movement-form-host .expenses-form-section {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    border: 1px solid rgba(255, 176, 168, 0.18) !important;
+    border-radius: 20px !important;
+    color: #ffffff !important;
+    background:
+      linear-gradient(
+        145deg,
+        rgba(150, 0, 24, 0.97),
+        rgba(103, 0, 16, 0.99)
+      ) !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .danybot-mobile-app .movement-form-host .expenses-form-section::before {
+    display: none !important;
+  }
+
+  .danybot-mobile-app .movement-form-host .expenses-form-section > .section-title-row {
+    display: none !important;
+  }
+
+  .danybot-mobile-app .movement-form-host #expenseFormContent {
+    display: block !important;
+    max-height: none !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .danybot-mobile-app .movement-form-host .modern-expense-form {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 13px !important;
+  }
+
+  /* Formularios de ingresos dentro del modal */
+
+  .danybot-mobile-app .movement-form-host .income-form-box {
+    display: grid !important;
+    width: 100% !important;
+    gap: 11px !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    border: 1px solid rgba(255, 176, 168, 0.18) !important;
+    border-radius: 20px !important;
+    color: #ffffff !important;
+    background:
+      linear-gradient(
+        145deg,
+        rgba(150, 0, 24, 0.97),
+        rgba(103, 0, 16, 0.99)
+      ) !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .danybot-mobile-app .movement-form-host .income-form-box h3 {
+    margin: 0 0 4px !important;
+    color: #ffffff !important;
+    font-size: 17px !important;
+  }
+
+  /* Etiquetas */
+
+  .danybot-mobile-app .movement-form-host label,
+  .danybot-mobile-app .movement-form-host .form-field label,
+  .danybot-mobile-app .movement-form-host .evidence-label {
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+  }
+
+  /* Campos */
+
+  .danybot-mobile-app .movement-form-host input,
+  .danybot-mobile-app .movement-form-host select,
+  .danybot-mobile-app .movement-form-host .input-shell input,
+  .danybot-mobile-app .movement-form-host .input-shell select {
+    width: 100% !important;
+    min-height: 46px !important;
+    height: 46px !important;
+    padding: 10px 13px !important;
+    border: 1px solid rgba(255, 199, 193, 0.26) !important;
+    border-radius: 14px !important;
+    color: #3c0000 !important;
+    background: #fff1ef !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    outline: none !important;
+  }
+
+  .danybot-mobile-app .movement-form-host input::placeholder {
+    color: #8a4b4b !important;
+  }
+
+  .danybot-mobile-app .movement-form-host input:focus,
+  .danybot-mobile-app .movement-form-host select:focus {
+    border-color: #ff9a90 !important;
+    box-shadow: 0 0 0 3px rgba(255, 154, 144, 0.18) !important;
+  }
+
+  /* Evidencia */
+
+  .danybot-mobile-app .movement-form-host .custom-file-label {
+    border: 1px solid rgba(255, 199, 193, 0.26) !important;
+    background: #fff1ef !important;
+  }
+
+  .danybot-mobile-app .movement-form-host .file-button {
+    color: #ffffff !important;
+    background: #960018 !important;
+  }
+
+  .danybot-mobile-app .movement-form-host .file-name,
+  .danybot-mobile-app .movement-form-host .field-help,
+  .danybot-mobile-app .movement-form-host .voice-text {
+    color: #ffc7c1 !important;
+  }
+
+  /* Voz */
+
+  .danybot-mobile-app .movement-form-host .voice-box {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .danybot-mobile-app .movement-form-host .voice-button {
+    color: #ffffff !important;
+    background: #cb4c46 !important;
+    box-shadow: none !important;
+  }
+
+  /* Botones guardar */
+
+  .danybot-mobile-app .movement-form-host #submitExpenseButton,
+  .danybot-mobile-app .movement-form-host #saveIncomeButton,
+  .danybot-mobile-app .movement-form-host #saveAdditionalIncomeButton,
+  .danybot-mobile-app .movement-form-host #voiceButton,
+  .danybot-mobile-app .movement-form-host #incomeVoiceButton {
+    width: 100% !important;
+    min-height: 46px !important;
+    border: 0 !important;
+    border-radius: 14px !important;
+    color: #3c0000 !important;
+    background: #ff9a90 !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    box-shadow: none !important;
+  }
+
+  .danybot-mobile-app .movement-form-host #cancelEditButton {
+    width: 100% !important;
+    min-height: 44px !important;
+    border: 1px solid rgba(255, 199, 193, 0.28) !important;
+    border-radius: 14px !important;
+    color: #ffffff !important;
+    background: rgba(255, 199, 193, 0.12) !important;
+  }
+
+  /* El formulario de gasto ya no aparece abierto en la pantalla */
+
+  .danybot-mobile-app .expenses-container > .expenses-form-section {
+    display: none !important;
+  }
+
+/* Tabla convertida en contenedor de movimientos */
+
+  .danybot-mobile-app .expenses-table-wrapper {
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .danybot-mobile-app .expenses-table {
+    display: block !important;
+    width: 100% !important;
+    border-collapse: separate !important;
+  }
+
+  .danybot-mobile-app .expenses-table thead {
+    display: none !important;
+  }
+
+  .danybot-mobile-app .expenses-table tbody {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 20px;
+    background:
+      linear-gradient(
+        180deg,
+        #960018 0%,
+        #670010 100%
+      );
+    box-shadow: 0 14px 30px rgba(60, 0, 0, 0.2);
+  }
+
+  .danybot-mobile-app .mobile-expense-row {
+    display: block !important;
+    width: 100%;
+  }
+
+  .danybot-mobile-app .mobile-expense-row > td {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  /* Tarjeta */
+
+  .danybot-mobile-app .mobile-expense-card {
+    width: 100%;
+    color: #ffffff;
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 199, 193, 0.12);
+  }
+
+  .danybot-mobile-app .mobile-expense-row:last-child .mobile-expense-card {
+    border-bottom: 0;
+  }
+
+  /* Fila visible */
+
+  .danybot-mobile-app .mobile-expense-summary {
+    width: 100%;
+    min-height: 78px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto 15px;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 14px;
+    border: 0;
+    color: #ffffff;
+    text-align: left;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .danybot-mobile-app .mobile-expense-summary:active {
+    background: rgba(255, 132, 120, 0.08);
+  }
+
+  /* Icono */
+
+  .danybot-mobile-app .mobile-expense-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 13px;
+    color: #ffffff !important;
+    background: #b00020 !important;
+    font-size: 17px;
+  }
+
+  /* Anulamos colores antiguos de las categorÃ­as dentro del icono */
+
+  .danybot-mobile-app .mobile-expense-icon.badge-purple,
+  .danybot-mobile-app .mobile-expense-icon.badge-green,
+  .danybot-mobile-app .mobile-expense-icon.badge-blue,
+  .danybot-mobile-app .mobile-expense-icon.badge-cyan,
+  .danybot-mobile-app .mobile-expense-icon.badge-red,
+  .danybot-mobile-app .mobile-expense-icon.badge-pink,
+  .danybot-mobile-app .mobile-expense-icon.badge-gray {
+    color: #ffffff !important;
+    background:
+      linear-gradient(
+        145deg,
+        #cb001f,
+        #960018
+      ) !important;
+  }
+
+  /* InformaciÃ³n principal */
+
+  .danybot-mobile-app .mobile-expense-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .danybot-mobile-app .mobile-expense-description {
+    display: block;
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 850;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .danybot-mobile-app .mobile-expense-meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+    color: #ff9a90;
+    font-size: 10px;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* Valor */
+
+  .danybot-mobile-app .mobile-expense-value {
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .danybot-mobile-app .mobile-expense-chevron {
+    color: #ff9a90;
+    font-size: 12px;
+  }
+
+  /* Estado abierto */
+
+  .danybot-mobile-app .mobile-expense-card.is-expanded {
+    background: rgba(60, 0, 0, 0.2);
+  }
+
+  .danybot-mobile-app .mobile-expense-card.is-expanded .mobile-expense-summary {
+    padding-bottom: 10px;
+  }
+
+  /* Detalles */
+
+  .danybot-mobile-app .mobile-expense-details {
+    padding: 0 14px 15px 66px;
+  }
+
+  .danybot-mobile-app .mobile-expense-details[hidden] {
+    display: none !important;
+  }
+
+  .danybot-mobile-app .mobile-expense-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid rgba(255, 199, 193, 0.12);
+    border-radius: 14px;
+    background: rgba(60, 0, 0, 0.3);
+  }
+
+  .danybot-mobile-app .mobile-expense-detail {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .danybot-mobile-app .mobile-expense-detail > span {
+    color: #ff9a90;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .danybot-mobile-app .mobile-expense-detail > strong {
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 11px;
+    line-height: 1.25;
+    font-weight: 800;
+    text-overflow: ellipsis;
+  }
+
+  /* Evidencia */
+
+  .danybot-mobile-app .mobile-expense-evidence {
+    min-height: 22px;
+    display: flex;
+    align-items: center;
+  }
+
+  .danybot-mobile-app .mobile-expense-evidence .no-evidence-label {
+    padding: 0;
+    color: #ffc7c1 !important;
+    background: transparent !important;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .danybot-mobile-app .mobile-expense-evidence .evidence-view-button {
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 9px;
+    border: 1px solid rgba(255, 199, 193, 0.18);
+    border-radius: 9px;
+    color: #ffffff;
+    background: #960018;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  /* Acciones */
+
+  .danybot-mobile-app .mobile-expense-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .danybot-mobile-app .mobile-expense-action {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-radius: 11px;
+    font-size: 11px;
+    font-weight: 850;
+  }
+
+  .danybot-mobile-app .mobile-expense-action.edit {
+    border: 1px solid rgba(255, 199, 193, 0.18);
+    color: #3c0000;
+    background: #ff9a90;
+  }
+
+  .danybot-mobile-app .mobile-expense-action.delete {
+    border: 1px solid rgba(255, 199, 193, 0.2);
+    color: #ffffff;
+    background: #670010;
+  }
+
+  /* Estado vacÃ­o */
+
+  .danybot-mobile-app .mobile-expense-empty-row {
+    display: block !important;
+  }
+
+  .danybot-mobile-app .mobile-expense-empty-row td {
+    display: block !important;
+    padding: 20px !important;
+  }
+
+  .danybot-mobile-app .mobile-expense-empty-row .empty-state {
+    color: #ffffff;
+  }
+
+  .danybot-mobile-app
+  .mobile-expense-empty-row
+  .empty-state p {
+    color: #ffc7c1;
+  }
+
+html.danybot-mobile-app .expenses-header,
+  html.danybot-mobile-app .expenses-summary-grid,
+  html.danybot-mobile-app .expenses-form-section {
+    display: none !important;
+  }
+
+  html.danybot-mobile-app .expenses-container {
+    width: 100%;
+    max-width: none;
+    min-height: 100vh;
+    padding-top: 0;
+  }
+
+  html.danybot-mobile-app .mobile-movements-header {
+    width: 100%;
+    min-height: 64px;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0;
+  }
+
+  html.danybot-mobile-app .mobile-movements-header h1 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  html.danybot-mobile-app .mobile-add-expense-button {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar) {
+    width: calc(100% - 36px);
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    margin: 4px 18px 14px;
+    padding: 0;
+    border: 0;
+    border-radius: 16px;
+    box-shadow: none;
+    overflow: hidden;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  .toolbar-info {
+    display: none !important;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  .toolbar-actions {
+    width: 100%;
+    display: block;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  .month-control {
+    width: 100%;
+    display: block;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  .month-control label {
+    display: none !important;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  #monthFilter {
+    width: 100%;
+    min-width: 0;
+    height: 50px;
+    margin: 0;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 16px;
+    outline: none;
+    box-shadow: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  #monthFilter:focus {
+    border: 0;
+    box-shadow: none;
+  }
+
+  html.danybot-mobile-app .expenses-list {
+    margin-top: 0;
+  }
+
+html.danybot-mobile-app .expenses-list > .section-title-row{
+    display:none !important;
+  }
+
+  html.danybot-mobile-app .income-panel{
+    display:none !important;
+  }
+
+/*
+   * Selector del mes.
+   */
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar) {
+    width: calc(100% - 36px) !important;
+    min-height: 52px !important;
+    margin: 0 18px 12px !important;
+    padding: 0 !important;
+    border: 1px solid rgba(103, 0, 16, 0.08) !important;
+    border-radius: 16px !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 20px rgba(60, 0, 0, 0.08) !important;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  #monthFilter {
+    width: 100% !important;
+    height: 52px !important;
+    padding: 0 16px !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    color: #3c0000 !important;
+    background: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    font-family: inherit !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /*
+   * Todos | Ingresos | Gastos
+   */
+  html.danybot-mobile-app .mobile-movement-filters {
+    width: calc(100% - 36px);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0 18px 14px;
+  }
+
+  html.danybot-mobile-app .mobile-movement-filter {
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 8px;
+    border: 0;
+    border-radius: 13px;
+    color: #ffffff;
+    background: #960018;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition:
+      transform 0.18s ease,
+      background 0.18s ease;
+  }
+
+  html.danybot-mobile-app .mobile-movement-filter:active {
+    transform: scale(0.97);
+  }
+
+  html.danybot-mobile-app .mobile-movement-filter.is-active {
+    background: #cb4c46;
+    box-shadow: 0 7px 16px rgba(150, 0, 24, 0.2);
+  }
+
+/* La sección deja de verse como una tarjeta blanca */
+  html.danybot-mobile-app .expenses-list {
+    width: calc(100% - 36px) !important;
+    margin: 0 18px 110px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    background: #670010 !important;
+    box-shadow: 0 14px 30px rgba(60, 0, 0, 0.22) !important;
+  }
+
+  /* El contenido siempre debe permanecer visible */
+  html.danybot-mobile-app #expensesListContent {
+    display: block !important;
+    width: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* La tabla se convierte en el bloque de movimientos */
+  html.danybot-mobile-app .expenses-list table {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-collapse: collapse !important;
+    background: transparent !important;
+  }
+
+  html.danybot-mobile-app .expenses-list thead {
+    display: none !important;
+  }
+
+  html.danybot-mobile-app .expenses-list tbody {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    background: #670010 !important;
+    box-shadow: none !important;
+  }
+
+  /* Cada fila queda pegada con la siguiente */
+  html.danybot-mobile-app .mobile-expense-row {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-row > td {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  /* Card individual */
+  html.danybot-mobile-app .mobile-expense-card {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(255, 199, 193, 0.12) !important;
+    border-radius: 0 !important;
+    color: #ffffff !important;
+    background: #670010 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+
+  html.danybot-mobile-app
+  .mobile-expense-row:last-child
+  .mobile-expense-card {
+    border-bottom: 0 !important;
+  }
+
+  /* Parte visible del movimiento */
+  html.danybot-mobile-app .mobile-expense-summary {
+    width: 100% !important;
+    min-height: 78px !important;
+    display: grid !important;
+    grid-template-columns: 42px minmax(0, 1fr) auto 14px !important;
+    align-items: center !important;
+    column-gap: 10px !important;
+    margin: 0 !important;
+    padding: 12px 14px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: #ffffff !important;
+    background: transparent !important;
+    text-align: left !important;
+    overflow: visible !important;
+  }
+
+  /* Contenedor de descripción, categoría y fecha */
+  html.danybot-mobile-app .mobile-expense-main {
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+    overflow: visible !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-description {
+    width: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-meta {
+    width: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    color: #ff9a90 !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Valor alineado a la derecha y sin quedar tapado */
+  html.danybot-mobile-app .mobile-expense-value {
+    display: block !important;
+    min-width: max-content !important;
+    margin: 0 !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+    text-align: right !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-chevron {
+    width: 14px !important;
+    color: #ff9a90 !important;
+    font-size: 11px !important;
+    text-align: center !important;
+  }
+
+  /* Base de los iconos */
+  html.danybot-mobile-app .mobile-expense-icon {
+    width: 40px !important;
+    height: 40px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 13px !important;
+    color: #ffffff !important;
+    font-size: 16px !important;
+    box-shadow: none !important;
+  }
+
+  /* Colores por categoría */
+  html.danybot-mobile-app .mobile-expense-icon.badge-purple {
+    background: #960018 !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-icon.badge-green {
+    background: #cb4c46 !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-icon.badge-blue {
+    background: #3c0000 !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-icon.badge-cyan {
+    background: #b00020 !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-icon.badge-red {
+    background: #960018 !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-icon.badge-pink {
+    background: #cb4c46 !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-icon.badge-gray {
+    background: #3c0000 !important;
+  }
+
+  /* Movimiento abierto */
+  html.danybot-mobile-app .mobile-expense-card.is-expanded {
+    background: #3c0000 !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-details {
+    padding: 0 14px 14px 66px !important;
+    background: transparent !important;
+  }
+
+/* Reduce los espacios entre encabezado, mes y filtros */
+  html.danybot-mobile-app .mobile-movements-header {
+    margin-bottom: 8px !important;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar) {
+    margin: 0 18px 8px !important;
+  }
+
+  html.danybot-mobile-app .mobile-movement-filters {
+    margin: 0 18px 8px !important;
+  }
+
+  /* La lista empieza inmediatamente después de los filtros */
+  html.danybot-mobile-app .expenses-list {
+    margin: 0 18px 100px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: #670010 !important;
+  }
+
+  html.danybot-mobile-app #expensesListContent {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  html.danybot-mobile-app .expenses-list table {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-spacing: 0 !important;
+    border-collapse: collapse !important;
+  }
+
+  html.danybot-mobile-app .expenses-list tbody {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    border: 0 !important;
+    background: #670010 !important;
+  }
+
+  /* Elimina completamente el texto automático FECHA */
+  html.danybot-mobile-app
+  .expenses-list
+  td::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  /* Elimina espacios, bordes y fondos blancos de cada fila */
+  html.danybot-mobile-app .expenses-list tr,
+  html.danybot-mobile-app .mobile-expense-row {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html.danybot-mobile-app .expenses-list td,
+  html.danybot-mobile-app .mobile-expense-row > td {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Cada movimiento queda pegado al siguiente */
+  html.danybot-mobile-app .mobile-expense-card {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(255, 199, 193, 0.12) !important;
+    border-radius: 0 !important;
+    background: #670010 !important;
+    box-shadow: none !important;
+  }
+
+  html.danybot-mobile-app
+  .mobile-expense-row:last-child
+  .mobile-expense-card {
+    border-bottom: 0 !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-summary {
+    min-height: 82px !important;
+    margin: 0 !important;
+    padding: 12px 14px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Categoría y fecha una debajo de la otra */
+  html.danybot-mobile-app .mobile-expense-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1px !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-category,
+  html.danybot-mobile-app .mobile-expense-date {
+    display: block !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    color: #ff9a90 !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+
+  html.danybot-mobile-app .mobile-expense-date {
+    color: #cb4c46 !important;
+  }
+
+/* El contenedor principal deja libres los bordes */
+  html.danybot-mobile-app .expenses-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* La lista ocupa todo el ancho disponible */
+  html.danybot-mobile-app .expenses-list {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 100px !important;
+    border-radius: 0 !important;
+  }
+
+  html.danybot-mobile-app #expensesListContent,
+  html.danybot-mobile-app .expenses-list table,
+  html.danybot-mobile-app .expenses-list tbody {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* El título conserva su separación */
+  html.danybot-mobile-app .mobile-movements-header {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+html.danybot-mobile-app
+  .expenses-charts-section{
+    display:none !important;
+  }
+
+html.danybot-mobile-app
+  .expenses-export-toolbar
+  .toolbar-info p {
+    display: none !important;
+  }
+
+/* Título más pequeño */
+  html.danybot-mobile-app .mobile-movements-header h1{
+    font-size: 13 px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Tarjeta */
+  html.danybot-mobile-app .expenses-export-toolbar{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+
+    margin:16px 18px 100px !important;
+    padding:14px 16px !important;
+
+    background:#670010 !important;
+    border:none !important;
+    border-radius:18px !important;
+  }
+
+  /* Oculta el icono del botón únicamente */
+  html.danybot-mobile-app
+  .download-excel-button i{
+    display:none !important;
+  }
+
+  /* Botón pequeño */
+  html.danybot-mobile-app
+  .download-excel-button{
+
+    width:auto !important;
+    min-width:120px !important;
+    height:38px !important;
+
+    padding:0 16px !important;
+
+    border-radius:12px !important;
+
+    font-size:.90rem !important;
+    font-weight:700 !important;
+  }
+
+/* Elimina el fondo blanco */
+  html.danybot-mobile-app .expenses-export-toolbar{
+      width:calc(100% - 36px) !important;
+      margin:14px 18px 100px !important;
+
+      padding:0 !important;
+
+      background:transparent !important;
+      border:0 !important;
+      box-shadow:none !important;
+
+      display:block !important;
+  }
+
+  /* Oculta el texto explicativo */
+  html.danybot-mobile-app .expenses-export-toolbar .toolbar-info p{
+      display:none !important;
+  }
+
+  /* Todo el contenido se convierte en un solo botón */
+  html.danybot-mobile-app .expenses-export-toolbar .toolbar-actions{
+      width:100% !important;
+      margin:0 !important;
+  }
+
+  html.danybot-mobile-app .download-excel-button{
+
+      width:100% !important;
+      height:48px !important;
+
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:10px !important;
+
+      padding:0 18px !important;
+
+      background:#670010 !important;
+
+      border:none !important;
+      border-radius:16px !important;
+
+      color:#fff !important;
+
+      font-size:12px !important;
+      font-weight:700 !important;
+
+      box-shadow:none !important;
+  }
+
+  /* Conserva únicamente el icono del botón */
+  html.danybot-mobile-app .download-excel-button i{
+      display:inline-flex !important;
+      font-size:18px !important;
+      margin:0 !important;
+  }
+
+  /* Oculta el icono grande de la izquierda */
+  html.danybot-mobile-app .toolbar-icon{
+      display:none !important;
+  }
+
+  /* Oculta el título grande */
+  html.danybot-mobile-app .toolbar-info h2{
+      display:none !important;
+  }
+}
+
+
+html.danybot-mobile-app .mobile-income-type-selector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 5px;
+
+  border: 1px solid rgba(255, 199, 193, 0.16);
+  border-radius: 15px;
+
+  background: rgba(60, 0, 0, 0.38);
+}
+
+html.danybot-mobile-app
+.mobile-income-type-selector[hidden] {
+  display: none !important;
+}
+
+html.danybot-mobile-app .mobile-income-type-button {
+  min-height: 40px;
+  padding: 8px 12px;
+
+  border: 0;
+  border-radius: 11px;
+
+  color: #ffc7c1;
+  background: transparent;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+html.danybot-mobile-app
+.mobile-income-type-button.is-active {
+  color: #ffffff;
+  background: #cb4c46;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+html.danybot-mobile-app
+.mobile-income-type-button:active {
+  transform: scale(0.98);
+}
+
+html.danybot-mobile-app .expense-date-field {
+  gap: 8px !important;
+}
+
+html.danybot-mobile-app .expense-date-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+html.danybot-mobile-app
+.expense-date-heading label {
+  margin: 0 !important;
+}
+
+html.danybot-mobile-app
+.toggle-expense-date-button {
+  padding: 0;
+  border: 0;
+
+  color: #ffb0a8;
+  background: transparent;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html.danybot-mobile-app
+.toggle-expense-date-button:active {
+  opacity: 0.7;
+}
+
+html.danybot-mobile-app
+.expense-date-control[hidden] {
+  display: none !important;
+}
+
+/* Entrada de dinero */
+.danybot-mobile-app
+.mobile-expense-icon.movement-income-icon {
+  background: #2e7d32 !important;
+  color: #ffffff !important;
+}
+
+/* Salida de dinero */
+.danybot-mobile-app
+.mobile-expense-icon.movement-expense-icon {
+  background: #960018 !important;
+  color: #ffffff !important;
+}

@@ -3302,4 +3302,18 @@ body {
   letter-spacing: 0 !important;
 }
 
+/* ==================================================
+   WEB: OCULTAR AGENDA Y RESUMEN DEL INICIO
+   En Android continúan visibles.
+   ================================================== */
+
+html:not(.danybot-mobile-app)
+  .dashboard-home
+  .upcoming-activities-section,
+
+html:not(.danybot-mobile-app)
+  .dashboard-home
+  .daily-summary-section {
+  display: none;
+}
 

@@ -54,7 +54,7 @@ function renderSidebar(activePage = "") {
 
       <a href="./gastos.html" class="sidebar-link ${activePage === "gastos" ? "active" : ""}">
         <i class="fa-solid fa-wallet"></i>
-        <span>Gastos</span>
+        <span>Movimientos</span>
       </a>
 
       <a href="./dashboard.html#cuenta" class="sidebar-link ${activePage === "cuenta" ? "active" : ""}">

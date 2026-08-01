@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -29,18 +29,25 @@
 
   <!-- CSS propio -->
    <script>
-    (function () {
-      const isDanyBotNativeApp =
-        window.location.origin === "http://localhost" ||
-        window.location.origin === "https://localhost" ||
-        window.location.protocol === "capacitor:" ||
-        window.location.protocol === "ionic:";
+      (function () {
+        const isCapacitorProtocol =
+          window.location.protocol === "capacitor:" ||
+          window.location.protocol === "ionic:";
 
-      if (isDanyBotNativeApp) {
-        document.documentElement.classList.add("danybot-mobile-app");
-      }
-    })();
-  </script>
+        const isLocalMobilePreview =
+          window.innerWidth <= 900 &&
+          (
+            window.location.hostname === "localhost" ||
+            window.location.hostname === "127.0.0.1" ||
+            /^192\.168\./.test(window.location.hostname) ||
+            /^10\./.test(window.location.hostname)
+          );
+
+        if (isCapacitorProtocol || isLocalMobilePreview) {
+          document.documentElement.classList.add("danybot-mobile-app");
+        }
+      })();
+    </script>
   <link rel="stylesheet" href="./src/css/gastos.css">
   <link rel="stylesheet" href="./src/css/gastos-mobile.css">
   <script src="src/js/api-config.js"></script>
@@ -54,6 +61,19 @@
 
     <!-- Contenedor principal de la pantalla -->
     <main class="expenses-container">
+
+      <header class="mobile-movements-header">
+        <h1>Movimientos</h1>
+
+        <button
+          type="button"
+          class="mobile-add-expense-button"
+          id="openMovementOptionsButton"
+          aria-label="Agregar movimiento"
+        >
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </header>
 
       <!-- Encabezado -->
       <section class="expenses-header">
@@ -170,6 +190,36 @@
 
       </section>
 
+      <!-- Filtros móviles de movimientos -->
+      <nav
+        class="mobile-movement-filters"
+        aria-label="Filtrar movimientos"
+      >
+        <button
+          type="button"
+          class="mobile-movement-filter is-active"
+          data-movement-filter="all"
+        >
+          Todos
+        </button>
+
+        <button
+          type="button"
+          class="mobile-movement-filter"
+          data-movement-filter="income"
+        >
+          Ingresos
+        </button>
+
+        <button
+          type="button"
+          class="mobile-movement-filter"
+          data-movement-filter="expense"
+        >
+          Gastos
+        </button>
+      </nav>
+
       <!-- Formulario para registrar gastos -->
       <section class="expenses-form-section">
 
@@ -197,16 +247,34 @@
 
           <form id="expenseForm" class="modern-expense-form">
 
-            <div class="form-field">
-              <label for="expenseDate">
-                <i class="bi bi-calendar-check"></i>
-                Fecha del gasto
-              </label>
+            <div
+    id="expenseDateField"
+    class="form-field expense-date-field"
+  >
+    <div class="voice-box full-field">
+              <button type="button" id="voiceButton" class="voice-button">
+                <i class="bi bi-mic-fill"></i>
+                Dictar gasto por voz
+              </button>
 
-              <div class="input-shell">
-                <input type="date" id="expenseDate" required>
-              </div>
-            </div>
+              
+    </div>
+    <div class="expense-date-heading">
+      <label for="expenseDate">
+        <i class="bi bi-calendar-check"></i>
+        Fecha del gasto
+      </label>
+
+    
+    </div>
+
+    <div
+      id="expenseDateControl"
+      class="input-shell expense-date-control"
+    >
+      <input type="date" id="expenseDate" required>
+    </div>
+  </div>
 
             <div class="form-field">
               <label for="category">
@@ -220,7 +288,6 @@
                   <option value="Factura">Factura</option>
                   <option value="Alimentación">Alimentación</option>
                   <option value="Transporte">Transporte</option>
-                  <option value="Pasajes">Pasajes</option>
                   <option value="Salud">Salud</option>
                   <option value="Entretenimiento">Entretenimiento</option>
                   <option value="Prestamos">Prestamos</option>
@@ -296,16 +363,6 @@
             <input type="hidden" id="source" value="manual">
             <input type="hidden" id="expenseId">
 
-            <div class="voice-box full-field">
-              <button type="button" id="voiceButton" class="voice-button">
-                <i class="bi bi-mic-fill"></i>
-                Dictar gasto por voz
-              </button>
-
-              <p id="voiceText" class="voice-text">
-                Puedes decir algo como: “Agrega un gasto de 12000 en pasajes por recarga de tarjeta tu llave”.
-              </p>
-            </div>
 
             <div class="form-actions full-field">
               <button type="submit" id="submitExpenseButton">
@@ -320,6 +377,8 @@
             </div>
 
           </form>
+
+            
 
           <!-- Aquí mostraremos mensajes como: gasto guardado o error -->
           <p id="expenseMessage"></p>
@@ -446,6 +505,17 @@
             <div class="income-form-box">
               <h3>Ingreso adicional</h3>
 
+               <div class="voice-box full-field">
+                <button
+                  type="button"
+                  id="incomeVoiceButton"
+                  class="voice-button"
+                >
+                  <i class="bi bi-mic-fill"></i>
+                  Dictar ingreso por voz
+                </button>
+              </div>
+
               <label for="additionalIncomeDate">Fecha</label>
               <input 
                 type="date" 
@@ -466,6 +536,7 @@
                 placeholder="Ej: 300000"
                 min="0"
               >
+
 
               <button type="button" id="saveAdditionalIncomeButton">
                 <i class="bi bi-plus-circle"></i>
@@ -550,7 +621,7 @@
           </span>
 
           <div>
-            <h2>Exportar reporte</h2>
+            <h2>Generar reporte</h2>
             <p>Descarga el Excel cuando ya hayas revisado ingresos, gastos y gráficas del mes.</p>
           </div>
         </div>
@@ -558,13 +629,131 @@
         <div class="toolbar-actions">
           <button type="button" id="downloadExcelButton" class="download-excel-button">
             <i class="bi bi-file-earmark-excel"></i>
-            Descargar Excel
+            Descargar Reporte
           </button>
         </div>
 
       </section>
 
     </main>
+  </div>
+
+  <!-- Selector móvil para agregar movimientos -->
+<div
+  id="movementOptionsModal"
+  class="movement-options-modal"
+  aria-hidden="true"
+>
+  <div class="movement-options-backdrop" data-close-movement-modal></div>
+
+    <section
+      class="movement-options-content"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="movementOptionsTitle"
+    >
+      <header class="movement-options-header">
+        <div>
+          <span>Nuevo movimiento</span>
+          <h2 id="movementOptionsTitle">¿Qué deseas agregar?</h2>
+        </div>
+
+        <button
+          type="button"
+          class="movement-options-close"
+          data-close-movement-modal
+          aria-label="Cerrar"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+
+      <div class="movement-options-grid">
+
+        <button
+          type="button"
+          class="movement-option-button"
+          data-movement-option="expense"
+        >
+          <i class="fa-solid fa-wallet"></i>
+
+          <span>
+            <strong>Agregar gasto</strong>
+            <small>Registrar una compra o pago</small>
+          </span>
+
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <button
+          type="button"
+          class="movement-option-button"
+          data-movement-option="income"
+        >
+          <i class="fa-solid fa-money-bill-wave"></i>
+
+          <span>
+            <strong>Agregar ingreso</strong>
+            <small>Registrar dinero recibido</small>
+          </span>
+
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+      </div>
+      
+      <div id="movementFormView" class="movement-form-view" hidden>
+        <header class="movement-form-header">
+          <button
+            type="button"
+            id="backToMovementOptionsButton"
+            class="movement-form-back"
+            aria-label="Volver a las opciones"
+          >
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+
+          <div>
+            <span>Nuevo movimiento</span>
+            <h2 id="movementFormTitle">Agregar movimiento</h2>
+          </div>
+
+          <button
+            type="button"
+            class="movement-options-close"
+            data-close-movement-modal
+            aria-label="Cerrar"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </header>
+
+        <div
+          id="mobileIncomeTypeSelector"
+          class="mobile-income-type-selector"
+          hidden
+        >
+          <button
+            type="button"
+            class="mobile-income-type-button is-active"
+            data-income-form-type="principal"
+          >
+            Principal
+          </button>
+
+          <button
+            type="button"
+            class="mobile-income-type-button"
+            data-income-form-type="additional"
+          >
+            Adicional
+          </button>
+        </div>
+
+        <div id="movementFormHost" class="movement-form-host"></div>
+      </div>
+      
+    </section>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

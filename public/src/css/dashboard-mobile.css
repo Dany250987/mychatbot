@@ -788,7 +788,7 @@
     line-height: 1.15 !important;
     font-weight: 800 !important;
     letter-spacing: -0.1px;
-    color: #8a4b4b;
+    color: #fff;
   }
 
   .danybot-mobile-app .dashboard-card .card-info p {
@@ -2561,3 +2561,212 @@ body {
     font-size: 11px;
   }
 }
+
+.account-logout-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid rgba(103, 0, 16, 0.12);
+  box-shadow: 0 12px 30px rgba(60, 0, 0, 0.08);
+}
+
+.account-logout-card h2 {
+  margin: 8px 0 6px;
+}
+
+.account-logout-card p {
+  margin: 0;
+}
+
+.account-logout-button {
+  border: 0;
+  border-radius: 14px;
+  padding: 13px 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #670010;
+  color: #ffffff;
+}
+
+.account-logout-button:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 900px) {
+  .danybot-mobile-app .account-logout-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  .danybot-mobile-app .account-logout-button {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+
+/* =========================================================
+   DANYBOT ANDROID - CABECERA Y MES COMPACTO
+   Solo afecta la aplicación móvil instalada
+========================================================= */
+
+@media (max-width: 900px) {
+
+  /* Oculta el encabezado grande de la versión web */
+  html.danybot-mobile-app .expenses-header {
+    display: none !important;
+  }
+
+  /* Oculta las tarjetas grandes del resumen mensual */
+  html.danybot-mobile-app .expenses-summary-grid {
+    display: none !important;
+  }
+
+  /*
+   * En Android el formulario se abre desde el botón +
+   * No debe ocupar espacio dentro de la pantalla principal.
+   */
+  html.danybot-mobile-app .expenses-form-section {
+    display: none !important;
+  }
+
+  /* Contenedor principal más compacto */
+  html.danybot-mobile-app .expenses-container {
+    width: 100%;
+    max-width: none;
+    min-height: 100vh;
+    padding-top: 0;
+  }
+
+  /* Cabecera principal de Movimientos */
+  html.danybot-mobile-app .mobile-movements-header {
+    width: 100%;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0;
+    padding: 12px 18px;
+  }
+
+  html.danybot-mobile-app .mobile-movements-header h1 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  /* Botón + de la cabecera */
+  html.danybot-mobile-app .mobile-add-expense-button {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  /*
+   * Selecciona únicamente la barra del mes.
+   * No modifica la barra de exportar Excel.
+   */
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar) {
+    width: calc(100% - 36px);
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    margin: 4px 18px 14px;
+    padding: 0;
+    border: 0;
+    border-radius: 16px;
+    box-shadow: none;
+    overflow: hidden;
+  }
+
+  /* Oculta el texto largo “Mes de trabajo” */
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  .toolbar-info {
+    display: none !important;
+  }
+
+  /* El selector ocupa toda la barra */
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  .toolbar-actions {
+    width: 100%;
+    display: block;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  .month-control {
+    position: relative;
+    width: 100%;
+    display: block;
+  }
+
+  /* Oculta únicamente la etiqueta visual “Mes” */
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  .month-control label {
+    display: none;
+  }
+
+  /*
+   * Conserva el mismo input y toda su lógica.
+   * Solo cambia su apariencia.
+   */
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  #monthFilter {
+    width: 100%;
+    min-width: 0;
+    height: 50px;
+    margin: 0;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 16px;
+    outline: none;
+    box-shadow: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  html.danybot-mobile-app
+  .expenses-container
+  > .expenses-toolbar:not(.expenses-export-toolbar)
+  #monthFilter:focus {
+    border: 0;
+    box-shadow: none;
+  }
+
+  /* La lista queda inmediatamente debajo del mes */
+  html.danybot-mobile-app .expenses-list {
+    margin-top: 0;
+  }
+}
+

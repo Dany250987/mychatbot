@@ -551,7 +551,7 @@ async function loadDashboardFinancialSummary() {
     console.error("Error al cargar ingresos adicionales del dashboard:", error);
   }
 
-  const totalIncome = mainIncome + additionalIncome;
+  const totalIncome = additionalIncome;
   const monthlySavings = totalIncome - monthlyExpenses;
 
   updateDashboardFinancialCards(monthlyExpenses, totalIncome, monthlySavings);
