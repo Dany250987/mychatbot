@@ -143,8 +143,14 @@ window.addEventListener("DOMContentLoaded", async () => {
     Luego cargamos los datos.
     No usamos await aquí para no bloquear el sidebar.
   */
-  loadDashboardRemindersCount();
-  loadDashboardFinancialSummary();
+  showDanyBotInitialLoader();
+
+  Promise.allSettled([
+    loadDashboardRemindersCount(),
+    loadDashboardFinancialSummary()
+  ]).finally(() => {
+    hideDanyBotInitialLoader();
+  });
 
   if (typeof loadAlertedReminderKeys === "function") {
     loadAlertedReminderKeys();
@@ -154,6 +160,96 @@ window.addEventListener("DOMContentLoaded", async () => {
     startReminderAlertChecker();
   }
 });
+
+// =====================================================
+// CARGADOR INICIAL DE DANYBOT MÓVIL
+// =====================================================
+
+let danyBotInitialLoaderTimeout = null;
+
+function showDanyBotInitialLoader() {
+  const isMobileApp =
+    document.documentElement.classList.contains(
+      "danybot-mobile-app"
+    );
+
+  if (!isMobileApp) {
+    return;
+  }
+
+  if (document.getElementById("danyBotInitialLoader")) {
+    return;
+  }
+
+  const loader = document.createElement("div");
+
+  loader.id = "danyBotInitialLoader";
+  loader.className = "danybot-initial-loader";
+  loader.setAttribute("role", "status");
+  loader.setAttribute("aria-live", "polite");
+
+  loader.innerHTML = `
+    <div class="danybot-initial-loader-content">
+      <div class="danybot-initial-loader-logo">
+        <img
+          src="./src/img/danybot.png"
+          alt=""
+          aria-hidden="true"
+        >
+      </div>
+
+      <p>Preparando tu agenda</p>
+
+      <div
+        class="danybot-initial-loader-dots"
+        aria-hidden="true"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(loader);
+
+  document.body.classList.add(
+    "danybot-initial-loading"
+  );
+
+  /*
+   * Protección: si alguna solicitud queda detenida,
+   * el cargador no bloqueará indefinidamente la app.
+   */
+  danyBotInitialLoaderTimeout = window.setTimeout(() => {
+    hideDanyBotInitialLoader();
+  }, 12000);
+}
+
+function hideDanyBotInitialLoader() {
+  const loader = document.getElementById(
+    "danyBotInitialLoader"
+  );
+
+  if (danyBotInitialLoaderTimeout) {
+    window.clearTimeout(danyBotInitialLoaderTimeout);
+    danyBotInitialLoaderTimeout = null;
+  }
+
+  document.body.classList.remove(
+    "danybot-initial-loading"
+  );
+
+  if (!loader) {
+    return;
+  }
+
+  loader.classList.add("is-leaving");
+
+  window.setTimeout(() => {
+    loader.remove();
+  }, 240);
+}
 
 
 function updateSidebar(activePage = "dashboard") {
@@ -630,3 +726,34 @@ async function confirmDeleteAccount() {
     });
   }
 }
+
+function updateDanyBotAccountMobileView() {
+  const isMobileApp =
+    document.documentElement.classList.contains(
+      "danybot-mobile-app"
+    );
+
+  if (!isMobileApp) {
+    return;
+  }
+
+  const isAccountView =
+    window.location.hash === "#cuenta";
+
+  document.documentElement.classList.toggle(
+    "danybot-account-view",
+    isAccountView
+  );
+}
+
+window.addEventListener(
+  "hashchange",
+  updateDanyBotAccountMobileView
+);
+
+document.addEventListener(
+  "DOMContentLoaded",
+  updateDanyBotAccountMobileView
+);
+
+updateDanyBotAccountMobileView();

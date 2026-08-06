@@ -2770,3 +2770,628 @@ body {
   }
 }
 
+/* ==================================================
+   CALENDARIO MÓVIL: AGENDA COMPACTA
+   No afecta la versión web
+================================================== */
+
+html.danybot-mobile-app .calendar-events-panel {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 14px !important;
+
+  border: 1px solid rgba(255, 199, 193, 0.14) !important;
+  border-radius: 20px !important;
+
+  color: #ffffff !important;
+  background: #670010 !important;
+
+  box-shadow: none !important;
+}
+
+html.danybot-mobile-app .calendar-events-heading {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+}
+
+html.danybot-mobile-app .calendar-events-heading h3 {
+  margin: 0 0 3px !important;
+
+  color: #ffffff !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+}
+
+html.danybot-mobile-app .calendar-events-heading p {
+  margin: 0 !important;
+
+  color: #ffb0a8 !important;
+  font-size: 10.5px !important;
+  line-height: 1.3 !important;
+}
+
+html.danybot-mobile-app .show-month-events-button {
+  width: auto !important;
+  min-width: 72px !important;
+  min-height: 34px !important;
+
+  margin: 0 !important;
+  padding: 0 12px !important;
+
+  border: 1px solid rgba(255, 176, 168, 0.30) !important;
+  border-radius: 12px !important;
+
+  color: #ffffff !important;
+  background: #960018 !important;
+
+  font-size: 10px !important;
+  font-weight: 800 !important;
+
+  box-shadow: none !important;
+}
+
+html.danybot-mobile-app .calendar-events-list {
+  display: grid !important;
+  gap: 8px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html.danybot-mobile-app .calendar-event-card {
+  width: 100% !important;
+
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+
+  margin: 0 !important;
+  padding: 10px 12px !important;
+
+  border: 1px solid rgba(255, 199, 193, 0.13) !important;
+  border-radius: 15px !important;
+
+  color: #ffffff !important;
+  background: #7d0014 !important;
+
+  box-shadow: none !important;
+}
+
+html.danybot-mobile-app .calendar-event-card::before {
+  width: 3px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+html.danybot-mobile-app .calendar-event-info {
+  min-width: 0 !important;
+}
+
+html.danybot-mobile-app .calendar-event-info h4 {
+  margin: 0 0 3px !important;
+
+  overflow: hidden !important;
+  color: #ffffff !important;
+
+  font-size: 11.5px !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+html.danybot-mobile-app .calendar-event-info p {
+  margin: 0 !important;
+
+  overflow: hidden !important;
+  color: #ffb0a8 !important;
+
+  font-size: 9.5px !important;
+  line-height: 1.25 !important;
+
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* ==================================================
+   MI CUENTA MÓVIL: OCULTAR CONTENIDO DEL INICIO
+================================================== */
+
+html.danybot-mobile-app.danybot-account-view
+#globalSearchPanel,
+
+html.danybot-mobile-app.danybot-account-view
+.cards-overview {
+  display: none !important;
+}
+
+/* ==========================================================
+   DANYBOT APP MÓVIL
+   MI CUENTA
+   Solo afecta la vista #cuenta de la app móvil
+========================================================== */
+
+html.danybot-mobile-app.danybot-account-view
+.account-section {
+  display: grid !important;
+  gap: 12px !important;
+
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 0 96px !important;
+}
+
+/* Tarjetas principales */
+
+html.danybot-mobile-app.danybot-account-view
+.account-card,
+
+html.danybot-mobile-app.danybot-account-view
+.account-logout-card,
+
+html.danybot-mobile-app.danybot-account-view
+.danger-zone-card {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 16px !important;
+
+  border: 1px solid rgba(255, 176, 168, 0.24) !important;
+  border-radius: 22px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fff9f8 0%,
+      #fff2f0 100%
+    ) !important;
+
+  box-shadow:
+    0 10px 24px rgba(35, 0, 5, 0.13) !important;
+}
+
+/* =====================================
+   CABECERA DE LA CUENTA
+===================================== */
+
+html.danybot-mobile-app.danybot-account-view
+.account-header {
+  display: grid !important;
+  grid-template-columns: 64px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 12px !important;
+
+  margin: 0 0 15px !important;
+  padding: 0 !important;
+}
+
+/* Avatar */
+
+html.danybot-mobile-app.danybot-account-view
+.account-avatar,
+
+html.danybot-mobile-app.danybot-account-view
+.account-avatar-placeholder {
+  width: 64px !important;
+  height: 64px !important;
+  margin: 0 !important;
+
+  border: 3px solid rgba(203, 76, 70, 0.36) !important;
+  border-radius: 50% !important;
+
+  object-fit: cover !important;
+
+  box-shadow:
+    0 0 0 4px rgba(255, 176, 168, 0.16),
+    0 8px 18px rgba(60, 0, 0, 0.15) !important;
+}
+
+/* Título y correo */
+
+html.danybot-mobile-app.danybot-account-view
+.account-header h2 {
+  margin: 0 0 4px !important;
+
+  color: #3c0000 !important;
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+  font-weight: 900 !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-header p {
+  margin: 0 !important;
+
+  overflow: hidden !important;
+  color: #8a5a5a !important;
+
+  font-size: 10.5px !important;
+  line-height: 1.3 !important;
+
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Etiqueta Información de cuenta */
+
+html.danybot-mobile-app.danybot-account-view
+.account-header
+.welcome-badge {
+  display: inline-flex !important;
+  width: fit-content !important;
+
+  margin: 0 0 5px !important;
+  padding: 5px 9px !important;
+
+  border-radius: 999px !important;
+
+  color: #960018 !important;
+  background: rgba(255, 176, 168, 0.20) !important;
+
+  font-size: 9.5px !important;
+  font-weight: 900 !important;
+}
+
+/* =====================================
+   DATOS DE LA CUENTA
+===================================== */
+
+html.danybot-mobile-app.danybot-account-view
+.account-info-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border-top:
+    1px solid rgba(150, 0, 24, 0.10) !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-info-grid > div {
+  display: grid !important;
+  grid-template-columns: 88px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 10px 2px !important;
+
+  border: 0 !important;
+  border-bottom:
+    1px solid rgba(150, 0, 24, 0.10) !important;
+  border-radius: 0 !important;
+
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-info-grid > div:last-child {
+  border-bottom: 0 !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-info-grid span {
+  margin: 0 !important;
+
+  color: #9b6a6a !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-info-grid strong {
+  min-width: 0 !important;
+
+  overflow-wrap: anywhere !important;
+  color: #3c0000 !important;
+
+  font-size: 11.5px !important;
+  line-height: 1.3 !important;
+  font-weight: 850 !important;
+}
+
+/* =====================================
+   SESIÓN
+===================================== */
+
+html.danybot-mobile-app.danybot-account-view
+.account-logout-card {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-logout-card h2 {
+  margin: 0 0 3px !important;
+
+  color: #670010 !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-logout-card p {
+  margin: 0 !important;
+
+  color: #8a5a5a !important;
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+}
+
+/* Cerrar sesión: acción secundaria */
+
+html.danybot-mobile-app.danybot-account-view
+.account-logout-button {
+  width: 100% !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+
+  border: 1px solid rgba(150, 0, 24, 0.18) !important;
+  border-radius: 14px !important;
+
+  color: #670010 !important;
+  background: rgba(255, 176, 168, 0.16) !important;
+
+  font-size: 11px !important;
+  font-weight: 900 !important;
+
+  box-shadow: none !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-logout-button:active {
+  transform: scale(0.98) !important;
+}
+
+/* =====================================
+   ZONA DE SEGURIDAD
+===================================== */
+
+html.danybot-mobile-app.danybot-account-view
+.danger-zone-card {
+  border-color: rgba(185, 28, 28, 0.18) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fff8f8 0%,
+      #fff0f0 100%
+    ) !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.danger-zone-card h2 {
+  margin: 0 0 5px !important;
+
+  color: #991b1b !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.danger-zone-card p {
+  margin: 0 !important;
+
+  color: #9b6060 !important;
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+}
+
+/* Eliminar cuenta: única acción peligrosa */
+
+html.danybot-mobile-app.danybot-account-view
+.delete-account-button {
+  width: 100% !important;
+  min-height: 42px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+
+  margin: 12px 0 0 !important;
+  padding: 0 14px !important;
+
+  border: 0 !important;
+  border-radius: 14px !important;
+
+  color: #ffffff !important;
+  background:
+    linear-gradient(
+      135deg,
+      #b91c1c 0%,
+      #7f1d1d 100%
+    ) !important;
+
+  font-size: 11px !important;
+  font-weight: 900 !important;
+
+  box-shadow:
+    0 8px 18px rgba(127, 29, 29, 0.25) !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.delete-account-button:active {
+  transform: scale(0.98) !important;
+}
+
+/* ==========================================================
+   DANYBOT APP MÓVIL
+   CARGADOR INICIAL SUTIL
+========================================================== */
+
+html.danybot-mobile-app
+.danybot-initial-loader {
+  position: fixed !important;
+  z-index: 10000 !important;
+  inset: 0 !important;
+
+  display: grid !important;
+  place-items: center !important;
+
+  padding:
+    env(safe-area-inset-top)
+    20px
+    env(safe-area-inset-bottom) !important;
+
+  background:
+    radial-gradient(
+      circle at 50% 46%,
+      rgba(150, 0, 24, 0.20),
+      transparent 34%
+    ),
+    #3c0000 !important;
+
+  opacity: 1;
+  visibility: visible;
+
+  transition:
+    opacity 220ms ease,
+    visibility 220ms ease;
+}
+
+html.danybot-mobile-app
+.danybot-initial-loader.is-leaving {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+html.danybot-mobile-app
+.danybot-initial-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: min(220px, 75vw);
+
+  margin-top: -12px;
+  text-align: center;
+}
+
+html.danybot-mobile-app
+.danybot-initial-loader-logo {
+  position: relative;
+
+  width: 82px;
+  height: 82px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 12px;
+
+  border-radius: 22px;
+
+  animation:
+    danybotLoaderFloat 1.8s ease-in-out infinite;
+}
+
+html.danybot-mobile-app
+.danybot-initial-loader-logo img {
+  display: block;
+
+  width: 82px;
+  height: 82px;
+
+  border-radius: 22px;
+  object-fit: cover;
+
+  box-shadow:
+    0 10px 24px rgba(20, 0, 3, 0.25);
+}
+
+html.danybot-mobile-app
+.danybot-initial-loader-content p {
+  margin: 0;
+
+  color: #fff1ef;
+
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 750;
+  letter-spacing: 0.1px;
+}
+
+html.danybot-mobile-app
+.danybot-initial-loader-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  margin-top: 12px;
+}
+
+html.danybot-mobile-app
+.danybot-initial-loader-dots span {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: #ff8478;
+  opacity: 0.30;
+
+  animation:
+    danybotLoaderDot 1.1s ease-in-out infinite;
+}
+
+html.danybot-mobile-app
+.danybot-initial-loader-dots span:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+html.danybot-mobile-app
+.danybot-initial-loader-dots span:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+@keyframes danybotLoaderFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes danybotLoaderDot {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.danybot-mobile-app
+  .danybot-initial-loader-logo,
+
+  html.danybot-mobile-app
+  .danybot-initial-loader-dots span {
+    animation: none !important;
+  }
+}

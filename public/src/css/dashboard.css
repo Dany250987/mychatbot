@@ -1539,7 +1539,7 @@ body {
 
 .calendar-header h2 {
   margin: 8px 0 10px;
-  color: #3c0000;
+  color: #ffb0a8;
   font-size: 32px;
 }
 
@@ -2867,18 +2867,21 @@ body {
 }
 
 .activity-priority-high {
-  color: #991b1b;
-  background: #fee2e2;
+  color: #ff9a9a;
+  background: rgba(220, 38, 38, 0.22);
+  border: 1px solid rgba(255, 84, 84, 0.48);
 }
 
 .activity-priority-medium {
-  color: #92400e;
-  background: #fef3c7;
+  color: #ffd166;
+  background: rgba(245, 158, 11, 0.22);
+  border: 1px solid rgba(255, 187, 51, 0.45);
 }
 
 .activity-priority-low {
-  color: #166534;
-  background: #dcfce7;
+  color: #8df0a8;
+  background: rgba(22, 163, 74, 0.22);
+  border: 1px solid rgba(90, 225, 135, 0.40);
 }
 
 .activity-status-pill.active {

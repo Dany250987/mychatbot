@@ -9,21 +9,17 @@ html.danybot-mobile-app.danybot-activities-view
 .cards-overview,
 
 html.danybot-mobile-app.danybot-activities-view
-#globalSearchPanel {
-  display: none !important;
-}
+
 
 
 /* Ocultar componentes web dentro de Actividades */
+html.danybot-mobile-app.danybot-activities-view
+.voice-reminders-header {
+  display: none !important;
+}
 
 html.danybot-mobile-app.danybot-activities-view
-.voice-reminders-header,
-
-html.danybot-mobile-app.danybot-activities-view
-.manual-reminder-panel,
-
-html.danybot-mobile-app.danybot-activities-view
-.voice-reminder-panel,
+.voice-reminder-panel,  s
 
 html.danybot-mobile-app.danybot-activities-view
 #detectedReminderBox,
@@ -131,6 +127,112 @@ html.danybot-mobile-app.danybot-activities-view
   background: #cb4c46 !important;
 }
 
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button.active {
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow:
+    0 7px 15px rgba(35, 0, 5, 0.28) !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="alta"].active {
+  background: #dc2626 !important;
+  border-color: #ff8a8a !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="media"].active {
+  background: #d97706 !important;
+  border-color: #ffd166 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="baja"].active {
+  background: #15803d !important;
+  border-color: #8df0a8 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="papelera"].active {
+  background: #6d28d9 !important;
+  border-color: #c4b5fd !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="vencidos"].active {
+  background: #991b1b !important;
+  border-color: #fca5a5 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="hoy"].active,
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="todos"].active {
+  background: #cb4c46 !important;
+  border-color: #ffb0a8 !important;
+}
+
+/* ========================================
+   COLORES DE FILTROS
+======================================== */
+
+/* Hoy */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="hoy"] {
+  border-color: rgba(255, 132, 120, 0.62) !important;
+  background: rgba(203, 76, 70, 0.30) !important;
+}
+
+/* Vencidos */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="vencidos"] {
+  border-color: rgba(239, 68, 68, 0.65) !important;
+  background: rgba(127, 29, 29, 0.55) !important;
+}
+
+/* Alta */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="alta"] {
+  border-color: rgba(239, 68, 68, 0.72) !important;
+  background: rgba(220, 38, 38, 0.34) !important;
+}
+
+/* Media */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="media"] {
+  border-color: rgba(245, 158, 11, 0.72) !important;
+  background: rgba(245, 158, 11, 0.26) !important;
+}
+
+/* Baja */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="baja"] {
+  border-color: rgba(34, 197, 94, 0.70) !important;
+  background: rgba(34, 197, 94, 0.25) !important;
+}
+
+/* Papelera */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="papelera"] {
+  border-color: rgba(167, 139, 250, 0.65) !important;
+  background: rgba(109, 40, 217, 0.25) !important;
+}
+
+/* Todos */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filter-button[data-filter="todos"] {
+  border-color: rgba(255, 176, 168, 0.55) !important;
+  background: rgba(150, 0, 24, 0.48) !important;
+}
+
 
 /* Panel y lista de actividades */
 
@@ -175,6 +277,87 @@ html.danybot-mobile-app.danybot-activities-view
   background: #670010 !important;
   box-shadow: none !important;
   overflow: hidden !important;
+}
+
+/* ========================================
+   ACENTO DE TARJETA SEGÚN PRIORIDAD
+======================================== */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-card {
+  position: relative !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-card::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 9px;
+  bottom: 9px;
+  left: 0;
+
+  width: 4px;
+  border-radius: 0 6px 6px 0;
+
+  pointer-events: none;
+}
+
+/* Alta */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-card.mobile-activity-priority-high::before {
+  background: #ef4444;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.55);
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-card.mobile-activity-priority-high
+.mobile-activity-icon {
+  color: #ffffff !important;
+  background: linear-gradient(
+    145deg,
+    #ef4444,
+    #b91c1c
+  ) !important;
+}
+
+/* Media */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-card.mobile-activity-priority-medium::before {
+  background: #f59e0b;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.50);
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-card.mobile-activity-priority-medium
+.mobile-activity-icon {
+  color: #ffffff !important;
+  background: linear-gradient(
+    145deg,
+    #f59e0b,
+    #c2410c
+  ) !important;
+}
+
+/* Baja */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-card.mobile-activity-priority-low::before {
+  background: #22c55e;
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.45);
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-card.mobile-activity-priority-low
+.mobile-activity-icon {
+  color: #ffffff !important;
+  background: linear-gradient(
+    145deg,
+    #22c55e,
+    #15803d
+  ) !important;
 }
 
 html.danybot-mobile-app.danybot-activities-view
@@ -286,7 +469,7 @@ html.danybot-mobile-app.danybot-activities-view
 html.danybot-mobile-app.danybot-activities-view
 .mobile-activity-chevron {
   color: #ff9a90 !important;
-  font-size: 11px !important;
+  font-size: 10px !important;
 }
 
 
@@ -329,7 +512,7 @@ html.danybot-mobile-app.danybot-activities-view
 .mobile-activity-description {
   margin: 0 0 10px !important;
   color: #fff1ef !important;
-  font-size: 11px !important;
+  font-size: 10px !important;
   line-height: 1.4 !important;
 }
 
@@ -407,4 +590,775 @@ html.danybot-mobile-app.danybot-activities-view
 .activities-pagination {
   width: calc(100% - 32px) !important;
   margin: 14px 16px 0 !important;
+}
+
+/* ========================================
+   ACTIVIDADES MÓVIL: FORMULARIO FLOTANTE
+======================================== */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-floating-button {
+  position: fixed !important;
+  z-index: 900 !important;
+  right: 18px !important;
+  bottom: 84px !important;
+  width: 48px !important;
+  height: 48px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  color: #ffffff !important;
+  background: #960018 !important;
+  font-size: 20px !important;
+  box-shadow: 0 12px 28px rgba(60, 0, 0, 0.38) !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-backdrop {
+  position: fixed !important;
+  z-index: 1090 !important;
+  inset: 0 !important;
+
+  display: none !important;
+  background: rgba(35, 0, 5, 0.72) !important;
+
+  pointer-events: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-backdrop.is-visible {
+  display: block !important;
+  pointer-events: auto !important;
+
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal {
+  position: fixed !important;
+  z-index: 1100 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: calc(100dvh - 120px) !important;
+  display: none !important;
+  margin: 0 !important;
+  padding: 12px 16px 18px !important;
+  overflow-y: auto !important;
+  border: 0 !important;
+  border-radius: 22px 22px 0 0 !important;
+  color: #ffffff !important;
+  background: linear-gradient(
+    180deg,
+    #960018 0%,
+    #670010 100%
+  ) !important;
+  box-shadow: 0 -18px 45px rgba(35, 0, 5, 0.42) !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal.is-open {
+  display: block !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal::before {
+  content: "";
+  display: block;
+  width: 38px;
+  height: 4px;
+  margin: -3px auto 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* Encabezado */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-header {
+  position: relative !important;
+  min-height: 42px !important;
+  margin: 0 0 9px !important;
+  padding: 0 40px 0 0 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-header
+.welcome-badge {
+  display: block !important;
+  margin: 0 0 2px !important;
+  padding: 0 !important;
+  color: #ffb0a8 !important;
+  background: transparent !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-header h3 {
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  line-height: 1.15 !important;
+  font-weight: 900 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-close {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 34px !important;
+  height: 34px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  color: #ffffff !important;
+  background: #b00020 !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+}
+
+/* Micrófono dentro del modal */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.mobile-activity-voice-panel {
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  margin: 0 0 10px !important;
+  padding: 9px 10px !important;
+  border: 1px solid rgba(255, 199, 193, 0.18) !important;
+  border-radius: 14px !important;
+  background: rgba(60, 0, 0, 0.34) !important;
+  box-shadow: none !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.voice-reminder-button {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  color: #960018 !important;
+  background: #fff1ef !important;
+  font-size: 16px !important;
+  box-shadow: none !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.voice-reminder-button.listening {
+  color: #ffffff !important;
+  background: #cb4c46 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.voice-reminder-info h3 {
+  margin: 0 0 2px !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  font-weight: 900 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.voice-reminder-info p {
+  margin: 0 !important;
+  color: #ffc7c1 !important;
+  font-size: 9.5px !important;
+  line-height: 1.3 !important;
+}
+
+/* Resultado detectado */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+#detectedReminderBox {
+  width: 100% !important;
+  margin: 0 0 10px !important;
+  padding: 10px !important;
+  border: 1px solid rgba(255, 199, 193, 0.16) !important;
+  border-radius: 14px !important;
+  color: #ffffff !important;
+  background: rgba(60, 0, 0, 0.3) !important;
+  box-shadow: none !important;
+}
+
+/* Formulario compacto */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-form {
+  display: block !important;
+  width: 100% !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  width: 100% !important;
+}
+
+/* Título y descripción ocupan ambas columnas */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field:first-child,
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field-full {
+  grid-column: 1 / -1 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field label {
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-size: 9.5px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field input,
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field select,
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field textarea {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 39px !important;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  border: 1px solid rgba(103, 0, 16, 0.12) !important;
+  border-radius: 11px !important;
+  outline: none !important;
+  color: #3c0000 !important;
+  background: #fff1ef !important;
+  font-family: inherit !important;
+  font-size: 10.5px !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field textarea {
+  min-height: 55px !important;
+  resize: none !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field input:focus,
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field select:focus,
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-field textarea:focus {
+  border-color: #ff9a90 !important;
+  box-shadow: 0 0 0 2px rgba(255, 154, 144, 0.16) !important;
+}
+
+/* Guardar */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activity-form-modal
+.manual-reminder-submit {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 40px !important;
+  margin: 11px 0 0 !important;
+  padding: 8px 12px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  color: #960018 !important;
+  background: #fff1ef !important;
+  font-family: inherit !important;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  box-shadow: none !important;
+}
+
+body.mobile-activity-form-open {
+  overflow: hidden !important;
+}
+
+/* ========================================
+   INICIO MÓVIL: BUSCADOR GLOBAL
+======================================== */
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchPanel {
+  position: relative !important;
+  isolation: isolate !important;
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 14px !important;
+  padding: 14px !important;
+  overflow: hidden !important;
+
+  border: 1px solid rgba(255, 199, 193, 0.18) !important;
+  border-radius: 22px !important;
+
+  color: #ffffff !important;
+  background:
+    radial-gradient(
+      circle at 12% 10%,
+      rgba(126, 87, 194, 0.55),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 92% 88%,
+      rgba(91, 33, 182, 0.38),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      #670010 0%,
+      #3c0000 100%
+    ) !important;
+
+  box-shadow:
+    0 16px 34px rgba(35, 0, 5, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchPanel::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -42px;
+  right: -34px;
+
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+
+  background: rgba(139, 92, 246, 0.18);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchPanel
+.global-search-header {
+  margin: 0 0 14px !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchPanel
+.welcome-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+
+  margin: 0 0 5px !important;
+  padding: 0 !important;
+
+  color: #d8c7ff !important;
+  background: transparent !important;
+
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchPanel
+.global-search-header h2 {
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-size: 18px !important;
+  line-height: 1.2 !important;
+  font-weight: 850 !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchPanel
+.global-search-box {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) 40px !important;
+  align-items: center !important;
+  gap: 4px !important;
+
+  width: 100% !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 4px !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: none !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchPanel
+.global-search-box > i {
+  display: grid !important;
+  place-items: center !important;
+  color: #d8c7ff !important;
+  font-size: 14px !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchInput {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 40px !important;
+  margin: 0 !important;
+  padding: 0 6px !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchInput::placeholder {
+  color: rgba(255, 241, 239, 0.68) !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchInput:focus {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* El botón existe y conserva su lógica,
+   pero se muestra como icono, no debajo */
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchButton {
+  display: none !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#clearGlobalSearchButton {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  min-height: 34px !important;
+  margin-top: 5px !important;
+
+  border: 0 !important;
+  border-radius: 11px !important;
+
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+
+html.danybot-mobile-app:not(.danybot-activities-view)
+#globalSearchResults {
+  width: 100% !important;
+  margin-top: 12px !important;
+}
+
+/* Encabezado de Actividades móvil:
+   título + campana + avatar */
+
+html.danybot-mobile-app.danybot-activities-view
+.main-header {
+  position: relative !important;
+
+  display: grid !important;
+  grid-template-columns:
+    minmax(0, 1fr)
+    34px
+    46px !important;
+
+  grid-template-areas:
+    "usuario campana avatar"
+    "fecha campana avatar" !important;
+
+  align-items: center !important;
+  column-gap: 9px !important;
+  row-gap: 3px !important;
+
+  padding: 0 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.main-header
+#section-title {
+  grid-area: usuario !important;
+  min-width: 0 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.main-header
+.date-time {
+  grid-area: fecha !important;
+  min-width: 0 !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.main-header
+.avatar {
+  grid-area: avatar !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-notification-button {
+  grid-area: campana !important;
+
+  position: static !important;
+  transform: none !important;
+
+  width: 32px !important;
+  height: 32px !important;
+
+  display: grid !important;
+  place-items: center !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border: 1px solid rgba(255, 176, 168, 0.28) !important;
+  border-radius: 50% !important;
+
+  color: #ffffff !important;
+  background: #960018 !important;
+
+  font-size: 12px !important;
+  box-shadow: 0 6px 14px rgba(35, 0, 5, 0.24) !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-notification-button:active {
+  transform: scale(0.94) !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-notification-button[hidden] {
+  display: none !important;
+}
+
+/* Mi cuenta móvil: no mostrar componentes exclusivos de Inicio */
+
+html.danybot-mobile-app.danybot-account-view
+#globalSearchPanel,
+
+html.danybot-mobile-app.danybot-account-view
+.cards-overview {
+  display: none !important;
+}
+
+/* ==================================================
+   ACTIVIDADES MÓVIL
+   CARGADOR DE PANTALLA COMPLETA
+================================================== */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-loader {
+  position: fixed !important;
+  z-index: 8500 !important;
+  inset: 0 !important;
+
+  width: 100% !important;
+  min-height: 100dvh !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  margin: 0 !important;
+  padding:
+    env(safe-area-inset-top)
+    20px
+    env(safe-area-inset-bottom) !important;
+
+  color: #ffffff !important;
+  text-align: center !important;
+
+  background:
+    radial-gradient(
+      circle at 50% 48%,
+      rgba(150, 0, 24, 0.22),
+      transparent 32%
+    ),
+    #3c0000 !important;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+
+  transition:
+    opacity 200ms ease,
+    visibility 200ms ease !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-loader.is-leaving {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Logo */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-loader img {
+  display: block !important;
+
+  width: 82px !important;
+  height: 82px !important;
+
+  margin: 0 0 12px !important;
+
+  border-radius: 22px !important;
+  object-fit: cover !important;
+
+  box-shadow:
+    0 10px 24px rgba(20, 0, 3, 0.25) !important;
+
+  animation:
+    mobileActivitiesLoaderFloat
+    1.8s
+    ease-in-out
+    infinite !important;
+}
+
+/* Texto */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-loader p {
+  margin: 0 !important;
+
+  color: #fff1ef !important;
+
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+  font-weight: 750 !important;
+}
+
+/* Puntos */
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-loader-dots {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+
+  margin-top: 12px !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-loader-dots span {
+  width: 6px !important;
+  height: 6px !important;
+
+  border-radius: 50% !important;
+
+  background: #ff8478 !important;
+  opacity: 0.28;
+
+  animation:
+    mobileActivitiesLoaderDot
+    1.05s
+    ease-in-out
+    infinite;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-loader-dots span:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.mobile-activities-loader-dots span:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+@keyframes mobileActivitiesLoaderFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes mobileActivitiesLoaderDot {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.danybot-mobile-app.danybot-activities-view
+  .mobile-activities-loader img,
+
+  html.danybot-mobile-app.danybot-activities-view
+  .mobile-activities-loader-dots span {
+    animation: none !important;
+  }
 }

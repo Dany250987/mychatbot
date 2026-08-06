@@ -611,33 +611,93 @@ async function saveVoiceReminder(reminderData) {
       return;
     }
 
-    await Swal.fire({
-      title: "Recordatorio creado",
-      text: "Tu recordatorio fue guardado correctamente.",
-      icon: "success",
-      confirmButtonColor: "#960018"
-    });
+  const createdReminderId = data.reminder_id;
 
-    const createdReminderId = data.reminder_id;
+  /*
+  * Limpiar el formulario que fue diligenciado por voz.
+  * Así no podrá guardarse nuevamente de forma manual.
+  */
+  const manualForm =
+    document.getElementById("manualReminderForm");
 
-    if (typeof pendingCreatedReminderId !== "undefined") {
-      pendingCreatedReminderId = createdReminderId;
+  if (manualForm) {
+    manualForm.reset();
+  }
+
+  const manualTimeInput =
+    document.getElementById("manualReminderTime");
+
+  if (manualTimeInput) {
+    manualTimeInput.value = "07:00";
+  }
+
+  const detectedReminderBox =
+    document.getElementById("detectedReminderBox");
+
+  if (detectedReminderBox) {
+    detectedReminderBox.innerHTML = "";
+    detectedReminderBox.style.display = "none";
+  }
+
+  /*
+  * Cerrar el modal antes de volver a renderizar
+  * la lista de actividades.
+  */
+  if (
+    typeof window.closeMobileActivityForm ===
+    "function"
+  ) {
+    window.closeMobileActivityForm();
+  }
+
+  if (typeof pendingCreatedReminderId !== "undefined") {
+    pendingCreatedReminderId = createdReminderId;
+  }
+
+  if (typeof currentReminderFilter !== "undefined") {
+    currentReminderFilter = "activos";
+  }
+
+  if (typeof currentActivitiesPage !== "undefined") {
+    currentActivitiesPage = 1;
+  }
+
+  /*
+  * Volver a Actividades y cargar la card creada.
+  */
+  if (typeof showSection === "function") {
+    window.location.hash = "recordatorios";
+    showSection("recordatorios");
+  } else {
+    await loadReminders();
+  }
+
+  /*
+  * Esperar a que la lista termine de dibujarse
+  * antes de buscar la nueva card.
+  */
+  window.setTimeout(() => {
+    if (
+      typeof scrollToCreatedReminderCard ===
+      "function"
+    ) {
+      scrollToCreatedReminderCard(
+        createdReminderId
+      );
     }
+  }, 250);
 
-    if (typeof currentReminderFilter !== "undefined") {
-      currentReminderFilter = "activos";
-    }
+/*
+ * Mensaje breve que no detiene la navegación.
+ */
+  window.closeMobileActivityForm();
 
-    if (typeof showSection === "function") {
-      window.location.hash = "recordatorios";
-      showSection("recordatorios");
-    } else {
-      await loadReminders();
-    }
+  window.location.hash = "recordatorios";
+  showSection("recordatorios");
 
-    if (typeof scrollToCreatedReminderCard === "function") {
+  window.setTimeout(() => {
       scrollToCreatedReminderCard(createdReminderId);
-    }
+  }, 250);
 
   } catch (error) {
     console.error("Error al guardar recordatorio:", error);
@@ -892,30 +952,120 @@ async function startVoiceReminder() {
   };
 }
 
+function fillManualReminderFormFromVoice(reminder) {
+  const titleInput =
+    document.getElementById("manualReminderTitle");
+
+  const descriptionInput =
+    document.getElementById("manualReminderDescription");
+
+  const categorySelect =
+    document.getElementById("manualReminderCategory");
+
+  const prioritySelect =
+    document.getElementById("manualReminderPriority");
+
+  const dueDateInput =
+    document.getElementById("manualReminderDueDate");
+
+  const reminderDateInput =
+    document.getElementById("manualReminderDate");
+
+  const reminderTimeInput =
+    document.getElementById("manualReminderTime");
+
+  const repeatSelect =
+    document.getElementById("manualReminderRepeat");
+
+  if (titleInput) {
+    titleInput.value = reminder.title || "";
+  }
+
+  if (descriptionInput) {
+    descriptionInput.value =
+      reminder.original_text || "";
+  }
+
+  if (categorySelect && reminder.category) {
+    const normalizedCategory =
+      String(reminder.category).toLowerCase();
+
+    const categoryExists = Array.from(
+      categorySelect.options
+    ).some((option) => {
+      return option.value === normalizedCategory;
+    });
+
+    if (categoryExists) {
+      categorySelect.value = normalizedCategory;
+    }
+  }
+
+  if (prioritySelect) {
+    prioritySelect.value = "media";
+  }
+
+  if (dueDateInput) {
+    dueDateInput.value =
+      reminder.reminder_date || "";
+  }
+
+  if (reminderDateInput) {
+    reminderDateInput.value =
+      reminder.reminder_date || "";
+  }
+
+  if (reminderTimeInput) {
+    reminderTimeInput.value =
+      reminder.reminder_time || "07:00";
+  }
+
+  if (repeatSelect && reminder.repeat_type) {
+    repeatSelect.value = reminder.repeat_type;
+  }
+}
+
 async function processCompletedVoiceReminder(spokenText) {
-  const detectedReminder = parseReminderFromVoice(spokenText);
+  const detectedReminder =
+    parseReminderFromVoice(spokenText);
+
+  if (!detectedReminder.reminder_time) {
+    detectedReminder.reminder_time = "07:00";
+  }
 
   lastDetectedReminder = detectedReminder;
 
-  renderDetectedReminder(detectedReminder);
+  const isMobileApp =
+    typeof window.isDanyBotRunningInMobileApp ===
+      "function" &&
+    window.isDanyBotRunningInMobileApp();
+
+  if (isMobileApp) {
+    fillManualReminderFormFromVoice(
+      detectedReminder
+    );
+
+    const detectedBox =
+      document.getElementById(
+        "detectedReminderBox"
+      );
+
+    if (detectedBox) {
+      detectedBox.style.display = "none";
+      detectedBox.innerHTML = "";
+    }
+  } else {
+    renderDetectedReminder(detectedReminder);
+  }
 
   if (!detectedReminder.reminder_date) {
     Swal.fire({
       title: "Falta la fecha",
-      text: "No pude detectar una fecha clara. Intenta decir algo como: recuérdame pagar internet mañana a las 8 de la noche.",
+      text: "No pude detectar una fecha clara para el recordatorio.",
       icon: "warning",
       confirmButtonColor: "#960018"
     });
-    return;
-  }
 
-  if (!detectedReminder.reminder_time) {
-    Swal.fire({
-      title: "Falta la hora",
-      text: "Para poder avisarte, necesito una hora. Intenta decir algo como: hoy a las 4:54 de la tarde.",
-      icon: "warning",
-      confirmButtonColor: "#960018"
-    });
     return;
   }
 

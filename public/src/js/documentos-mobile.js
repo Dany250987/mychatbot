@@ -60,6 +60,68 @@ function sanitizeMobileDocumentFileName(
   return normalizedName || 'documento';
 }
 
+async function writeDocumentBlobToNativeFile({
+  documentData,
+  blob,
+  directory,
+  folder = 'DANYBOT'
+}) {
+  if (!(blob instanceof Blob) || blob.size === 0) {
+    throw new Error(
+      'El documento recibido está vacío o no es válido.'
+    );
+  }
+
+  const Filesystem =
+    window.Capacitor?.Plugins?.Filesystem;
+
+  if (!Filesystem) {
+    throw new Error(
+      'No se encontró el sistema nativo de archivos.'
+    );
+  }
+
+  const originalFileName =
+    documentData?.file_name ||
+    `documento-${documentData?.id || Date.now()}`;
+
+  const safeFileName =
+    sanitizeMobileDocumentFileName(
+      originalFileName
+    );
+
+  const filePath =
+    `${folder}/${safeFileName}`;
+
+  const base64Data =
+    await convertDocumentBlobToBase64(blob);
+
+  await Filesystem.writeFile({
+    path: filePath,
+    data: base64Data,
+    directory,
+    recursive: true
+  });
+
+  const fileInfo =
+    await Filesystem.getUri({
+      path: filePath,
+      directory
+    });
+
+  if (!fileInfo?.uri) {
+    throw new Error(
+      'No se pudo obtener la ubicación del documento.'
+    );
+  }
+
+  return {
+    fileName: safeFileName,
+    filePath,
+    uri: fileInfo.uri
+  };
+}
+
 window.openDocumentInMobileApp =
   async function openDocumentInMobileApp(
     documentData,
@@ -133,22 +195,48 @@ window.openDocumentInMobileApp =
     });
   };
 
-window.downloadDocumentInMobileApp =
+  window.downloadDocumentInMobileApp =
   async function downloadDocumentInMobileApp(
     documentData,
     blob
   ) {
-    console.warn(
-      'Descarga nativa de documentos pendiente.',
-      {
-        documentId: documentData?.id,
-        blobSize: blob?.size
-      }
-    );
+    if (!isNativeDocumentsApp()) {
+      throw new Error(
+        'La descarga nativa solo está disponible en la aplicación móvil.'
+      );
+    }
 
-    throw new Error(
-      'La descarga nativa todavía no está configurada.'
-    );
+    const Filesystem =
+      window.Capacitor?.Plugins?.Filesystem;
+
+    if (!Filesystem) {
+      throw new Error(
+        'No se encontró el sistema nativo de archivos.'
+      );
+    }
+
+    if (
+      typeof Filesystem.requestPermissions ===
+      'function'
+    ) {
+      await Filesystem.requestPermissions();
+    }
+
+    const savedFile =
+      await writeDocumentBlobToNativeFile({
+        documentData,
+        blob,
+        directory: 'DOCUMENTS',
+        folder: 'DANYBOT'
+      });
+
+    await Swal.fire({
+      title: 'Documento guardado',
+      text:
+        `${savedFile.fileName} fue guardado en la carpeta Documentos/DANYBOT.`,
+      icon: 'success',
+      confirmButtonColor: '#3c0000'
+    });
   };
 
 window.shareDocumentInMobileApp =
@@ -156,16 +244,54 @@ window.shareDocumentInMobileApp =
     documentData,
     blob
   ) {
-    console.warn(
-      'Compartir documento en Android está pendiente.',
-      {
-        documentId: documentData?.id,
-        blobSize: blob?.size
-      }
-    );
+    if (!isNativeDocumentsApp()) {
+      throw new Error(
+        'La función de compartir solo está disponible en la aplicación móvil.'
+      );
+    }
 
-    throw new Error(
-      'La opción de compartir todavía no está configurada.'
-    );
+    const Share =
+      window.Capacitor?.Plugins?.Share;
+
+    if (!Share) {
+      throw new Error(
+        'No se encontró el menú nativo para compartir.'
+      );
+    }
+
+    const temporaryFile =
+      await writeDocumentBlobToNativeFile({
+        documentData,
+        blob,
+        directory: 'CACHE',
+        folder: 'documentos-compartidos'
+      });
+
+    const canShareResult =
+      typeof Share.canShare === 'function'
+        ? await Share.canShare()
+        : { value: true };
+
+    if (!canShareResult.value) {
+      throw new Error(
+        'Este dispositivo no permite compartir archivos.'
+      );
+    }
+
+    await Share.share({
+      title:
+        documentData?.document_name ||
+        'Documento DANYBOT',
+
+      text:
+        'Documento compartido desde DANYBOT.',
+
+      url:
+        temporaryFile.uri,
+
+      dialogTitle:
+        'Compartir documento'
+    });
   };
+  
   

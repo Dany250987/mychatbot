@@ -141,11 +141,15 @@
     text-align: left !important;
   }
 
-  /* El buscador global no forma parte del inicio móvil */
-  #globalSearchPanel {
-    display: none !important;
+  html.danybot-mobile-app:not(.danybot-activities-view)
+  #globalSearchPanel
+  .global-search-header h2 {
+    margin: 0 !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    font-weight: 800 !important;
   }
-
   /* ==================================================
      CUATRO TARJETAS PRINCIPALES
      ================================================== */

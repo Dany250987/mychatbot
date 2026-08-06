@@ -10,7 +10,7 @@
     min-height: 100%;
     margin: 0;
     overflow-x: hidden;
-    font-family: "Inter", sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva,Verdana, sans-serif;
     background: #3c0000;
   }
 
@@ -54,9 +54,9 @@
   html.danybot-mobile-app .documents-user-info h1 {
     margin: 0 0 3px;
     color: #ffffff;
-    font-size: 22px;
+    font-size: 18px;
     line-height: 1.15;
-    font-weight: 900;
+    font-weight: 600;
     letter-spacing: -0.3px;
   }
 
@@ -93,6 +93,8 @@
     border: 1px solid rgba(255, 199, 193, 0.12);
     border-radius: 22px;
     color: #ffffff;
+    width: 100%;
+    min-width: 0;
     background:
       radial-gradient(circle at 88% 18%, rgba(255, 132, 120, 0.14), transparent 36%),
       linear-gradient(145deg, #3c0000 0%, #670010 100%);
@@ -187,6 +189,7 @@
     align-items: center;
     gap: 9px;
     width: 100%;
+    min-width: 0;
     margin: 0 0 14px;
   }
 
@@ -737,6 +740,8 @@
   html.danybot-mobile-app .documents-hero {
     min-height: 146px;
     padding-right: 118px;
+    width: 100%;
+    min-width: 0;
   }
 
   html.danybot-mobile-app .documents-folder-illustration {

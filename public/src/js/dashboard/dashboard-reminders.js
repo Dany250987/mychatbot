@@ -91,6 +91,74 @@ async function handleReminderUnauthorizedSession(data) {
   window.location.href = "login_google.html";
 }
 
+// =====================================================
+// CARGADOR INTERNO DE ACTIVIDADES MÓVIL
+// =====================================================
+
+function showMobileActivitiesLoader() {
+  const isMobileActivitiesView =
+    document.documentElement.classList.contains(
+      "danybot-mobile-app"
+    ) &&
+    document.documentElement.classList.contains(
+      "danybot-activities-view"
+    );
+
+  if (!isMobileActivitiesView) {
+    return;
+  }
+
+  const remindersList =
+    document.getElementById("remindersList");
+
+  if (!remindersList) {
+    return;
+  }
+
+  remindersList.innerHTML = `
+    <div
+      id="mobileActivitiesLoader"
+      class="mobile-activities-loader"
+      role="status"
+      aria-live="polite"
+    >
+      <img
+        src="./src/img/danybot.png"
+        alt=""
+        aria-hidden="true"
+      >
+
+      <p>Cargando actividades</p>
+
+      <div
+        class="mobile-activities-loader-dots"
+        aria-hidden="true"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  `;
+}
+
+function hideMobileActivitiesLoader() {
+  const loader =
+    document.getElementById(
+      "mobileActivitiesLoader"
+    );
+
+  if (!loader) {
+    return;
+  }
+
+  loader.classList.add("is-leaving");
+
+  window.setTimeout(() => {
+    loader.remove();
+  }, 180);
+}
+
 async function loadReminders() {
   const token = getReminderAuthToken();
 
@@ -100,6 +168,8 @@ async function loadReminders() {
     });
     return;
   }
+
+  showMobileActivitiesLoader();
 
   try {
     const response = await fetch(REMINDERS_API_URL, {
@@ -124,8 +194,14 @@ async function loadReminders() {
     updateDashboardRemindersCount();
     updateDashboardTodayEventsCount();
 
-  } catch (error) {
-    console.error("Error al consultar recordatorios:", error);
+    } catch (error) {
+    console.error(
+      "Error al consultar recordatorios:",
+      error
+    );
+
+  } finally {
+    hideMobileActivitiesLoader();
   }
 }
 
@@ -184,7 +260,7 @@ function renderReminderActions(reminder) {
           class="delete-reminder-button"
         >
           <i class="fa-solid fa-trash-can"></i>
-          Eliminar definitivo
+          Eliminar
         </button>
       </div>
     `;
@@ -960,13 +1036,6 @@ async function deleteReminder(reminderId) {
 
     await loadReminders();
 
-    Swal.fire({
-      title: "Recordatorio eliminado",
-      text: "El recordatorio fue eliminado correctamente.",
-      icon: "success",
-      confirmButtonColor: "#960018"
-    });
-
   } catch (error) {
     console.error("Error al eliminar recordatorio:", error);
 
@@ -1029,13 +1098,6 @@ async function restoreReminder(reminderId) {
 
     await loadReminders();
 
-    Swal.fire({
-      title: "Recordatorio restaurado",
-      text: "El recordatorio volvió a quedar activo.",
-      icon: "success",
-      confirmButtonColor: "#960018"
-    });
-
   } catch (error) {
     console.error("Error al restaurar recordatorio:", error);
 
@@ -1088,12 +1150,7 @@ async function deleteReminderPermanently(reminderId) {
 
     await loadReminders();
 
-    Swal.fire({
-      title: "Eliminado definitivamente",
-      text: "El recordatorio fue eliminado de la base de datos.",
-      icon: "success",
-      confirmButtonColor: "#960018"
-    });
+    
 
   } catch (error) {
     console.error("Error al eliminar definitivamente:", error);
@@ -1259,14 +1316,7 @@ async function completeReminder(reminder, showSuccessMessage = true) {
       return;
     }
 
-    Swal.fire({
-      title: isRecurring ? "Recordatorio reprogramado" : "Recordatorio completado",
-      text: isRecurring
-        ? `Se movió a la próxima fecha: ${formatReminderDateLabel(updatedReminder.reminder_date)}.`
-        : "El recordatorio fue enviado a la papelera. Podrás recuperarlo durante 30 días.",
-      icon: "success",
-      confirmButtonColor: "#960018"
-    });
+    
 
   } catch (error) {
     console.error("Error al completar recordatorio:", error);
@@ -1296,11 +1346,6 @@ function renderRemindersSection() {
             Crea pendientes, avisos y recordatorios con prioridad, fecha límite y alertas opcionales.
           </p>
         </div>
-
-        <button type="button" id="enableReminderAlertsButton" class="enable-alerts-button">
-          <i class="fa-solid fa-volume-high"></i>
-          Activar alertas
-        </button>
       </div>
 
       <div class="manual-reminder-panel">
@@ -1426,9 +1471,7 @@ function renderRemindersSection() {
   </div>
 
   <div class="reminder-filters">
-        <button type="button" class="reminder-filter-button active" data-filter="activos">
-          Activos
-        </button>
+        
 
         <button type="button" class="reminder-filter-button" data-filter="hoy">
           Hoy
@@ -1469,15 +1512,10 @@ function renderRemindersSection() {
   `;
 
   const voiceButton = document.getElementById("voiceReminderButton");
-  const enableAlertsButton = document.getElementById("enableReminderAlertsButton");
   const manualReminderForm = document.getElementById("manualReminderForm");
 
   if (voiceButton) {
     voiceButton.addEventListener("click", startVoiceReminder);
-  }
-
-  if (enableAlertsButton) {
-    enableAlertsButton.addEventListener("click", enableReminderAlerts);
   }
 
   if (manualReminderForm) {
@@ -1500,6 +1538,13 @@ function renderRemindersSection() {
   setupReminderFilters();
   setupActivitySearch();
   loadReminders();
+
+  if (
+    typeof setupMobileActivityFormControls ===
+    "function"
+  ) {
+    setupMobileActivityFormControls();
+  }
 }
 
 async function handleManualReminderSubmit(event) {
@@ -1587,22 +1632,22 @@ async function handleManualReminderSubmit(event) {
       return;
     }
 
-    await Swal.fire({
-      title: "Recordatorio creado",
-      text: data.mensaje || "Tu recordatorio fue guardado correctamente.",
-      icon: "success",
-      confirmButtonColor: "#960018"
-    });
+    // Sin mensaje de éxito
 
     const createdReminderId = data.reminder_id;
 
     pendingCreatedReminderId = createdReminderId;
 
     event.target.reset();
+    document.getElementById("manualReminderTime").value = "07:00";
 
-    if (typeof currentReminderFilter !== "undefined") {
-      currentReminderFilter = "activos";
+    if (
+      typeof window.closeMobileActivityForm ===
+      "function"
+    ) {
+      window.closeMobileActivityForm();
     }
+    
 
     if (typeof currentActivitiesPage !== "undefined") {
       currentActivitiesPage = 1;

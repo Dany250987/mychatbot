@@ -82,30 +82,31 @@
 
     <aside id="appSidebar"></aside>
 
-    <main class="documents-container">
+    <main class="main documents-container">
 
-      <header class="documents-main-header">
+       <!-- Encabezado principal -->
+      <header class="main-header documents-main-header">
 
-        <div class="documents-user-info">
+        <div class="user-info documents-user-info">
+
+          <img
+            id="user-avatar"
+            class="avatar documents-avatar"
+            src=""
+            alt="Avatar"
+            style="display: none;"
+          >
 
           <h1 id="section-title">
-            Mis documentos
+            Documentos
           </h1>
-
-          <div
-            id="datetime"
-            class="documents-date-time"
-          ></div>
 
         </div>
 
-        <img
-          id="user-avatar"
-          class="documents-avatar"
-          src=""
-          alt="Avatar del usuario"
-          style="display: none;"
-        >
+        <div
+          class="date-time documents-date-time"
+          id="datetime"
+        ></div>
 
       </header>
 

@@ -62,18 +62,39 @@
     <!-- Contenedor principal de la pantalla -->
     <main class="expenses-container">
 
-      <header class="mobile-movements-header">
-        <h1>Movimientos</h1>
+    <header class="main-header mobile-main-header">
 
-        <button
-          type="button"
-          class="mobile-add-expense-button"
-          id="openMovementOptionsButton"
-          aria-label="Agregar movimiento"
+        <div class="user-info">
+
+          <h1 id="section-title">
+            Movimientos
+          </h1>
+
+          <div
+            class="date-time"
+            id="datetime"
+          ></div>
+
+        </div>
+
+        <img
+          id="user-avatar"
+          class="avatar"
+          src=""
+          alt="Avatar"
+          style="display:none;"
         >
-          <i class="fa-solid fa-plus"></i>
-        </button>
+
       </header>
+
+      <button
+        type="button"
+        id="openMovementOptionsButton"
+        class="mobile-movement-floating-button"
+        aria-label="Agregar movimiento"
+      >
+        <i class="fa-solid fa-plus"></i>
+      </button>
 
       <!-- Encabezado -->
       <section class="expenses-header">

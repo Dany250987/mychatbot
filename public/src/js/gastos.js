@@ -2058,7 +2058,7 @@ function extractDate(text) {
   return getLocalDate();
 }
 
-function downloadExpensesExcel() {
+async function downloadExpensesExcel() {
   const selectedMonth = monthFilter.value || getLocalMonth();
 
   const expenses = filteredExpenses || [];
@@ -2364,16 +2364,98 @@ function downloadExpensesExcel() {
 
   XLSX.utils.book_append_sheet(workbook, expensesWorksheet, 'Gastos');
 
-  const fileName = `reporte-mensual-${selectedMonth}.xlsx`;
+    const fileName =
+    `reporte-mensual-${selectedMonth}.xlsx`;
 
-  XLSX.writeFile(workbook, fileName);
+  const isNativeApp =
+    window.Capacitor &&
+    typeof window.Capacitor.isNativePlatform ===
+      'function' &&
+    window.Capacitor.isNativePlatform();
 
-  Swal.fire({
-    title: 'Excel generado',
-    text: 'El reporte mensual fue descargado correctamente.',
-    icon: 'success',
-    confirmButtonColor: '#3c0000'
-  });
+  /*
+   * WEB
+   * Conserva la descarga actual del navegador.
+   */
+  if (!isNativeApp) {
+    XLSX.writeFile(workbook, fileName);
+
+    await Swal.fire({
+      title: 'Excel generado',
+      text:
+        'El reporte mensual fue descargado correctamente.',
+      icon: 'success',
+      confirmButtonColor: '#3c0000'
+    });
+
+    return;
+  }
+
+  /*
+   * ANDROID
+   * Genera el Excel en base64, lo guarda temporalmente
+   * y abre el menú nativo para guardar o compartir.
+   */
+  try {
+    const CapacitorPlugins =
+      window.Capacitor?.Plugins || {};
+
+    const Filesystem =
+      CapacitorPlugins.Filesystem;
+
+    const Share =
+      CapacitorPlugins.Share;
+
+    if (!Filesystem || !Share) {
+      throw new Error(
+        'No se encontraron los plugins necesarios para exportar el archivo.'
+      );
+    }
+
+    const excelBase64 = XLSX.write(
+      workbook,
+      {
+        bookType: 'xlsx',
+        type: 'base64'
+      }
+    );
+
+    await Filesystem.writeFile({
+      path: fileName,
+      data: excelBase64,
+      directory: 'CACHE',
+      recursive: true
+    });
+
+    const fileInfo =
+      await Filesystem.getUri({
+        path: fileName,
+        directory: 'CACHE'
+      });
+
+    await Share.share({
+      title: 'Reporte mensual DANYBOT',
+      text:
+        `Reporte financiero correspondiente a ${selectedMonth}.`,
+      url: fileInfo.uri,
+      dialogTitle:
+        'Guardar o compartir reporte'
+    });
+
+  } catch (error) {
+    console.error(
+      'Error al exportar Excel en Android:',
+      error
+    );
+
+    await Swal.fire({
+      title: 'No se pudo exportar',
+      text:
+        'El reporte fue generado, pero no se pudo guardar o compartir en el teléfono.',
+      icon: 'error',
+      confirmButtonColor: '#3c0000'
+    });
+  }
 }
 
 async function loadMonthlyIncome() {
@@ -3778,7 +3860,171 @@ function setupMobileExpenseDate() {
   });
 }
 
+function renderMovementsMobileHeader() {
+  const titleElement =
+    document.getElementById('section-title');
+
+  const dateTimeElement =
+    document.getElementById('datetime');
+
+  const avatarElement =
+    document.getElementById('user-avatar');
+
+  if (titleElement) {
+    titleElement.textContent = 'Movimientos';
+  }
+
+  if (dateTimeElement) {
+    const now = new Date();
+
+    const dateText = new Intl.DateTimeFormat(
+      'es-CO',
+      {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }
+    ).format(now);
+
+    const timeText = new Intl.DateTimeFormat(
+      'es-CO',
+      {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }
+    ).format(now);
+
+    dateTimeElement.textContent =
+      `${dateText} · ${timeText}`;
+  }
+
+  if (!avatarElement) {
+    return;
+  }
+
+  if (user.picture) {
+    avatarElement.src = user.picture;
+    avatarElement.alt =
+      `Foto de ${user.name || 'usuario'}`;
+    avatarElement.style.display = 'block';
+    return;
+  }
+
+  const initials = String(user.name || 'U')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join('');
+
+  const avatarSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="96"
+         height="96"
+         viewBox="0 0 96 96">
+      <rect width="96"
+            height="96"
+            rx="48"
+            fill="#cb4c46"/>
+      <text x="48"
+            y="57"
+            text-anchor="middle"
+            font-family="Arial, sans-serif"
+            font-size="32"
+            font-weight="700"
+            fill="#ffffff">${initials}</text>
+    </svg>
+  `;
+
+  avatarElement.src =
+    `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(avatarSvg)}`;
+
+  avatarElement.alt =
+    `Iniciales de ${user.name || 'usuario'}`;
+
+  avatarElement.style.display = 'block';
+}
+
+// =====================================================
+// CARGADOR INICIAL DE MOVIMIENTOS MÓVIL
+// =====================================================
+
+let danyBotMovementsLoaderTimeout = null;
+
+function showDanyBotMovementsLoader() {
+  if (!isDanyBotMobileApp()) {
+    return;
+  }
+
+  if (document.getElementById('danyBotMovementsLoader')) {
+    return;
+  }
+
+  const loader = document.createElement('div');
+
+  loader.id = 'danyBotMovementsLoader';
+  loader.className = 'danybot-movements-loader';
+  loader.setAttribute('role', 'status');
+  loader.setAttribute('aria-live', 'polite');
+
+  loader.innerHTML = `
+    <div class="danybot-movements-loader-content">
+      <img
+        src="./src/img/danybot.png"
+        alt=""
+        aria-hidden="true"
+      >
+
+      <p>Cargando tus movimientos</p>
+
+      <div
+        class="danybot-movements-loader-dots"
+        aria-hidden="true"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(loader);
+
+  danyBotMovementsLoaderTimeout = window.setTimeout(() => {
+    hideDanyBotMovementsLoader();
+  }, 12000);
+}
+
+function hideDanyBotMovementsLoader() {
+  const loader = document.getElementById(
+    'danyBotMovementsLoader'
+  );
+
+  if (danyBotMovementsLoaderTimeout) {
+    window.clearTimeout(
+      danyBotMovementsLoaderTimeout
+    );
+
+    danyBotMovementsLoaderTimeout = null;
+  }
+
+  if (!loader) {
+    return;
+  }
+
+  loader.classList.add('is-leaving');
+
+  window.setTimeout(() => {
+    loader.remove();
+  }, 220);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  renderMovementsMobileHeader();
+  
   setTodayDate();
   setCurrentMonthFilter();
   setupCollapsibleSections();
@@ -3798,9 +4044,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  loadExpenses();
-  loadMonthlyIncome();
-  loadAdditionalIncomes();
+  showDanyBotMovementsLoader();
+
+  Promise.allSettled([
+    loadExpenses(),
+    loadMonthlyIncome(),
+    loadAdditionalIncomes()
+  ]).finally(() => {
+    hideDanyBotMovementsLoader();
+  });
 
   expenseForm.addEventListener('submit', saveExpense);
   cancelEditButton.addEventListener('click', resetFormMode);
