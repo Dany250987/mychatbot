@@ -1,0 +1,340 @@
+:root{
+  --documents-primary:#3c0000;
+  --documents-secondary:#670010;
+  --documents-accent:#960018;
+  --documents-surface:#ffffff;
+  --documents-border:#ececec;
+  --documents-text:#222;
+  --documents-muted:#6b7280;
+  --documents-radius:22px;
+}
+
+.documents-container{
+  width:100%;
+  max-width:1400px;
+  margin:auto;
+  padding:30px;
+}
+
+.documents-main-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:28px;
+}
+
+.documents-user-info h1{
+  font-size:2rem;
+  font-weight:800;
+  color:var(--documents-primary);
+}
+
+.documents-date-time{
+  margin-top:6px;
+  color:var(--documents-muted);
+}
+
+.documents-avatar{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+.documents-hero{
+  background:linear-gradient(
+      135deg,
+      var(--documents-primary),
+      var(--documents-accent)
+  );
+
+  color:white;
+
+  border-radius:28px;
+
+  padding:34px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  gap:30px;
+
+  margin-bottom:28px;
+}
+
+.documents-hero-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+
+  padding:8px 14px;
+
+  border-radius:999px;
+
+  background:rgba(255,255,255,.15);
+
+  margin-bottom:18px;
+}
+
+.documents-hero h2{
+  font-size:2rem;
+  margin-bottom:12px;
+}
+
+.documents-hero p{
+  max-width:600px;
+  opacity:.9;
+}
+
+.documents-primary-button{
+
+  border:none;
+
+  border-radius:18px;
+
+  background:white;
+
+  color:var(--documents-primary);
+
+  padding:16px 24px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+  transition:.2s;
+}
+
+.documents-primary-button:hover{
+  transform:translateY(-2px);
+}
+
+.documents-toolbar{
+
+  margin-bottom:25px;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  gap:20px;
+}
+
+.documents-search{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+  background:white;
+
+  border:1px solid var(--documents-border);
+
+  border-radius:18px;
+
+  padding:14px 18px;
+
+  flex:1;
+}
+
+.documents-search input{
+
+  width:100%;
+
+  border:none;
+
+  outline:none;
+
+  font-size:15px;
+
+  background:transparent;
+}
+
+.documents-count{
+  color:var(--documents-muted);
+  font-weight:600;
+}
+
+.documents-list{
+
+  display:grid;
+
+  grid-template-columns:
+      repeat(auto-fill,minmax(320px,1fr));
+
+  gap:22px;
+}
+
+.documents-loading{
+
+  grid-column:1/-1;
+
+  text-align:center;
+
+  padding:80px 20px;
+
+  color:var(--documents-muted);
+}
+
+/* ---------- MODAL ---------- */
+
+.document-modal{
+
+  position:fixed;
+
+  inset:0;
+
+  display:none;
+
+  z-index:5000;
+}
+
+.document-modal.is-open{
+
+  display:block;
+}
+
+.document-modal-backdrop{
+
+  position:absolute;
+
+  inset:0;
+
+  background:rgba(0,0,0,.45);
+
+  backdrop-filter:blur(4px);
+}
+
+.document-modal-content{
+
+  position:relative;
+
+  width:min(92vw,620px);
+
+  margin:4vh auto;
+
+  background:white;
+
+  border-radius:28px;
+
+  padding:30px;
+
+  z-index:2;
+}
+
+.document-modal-header{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:flex-start;
+
+  margin-bottom:28px;
+}
+
+.document-modal-close{
+
+  border:none;
+
+  background:none;
+
+  font-size:26px;
+
+  cursor:pointer;
+}
+
+.document-form{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:22px;
+}
+
+.document-field{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:10px;
+}
+
+.document-field label{
+
+  font-weight:700;
+}
+
+.document-field input[type=text]{
+
+  padding:15px;
+
+  border-radius:14px;
+
+  border:1px solid var(--documents-border);
+}
+
+.document-file-selector{
+
+  border:2px dashed #d4d4d4;
+
+  border-radius:18px;
+
+  padding:26px;
+
+  text-align:center;
+
+  cursor:pointer;
+}
+
+.document-file-selector i{
+
+  font-size:34px;
+
+  margin-bottom:12px;
+
+  color:var(--documents-primary);
+
+  display:block;
+}
+
+#documentFile{
+
+  display:none;
+}
+
+.document-selected-file{
+
+  color:var(--documents-muted);
+
+  font-size:14px;
+}
+
+.document-form-actions{
+
+  display:flex;
+
+  justify-content:flex-end;
+
+  gap:15px;
+}
+
+.document-secondary-button{
+
+  border:none;
+
+  background:#efefef;
+
+  padding:14px 22px;
+
+  border-radius:14px;
+
+  cursor:pointer;
+}

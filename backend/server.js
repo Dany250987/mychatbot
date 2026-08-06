@@ -13,6 +13,7 @@ const incomeRoutes = require('./routes/incomeRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const reminderRoutes = require('./routes/reminderRoutes');
 const searchRoutes = require('./routes/searchRoutes');
+const documentRoutes = require('./routes/documentRoutes');
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use('/api/incomes', incomeRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/documents', documentRoutes);
 
 // Ruta principal
 app.get('/', (req, res) => {

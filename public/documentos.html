@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    http-equiv="Content-Type"
+    content="text/html; charset=UTF-8"
+  >
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <title>Mis documentos</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./src/css/sidebar.css"
+  >
+
+  <script>
+    (function () {
+      const isCapacitorProtocol =
+        window.location.protocol === "capacitor:" ||
+        window.location.protocol === "ionic:";
+
+      const isLocalMobilePreview =
+        window.innerWidth <= 900 &&
+        (
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1" ||
+          /^192\.168\./.test(window.location.hostname) ||
+          /^10\./.test(window.location.hostname)
+        );
+
+      if (
+        isCapacitorProtocol ||
+        isLocalMobilePreview
+      ) {
+        document.documentElement.classList.add(
+          "danybot-mobile-app"
+        );
+      }
+    })();
+  </script>
+
+  <link
+    rel="stylesheet"
+    href="./src/css/documentos.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./src/css/documentos-mobile.css"
+  >
+
+  <script src="./src/js/api-config.js"></script>
+</head>
+
+<body>
+  <div class="app-layout">
+
+    <aside id="appSidebar"></aside>
+
+    <main class="documents-container">
+
+      <header class="documents-main-header">
+
+        <div class="documents-user-info">
+
+          <h1 id="section-title">
+            Mis documentos
+          </h1>
+
+          <div
+            id="datetime"
+            class="documents-date-time"
+          ></div>
+
+        </div>
+
+        <img
+          id="user-avatar"
+          class="documents-avatar"
+          src=""
+          alt="Avatar del usuario"
+          style="display: none;"
+        >
+
+      </header>
+
+      <section class="documents-hero documents-hero-shared">
+
+        <div class="documents-hero-content">
+
+            <span class="documents-hero-badge">
+            <i class="fa-solid fa-shield-halved"></i>
+            Espacio personal
+            </span>
+
+            <div class="documents-hero-copy">
+            <h2>
+                Tus documentos importantes, siempre disponibles
+            </h2>
+
+            <p>
+                Guarda, consulta y comparte tus archivos personales
+                desde un solo lugar.
+            </p>
+            </div>
+
+            <div
+            class="documents-folder-illustration"
+            aria-hidden="true"
+            >
+            <span class="documents-folder-file">
+                <i class="fa-solid fa-file-lines"></i>
+            </span>
+
+            <span class="documents-folder-icon">
+                <i class="fa-solid fa-folder-open"></i>
+            </span>
+            </div>
+
+        </div>
+
+        <button
+            type="button"
+            id="openDocumentModalButton"
+            class="documents-primary-button"
+        >
+            <i class="fa-solid fa-plus"></i>
+            Agregar documento
+        </button>
+
+      </section>
+    
+      <section class="documents-toolbar">
+
+        <label
+          class="documents-search"
+          for="documentsSearchInput"
+        >
+          <i class="fa-solid fa-magnifying-glass"></i>
+
+          <input
+            type="search"
+            id="documentsSearchInput"
+            placeholder="Buscar documento"
+            autocomplete="off"
+          >
+        </label>
+
+        <div class="documents-count-box">
+            <i class="fa-regular fa-file-lines"></i>
+
+            <span
+                id="documentsCount"
+                class="documents-count"
+            >
+                0 documentos
+            </span>
+        </div>
+
+      </section>
+
+      <section
+        id="documentsList"
+        class="documents-list"
+        aria-live="polite"
+      >
+        <div class="documents-loading">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <p>Cargando documentos...</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal: agregar o editar documento -->
+  <div
+    id="documentModal"
+    class="document-modal"
+    aria-hidden="true"
+  >
+
+    <div
+      class="document-modal-backdrop"
+      data-close-document-modal
+    ></div>
+
+    <section
+      class="document-modal-content"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="documentModalTitle"
+    >
+
+      <header class="document-modal-header">
+
+        <div>
+          <span>Documento personal</span>
+
+          <h2 id="documentModalTitle">
+            Agregar documento
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          class="document-modal-close"
+          data-close-document-modal
+          aria-label="Cerrar"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+      </header>
+
+      <form
+        id="documentForm"
+        class="document-form"
+        enctype="multipart/form-data"
+      >
+
+        <input
+          type="hidden"
+          id="documentId"
+        >
+
+        <div class="document-field">
+
+          <label for="documentName">
+            Nombre del documento
+          </label>
+
+          <input
+            type="text"
+            id="documentName"
+            name="document_name"
+            maxlength="180"
+            placeholder="Ejemplo: Cédula de ciudadanía"
+            required
+          >
+
+        </div>
+
+        <div class="document-field">
+
+          <label for="documentFile">
+            Archivo
+          </label>
+
+          <label
+            for="documentFile"
+            class="document-file-selector"
+          >
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+
+            <span>
+              <strong>Seleccionar archivo</strong>
+              <small>
+                PDF, JPG, PNG o WEBP · máximo 5 MB
+              </small>
+            </span>
+          </label>
+
+          <input
+            type="file"
+            id="documentFile"
+            name="file"
+            accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+          >
+
+          <p
+            id="documentFileName"
+            class="document-selected-file"
+          >
+            Ningún archivo seleccionado
+          </p>
+
+        </div>
+
+        <p
+          id="documentFormMessage"
+          class="document-form-message"
+          aria-live="polite"
+        ></p>
+
+        <div class="document-form-actions">
+
+          <button
+            type="button"
+            class="document-secondary-button"
+            data-close-document-modal
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            id="saveDocumentButton"
+            class="documents-primary-button"
+          >
+            <i class="fa-solid fa-floppy-disk"></i>
+            Guardar
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="./src/js/sidebar.js"></script>
+
+  <script>
+    renderSidebar("documentos");
+  </script>
+
+  <script src="./src/js/documentos.js"></script>
+  <script src="./src/js/documentos-mobile.js"></script>
+
+</body>
+</html>

@@ -12,6 +12,24 @@ function renderSidebar(activePage = "") {
   const userPicture = user?.picture || null;
   const userInitial = getUserInitials(userName);
 
+  const isMobileApp =
+  document.documentElement.classList.contains(
+    "danybot-mobile-app"
+  ) ||
+  document.body.classList.contains(
+    "danybot-mobile-app"
+  );
+
+const calendarMenuItem = isMobileApp
+  ? ""
+  : `
+      <a href="./dashboard.html#calendario"
+         class="sidebar-link ${activePage === "calendario" ? "active" : ""}">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Calendario</span>
+      </a>
+    `;
+
   sidebar.className = "app-sidebar";
 
   sidebar.innerHTML = `
@@ -47,14 +65,16 @@ function renderSidebar(activePage = "") {
         <span>Actividades</span>
       </a>
 
-      <a href="./dashboard.html#calendario" class="sidebar-link ${activePage === "calendario" ? "active" : ""}">
-        <i class="fa-solid fa-calendar-days"></i>
-        <span>Calendario</span>
-      </a>
+      ${calendarMenuItem}
 
       <a href="./gastos.html" class="sidebar-link ${activePage === "gastos" ? "active" : ""}">
         <i class="fa-solid fa-wallet"></i>
         <span>Movimientos</span>
+      </a>
+
+      <a href="./documentos.html" class="sidebar-link ${activePage === "documentos" ? "active" : ""}">
+        <i class="fa-solid fa-folder-open"></i>
+        <span>Documentos</span>
       </a>
 
       <a href="./dashboard.html#cuenta" class="sidebar-link ${activePage === "cuenta" ? "active" : ""}">

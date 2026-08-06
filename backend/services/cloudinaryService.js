@@ -54,22 +54,47 @@ async function pingCloudinary() {
   return cloudinaryClient.api.ping();
 }
 
-function uploadEvidenceBuffer({
+function normalizeCloudinaryModuleFolder(moduleFolder) {
+  const normalizedFolder = String(
+    moduleFolder || ''
+  )
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]/g, '');
+
+  if (!normalizedFolder) {
+    throw new TypeError(
+      'La carpeta del módulo de Cloudinary es obligatoria.'
+    );
+  }
+
+  return normalizedFolder;
+}
+
+function uploadPrivateFileBuffer({
   buffer,
   userId,
-  fileExtension
+  fileExtension,
+  moduleFolder
 }) {
   if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
     return Promise.reject(
-      new TypeError('La evidencia debe ser un buffer válido.')
+      new TypeError(
+        'El archivo debe ser un buffer válido.'
+      )
     );
   }
 
   const parsedUserId = Number.parseInt(userId, 10);
 
-  if (!Number.isInteger(parsedUserId) || parsedUserId <= 0) {
+  if (
+    !Number.isInteger(parsedUserId) ||
+    parsedUserId <= 0
+  ) {
     return Promise.reject(
-      new TypeError('El identificador del usuario no es válido.')
+      new TypeError(
+        'El identificador del usuario no es válido.'
+      )
     );
   }
 
@@ -83,24 +108,33 @@ function uploadEvidenceBuffer({
   if (!/^[a-z0-9]{1,10}$/.test(normalizedExtension)) {
     return Promise.reject(
       new TypeError(
-        'La extensi?n de la evidencia no es v?lida.'
+        'La extensión del archivo no es válida.'
       )
     );
   }
 
-  const cloudinaryClient = configureCloudinary();
+  let normalizedModuleFolder;
 
-  const publicId = [
-    'danybot',
-    'evidencias',
-    `usuario-${parsedUserId}`,
-    `${randomUUID()}.${normalizedExtension}`
-  ].join('/');
+  try {
+    normalizedModuleFolder =
+      normalizeCloudinaryModuleFolder(
+        moduleFolder
+      );
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
+  const cloudinaryClient = configureCloudinary();
 
   const assetFolder = [
     'danybot',
-    'evidencias',
+    normalizedModuleFolder,
     `usuario-${parsedUserId}`
+  ].join('/');
+
+  const publicId = [
+    assetFolder,
+    `${randomUUID()}.${normalizedExtension}`
   ].join('/');
 
   return new Promise((resolve, reject) => {
@@ -145,6 +179,19 @@ function uploadEvidenceBuffer({
 
     uploadStream.on('error', reject);
     uploadStream.end(buffer);
+  });
+}
+
+function uploadEvidenceBuffer({
+  buffer,
+  userId,
+  fileExtension
+}) {
+  return uploadPrivateFileBuffer({
+    buffer,
+    userId,
+    fileExtension,
+    moduleFolder: 'evidencias'
   });
 }
 
@@ -308,6 +355,7 @@ async function downloadEvidenceFromCloudinary({
 module.exports = {
   configureCloudinary,
   pingCloudinary,
+  uploadPrivateFileBuffer,
   uploadEvidenceBuffer,
   deleteEvidenceFromCloudinary,
   createEvidenceDownloadUrl,
