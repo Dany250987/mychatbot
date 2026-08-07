@@ -1766,11 +1766,10 @@ html.danybot-mobile-app
   grid-area: usuario;
   min-width: 0;
   margin: 0 !important;
-
   color: #ffffff !important;
   font-size: 18px !important;
   line-height: 1.16 !important;
-  font-weight: 800 !important;
+  font-weight: 600 !important;
   letter-spacing: -0.2px;
 }
 

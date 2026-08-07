@@ -1,6 +1,4 @@
 ﻿
-
-
 :root {
   --documents-primary: #3c0000;
   --documents-secondary: #670010;
@@ -684,21 +682,20 @@ body.document-modal-open {
 }
 
 /* ==================================================
-   ESCRITORIO MEDIANO
+   ENCABEZADO COMPARTIDO - SOLO ESCRITORIO
    ================================================== */
 
-@media (min-width: 901px) and (max-width: 1180px) {
-  /* =========================
-   ENCABEZADO COMPARTIDO
-   ========================= */
+@media (min-width: 901px) {
 
-  .main-header {
-    display: flex;
-    justify-content: space-between;
+  .documents-main-header {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "avatar title date";
     align-items: center;
+    gap: 14px;
 
     width: 100%;
-
     margin: 0 0 28px;
     padding: 20px 22px;
 
@@ -716,58 +713,56 @@ body.document-modal-open {
       0 12px 30px rgba(60, 0, 0, 0.08);
   }
 
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    min-width: 0;
+  /*
+   Permite colocar título y fecha en áreas distintas
+   sin cambiar la estructura requerida por Android.
+  */
+  .documents-user-info {
+    display: contents;
   }
 
-  .avatar {
-    flex: 0 0 auto;
+  .documents-avatar {
+    grid-area: avatar;
 
     width: 52px;
     height: 52px;
 
-    border-radius: 50%;
-
-    object-fit: cover;
-
     border: 3px solid
       var(--pale-salmon, #ffc7c1);
+
+    border-radius: 50%;
+    object-fit: cover;
   }
 
-#section-title {
-  margin: 0;
+  .documents-user-info h1 {
+    grid-area: title;
 
-  color: var(--dark-red, #3c0000);
+    margin: 0;
 
-  font-size: 26px;
-  line-height: 1.2;
-  font-weight: 800;
+    color: var(--dark-red, #3c0000);
+
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: normal;
+  }
+
+  .documents-date-time {
+    grid-area: date;
+
+    margin: 0;
+    padding: 10px 14px;
+
+    color: var(--text-muted, #8a4b4b);
+    background: var(--soft-bg, #fff1ef);
+
+    border-radius: 99px;
+
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
 }
-
-.date-time {
-  flex: 0 0 auto;
-
-  padding: 10px 14px;
-
-  color: var(--text-muted, #8a4b4b);
-  background: var(--soft-bg, #fff1ef);
-
-  border-radius: 99px;
-
-  font-size: 14px;
-  line-height: 1.2;
-}
-}
-
-/* ==================================================
-   RESPONSIVE WEB
-   La vista Android específica se termina de controlar
-   desde documentos-mobile.css, cargado después.
-   ================================================== */
 
 @media (max-width: 900px) {
   .documents-container {
