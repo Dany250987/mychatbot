@@ -76,6 +76,16 @@
       ) !important;
   }
 
+  /*
+   * INICIO MÓVIL:
+   * reserva espacio real debajo del contenido para que
+   * la última card pueda subir por encima del menú fijo.
+   */
+  html.danybot-mobile-app .dashboard-home {
+    padding-bottom:
+      calc(88px + env(safe-area-inset-bottom)) !important;
+  }
+
   /* ==================================================
      ENCABEZADO
      ================================================== */
@@ -804,7 +814,6 @@
     font-weight: 700 !important;
   }
 }
-/* ===== FIN AGENDA Y RESUMEN HOME ===== */
 
 /* ===== INICIO COLORES ACTIVIDADES HOME ===== */
 @media (max-width: 620px) {
@@ -854,6 +863,5 @@
   }
 }
 /* ===== FIN COLORES ACTIVIDADES HOME ===== */
-
 
 

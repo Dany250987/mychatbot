@@ -539,12 +539,51 @@ const paginatedActivities = getPaginatedActivities(sortedReminders);
       list.appendChild(mobileCard);
 
       if (isReminderSearchTarget(reminder.id)) {
+        const summaryButton =
+          mobileCard.querySelector(
+            '.mobile-activity-summary'
+          );
+
+        const details =
+          mobileCard.querySelector(
+            '.mobile-activity-details'
+          );
+
+        const chevron =
+          mobileCard.querySelector(
+            '.mobile-activity-chevron'
+          );
+
+        if (summaryButton && details) {
+          summaryButton.setAttribute(
+            'aria-expanded',
+            'true'
+          );
+
+          details.hidden = false;
+
+          mobileCard.classList.add(
+            'is-expanded'
+          );
+
+          if (chevron) {
+            chevron.classList.remove(
+              'fa-chevron-down'
+            );
+
+            chevron.classList.add(
+              'fa-chevron-up'
+            );
+          }
+        }
+
         highlightReminderSearchTargetElement(
           mobileCard
         );
       }
 
       return;
+      
     }
     const card = document.createElement("div");
 

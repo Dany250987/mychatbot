@@ -4052,6 +4052,21 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAdditionalIncomes()
   ]).finally(() => {
     hideDanyBotMovementsLoader();
+
+    const searchTarget =
+      getExpenseSearchTarget();
+
+    if (
+      isDanyBotMobileApp() &&
+      searchTarget.type === 'expense' &&
+      searchTarget.id
+    ) {
+      requestAnimationFrame(() => {
+        focusExpenseCard(
+          searchTarget.id
+        );
+      });
+    }
   });
 
   expenseForm.addEventListener('submit', saveExpense);
