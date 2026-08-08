@@ -74,13 +74,27 @@ async function startForgotPasswordFlow() {
     text: "Ingresa el correo registrado en tu cuenta.",
     input: "email",
     inputPlaceholder: "correo@ejemplo.com",
+
     showCancelButton: true,
     confirmButtonText: "Enviar código",
     cancelButtonText: "Cancelar",
+
     confirmButtonColor: "#3c0000",
     cancelButtonColor: "#6b7280",
+
     showLoaderOnConfirm: true,
     allowOutsideClick: () => !Swal.isLoading(),
+
+    customClass: {
+      popup: "danybot-password-reset-popup",
+      title: "danybot-password-reset-title",
+      htmlContainer: "danybot-password-reset-text",
+      input: "danybot-password-reset-input",
+      actions: "danybot-password-reset-actions",
+      confirmButton: "danybot-password-reset-confirm",
+      cancelButton: "danybot-password-reset-cancel"
+    },
+
     preConfirm: async (email) => {
       const cleanEmail = String(email || "").trim().toLowerCase();
 
@@ -107,39 +121,53 @@ async function startForgotPasswordFlow() {
 
   const resetResult = await Swal.fire({
     title: "Código enviado",
+
     html: `
       <p>Enviamos un código de recuperación a:</p>
       <strong>${email}</strong>
 
-      <input 
-        id="resetPasswordCode" 
-        class="swal2-input" 
+      <input
+        id="resetPasswordCode"
+        class="swal2-input"
         placeholder="Código de verificación"
         maxlength="6"
       >
 
-      <input 
-        id="resetNewPassword" 
-        type="password" 
-        class="swal2-input" 
+      <input
+        id="resetNewPassword"
+        type="password"
+        class="swal2-input"
         placeholder="Nueva contraseña"
       >
 
-      <input 
-        id="resetConfirmPassword" 
-        type="password" 
-        class="swal2-input" 
+      <input
+        id="resetConfirmPassword"
+        type="password"
+        class="swal2-input"
         placeholder="Confirmar nueva contraseña"
       >
     `,
+
     showCancelButton: true,
     confirmButtonText: "Cambiar contraseña",
     cancelButtonText: "Cancelar",
+
     confirmButtonColor: "#3c0000",
     cancelButtonColor: "#6b7280",
+
     showLoaderOnConfirm: true,
     allowOutsideClick: () => !Swal.isLoading(),
     focusConfirm: false,
+
+    customClass: {
+      popup: "danybot-password-change-popup",
+      title: "danybot-password-reset-title",
+      htmlContainer: "danybot-password-change-content",
+      actions: "danybot-password-reset-actions",
+      confirmButton: "danybot-password-reset-confirm",
+      cancelButton: "danybot-password-reset-cancel"
+    },
+
     preConfirm: async () => {
       const code = document.getElementById("resetPasswordCode").value.trim();
       const newPassword = document.getElementById("resetNewPassword").value;
@@ -161,8 +189,7 @@ async function startForgotPasswordFlow() {
       }
 
       try {
-        const data = await resetPassword(email, code, newPassword);
-        return data;
+        return await resetPassword(email, code, newPassword);
       } catch (error) {
         Swal.showValidationMessage(error.message);
         return false;
@@ -180,7 +207,6 @@ async function startForgotPasswordFlow() {
     icon: "success"
   });
 }
-
 // ===============================
 // Login con Google
 // Esta función debe quedar global porque Google la llama desde el HTML
@@ -226,6 +252,16 @@ async function handleCredentialResponse(response) {
       icon: "success"
     });
 
+    if (
+      typeof window.offerDanyBotBiometricAccess ===
+      "function"
+    ) {
+      await window.offerDanyBotBiometricAccess(
+        data.user,
+        data.token
+      );
+    }
+
     redirectToDashboard();
 
   } catch (error) {
@@ -247,16 +283,16 @@ window.handleCredentialResponse = handleCredentialResponse;
 // ===============================
 
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("login-form");
-    const forgotPasswordButton = document.getElementById("forgotPasswordButton");
+  const form = document.getElementById("login-form");
+  const forgotPasswordButton = document.getElementById("forgotPasswordButton");
 
-    if (forgotPasswordButton) {
-      forgotPasswordButton.addEventListener("click", startForgotPasswordFlow);
-    }
+  if (forgotPasswordButton) {
+    forgotPasswordButton.addEventListener("click", startForgotPasswordFlow);
+  }
 
-    if (!form) {
-      return;
-    }
+  if (!form) {
+    return;
+  }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -304,9 +340,19 @@ document.addEventListener("DOMContentLoaded", () => {
         icon: "success"
       });
 
+      if (
+        typeof window.offerDanyBotBiometricAccess ===
+        "function"
+      ) {
+        await window.offerDanyBotBiometricAccess(
+          data.user,
+          data.token
+        );
+      }
+
       redirectToDashboard();
 
-        } catch (error) {
+    } catch (error) {
       console.error("Error en login clásico:", error);
 
       const apiDebug = window.DANYBOT_API_DEBUG || {};

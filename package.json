@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^9.1.2",
+    "@aparajita/capacitor-secure-storage": "^7.1.6",
     "@capacitor-community/speech-recognition": "^7.0.1",
     "@capacitor/android": "^7.6.7",
     "@capacitor/core": "^7.6.7",

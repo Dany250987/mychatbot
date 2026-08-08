@@ -19,8 +19,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="src/css/login_google.css">
+  <link rel="stylesheet" href="src/css/login_google-mobile.css">
   <script src="src/js/script.js" defer></script>
   <script src="src/js/api-config.js"></script>
+  <script src="src/js/biometric-login.js" defer></script>
   <script src="src/js/native-google-login.js" defer></script>
 </head>
 
@@ -144,6 +146,15 @@
         </div>
 
         <button type="submit">Iniciar sesión</button>
+        <button
+          type="button"
+          id="biometricLoginButton"
+          class="biometric-login-button"
+          hidden
+        >
+          <i class="fa-solid fa-fingerprint"></i>
+          Ingresar con huella
+        </button>
       </form>
 
       <p class="forgot-password-text">

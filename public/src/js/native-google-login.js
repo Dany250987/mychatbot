@@ -18,6 +18,21 @@ function isDanyBotNativeAppLogin() {
   );
 }
 
+function applyDanyBotNativeLoginClass() {
+  const isNativeApp = Boolean(
+    window.Capacitor &&
+    typeof window.Capacitor.isNativePlatform === "function" &&
+    window.Capacitor.isNativePlatform()
+  );
+
+  document.documentElement.classList.toggle(
+    "danybot-mobile-app",
+    isNativeApp
+  );
+}
+
+applyDanyBotNativeLoginClass();
+
 function getDanyBotSocialLoginPlugin() {
   if (!window.Capacitor || !window.Capacitor.Plugins) {
     return null;
@@ -108,27 +123,37 @@ async function loginWithDanyBotNativeGoogle() {
       icon: "success"
     });
 
+    if (
+      typeof window.offerDanyBotBiometricAccess ===
+      "function"
+    ) {
+      await window.offerDanyBotBiometricAccess(
+        data.user,
+        data.token
+      );
+    }
+
     redirectToDashboard();
 
-  } catch (error) {
-    console.error("Error en Google nativo:", error);
+    } catch (error) {
+      console.error("Error en Google nativo:", error);
 
-    await showAuthMessage({
-      title: "Error con Google",
-      text: error.message || "No fue posible iniciar sesiÃ³n con Google.",
-      icon: "error"
-    });
+      await showAuthMessage({
+        title: "Error con Google",
+        text: error.message || "No fue posible iniciar sesiÃ³n con Google.",
+        icon: "error"
+      });
 
-  } finally {
-    if (nativeGoogleButton) {
-      nativeGoogleButton.disabled = false;
-      nativeGoogleButton.innerHTML = `
-        <span class="native-google-icon">G</span>
-        Continuar con Google
-      `;
+    } finally {
+      if (nativeGoogleButton) {
+        nativeGoogleButton.disabled = false;
+        nativeGoogleButton.innerHTML = `
+          <span class="native-google-icon">G</span>
+          Continuar con Google
+        `;
+      }
     }
   }
-}
 
 function renderDanyBotNativeGoogleButton() {
   if (!isDanyBotNativeAppLogin()) {

@@ -1,0 +1,1044 @@
+/* =====================================================
+   DANYBOT - LOGIN NATIVO ANDROID
+   Archivo exclusivo para la app móvil
+===================================================== */
+
+html.danybot-mobile-app,
+html.danybot-mobile-app body {
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+html.danybot-mobile-app body {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+
+  background:
+    radial-gradient(
+      circle at 15% 8%,
+      rgba(255, 132, 120, 0.22),
+      transparent 31%
+    ),
+    radial-gradient(
+      circle at 90% 92%,
+      rgba(150, 0, 24, 0.09),
+      transparent 35%
+    ),
+    linear-gradient(
+      180deg,
+      #fff4f2 0%,
+      #ffffff 52%,
+      #fff7f6 100%
+    );
+}
+
+
+/* =====================================================
+   Elementos web que no se muestran en Android
+===================================================== */
+
+html.danybot-mobile-app
+.login-background-decoration,
+html.danybot-mobile-app
+.login-visual-panel {
+  display: none !important;
+}
+
+
+/* =====================================================
+   Estructura principal
+===================================================== */
+
+html.danybot-mobile-app
+.login-card {
+  width: 100% !important;
+  max-width: none !important;
+
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+
+  display: block !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  background: transparent !important;
+
+  box-shadow: none !important;
+
+  overflow: hidden !important;
+}
+
+
+html.danybot-mobile-app
+.login-form-panel {
+  width: 100% !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+
+  padding:
+    calc(16px + env(safe-area-inset-top, 0px))
+    22px
+    calc(14px + env(safe-area-inset-bottom, 0px))
+    !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  justify-content: center !important;
+  align-items: center !important;
+
+  overflow: hidden !important;
+}
+
+
+/* Todos los bloques con el mismo ancho */
+
+html.danybot-mobile-app
+.card-header,
+html.danybot-mobile-app
+.g_id_signin,
+html.danybot-mobile-app
+.login-divider,
+html.danybot-mobile-app
+.form {
+  width: 100% !important;
+  max-width: 420px !important;
+}
+
+
+/* =====================================================
+   CABECERA
+===================================================== */
+
+html.danybot-mobile-app
+.card-header {
+  margin: 0 auto clamp(14px, 2.3vh, 22px) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+
+  gap: 4px !important;
+
+  text-align: center !important;
+}
+
+
+html.danybot-mobile-app
+.logo-container {
+  width: 52px !important;
+  height: 52px !important;
+
+  margin: 0 0 7px !important;
+
+  border-radius: 16px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #ffc7c1
+    ) !important;
+
+  box-shadow:
+    0 8px 20px
+    rgba(150, 0, 24, 0.13) !important;
+}
+
+
+html.danybot-mobile-app
+.logo-container img {
+  width: 41px !important;
+  max-width: 41px !important;
+
+  border-radius: 13px !important;
+}
+
+
+html.danybot-mobile-app
+.login-kicker {
+  margin: 0 0 5px !important;
+
+  padding: 5px 10px !important;
+
+  border-radius: 999px !important;
+
+  background:
+    rgba(255, 199, 193, 0.34) !important;
+
+  color: var(--deep-red) !important;
+
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+}
+
+
+html.danybot-mobile-app
+.card-header h1 {
+  margin: 0 !important;
+
+  color: var(--dark-red) !important;
+
+  font-size: 19px !important;
+  line-height: 1.18 !important;
+  font-weight: 800 !important;
+}
+
+
+html.danybot-mobile-app
+.card-header p {
+  max-width: 330px !important;
+
+  margin: 3px 0 0 !important;
+
+  color: var(--text-muted) !important;
+
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+
+
+/* =====================================================
+   GOOGLE
+===================================================== */
+
+html.danybot-mobile-app
+.g_id_signin {
+  margin: 0 auto !important;
+
+  display: flex !important;
+  justify-content: center !important;
+
+  overflow: visible !important;
+}
+
+
+html.danybot-mobile-app
+.native-google-login-button {
+  width: 100% !important;
+  max-width: none !important;
+
+  min-height: 42px !important;
+
+  margin: 0 !important;
+  padding: 9px 15px !important;
+
+  border:
+    1px solid
+    rgba(103, 0, 16, 0.14) !important;
+
+  border-radius: 13px !important;
+
+  background: #ffffff !important;
+
+  color: #3c4043 !important;
+
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+
+  box-shadow:
+    0 5px 14px
+    rgba(60, 0, 0, 0.045) !important;
+}
+
+
+html.danybot-mobile-app
+.native-google-icon,
+html.danybot-mobile-app
+.native-google-svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+
+/* =====================================================
+   DIVISOR
+===================================================== */
+
+html.danybot-mobile-app
+.login-divider {
+  margin:
+    clamp(11px, 1.7vh, 15px)
+    auto
+    clamp(11px, 1.7vh, 15px)
+    !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 11px !important;
+
+  color: var(--text-muted) !important;
+
+  font-size: 10.5px !important;
+  font-weight: 650 !important;
+}
+
+
+html.danybot-mobile-app
+.login-divider::before,
+html.danybot-mobile-app
+.login-divider::after {
+  height: 1px !important;
+
+  background:
+    rgba(150, 0, 24, 0.14) !important;
+}
+
+
+/* =====================================================
+   FORMULARIO
+===================================================== */
+
+html.danybot-mobile-app
+.form {
+  margin: 0 auto !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 0 !important;
+}
+
+
+html.danybot-mobile-app
+.form-fields {
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 5px !important;
+}
+
+
+/*
+   Aquí está una de las mejoras importantes:
+   dejamos poco espacio entre etiqueta y campo,
+   pero más espacio antes del siguiente campo.
+*/
+
+html.danybot-mobile-app
+.form-fields > label:not(:first-child) {
+  margin-top: 8px !important;
+}
+
+
+html.danybot-mobile-app
+.form-fields label {
+  color: var(--wine-red) !important;
+
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+}
+
+
+/* Correo */
+
+html.danybot-mobile-app
+input[type="email"] {
+  width: 100% !important;
+
+  min-height: 42px !important;
+
+  padding: 10px 13px !important;
+
+  border:
+    1px solid
+    rgba(150, 0, 24, 0.16) !important;
+
+  border-radius: 12px !important;
+
+  background: rgba(255, 255, 255, 0.94) !important;
+
+  color: var(--dark-red) !important;
+
+  font-size: 13px !important;
+
+  box-shadow:
+    0 4px 12px
+    rgba(60, 0, 0, 0.03) !important;
+}
+
+
+/* Contraseña */
+
+html.danybot-mobile-app
+.login-password-group {
+  width: 100% !important;
+}
+
+
+html.danybot-mobile-app
+.login-password-group input,
+html.danybot-mobile-app
+.login-password-group input[type="password"],
+html.danybot-mobile-app
+.login-password-group input[type="text"] {
+  width: 100% !important;
+
+  min-height: 42px !important;
+
+  padding:
+    10px 46px
+    10px 13px !important;
+
+  border:
+    1px solid
+    rgba(150, 0, 24, 0.16) !important;
+
+  border-radius: 12px !important;
+
+  background: rgba(255, 255, 255, 0.94) !important;
+
+  color: var(--dark-red) !important;
+
+  font-size: 13px !important;
+
+  box-shadow:
+    0 4px 12px
+    rgba(60, 0, 0, 0.03) !important;
+}
+
+
+/* Ojo */
+
+html.danybot-mobile-app
+.login-toggle-password {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+
+  right: 5px !important;
+
+  border-radius: 10px !important;
+
+  background: #fff1ef !important;
+  color: var(--deep-red) !important;
+}
+
+
+html.danybot-mobile-app
+.login-toggle-password i {
+  font-size: 13px !important;
+}
+
+
+/* Focus */
+
+html.danybot-mobile-app
+input[type="email"]:focus,
+html.danybot-mobile-app
+.login-password-group input:focus {
+  border-color: var(--coral-red) !important;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(203, 76, 70, 0.10) !important;
+
+  transform: none !important;
+}
+
+
+/* =====================================================
+   BOTÓN PRINCIPAL
+===================================================== */
+
+html.danybot-mobile-app
+.form button[type="submit"] {
+  width: 100% !important;
+
+  min-height: 43px !important;
+
+  margin: 12px 0 0 !important;
+  padding: 10px 15px !important;
+
+  border: 0 !important;
+  border-radius: 13px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--dark-red),
+      var(--deep-red),
+      var(--coral-red)
+    ) !important;
+
+  color: #ffffff !important;
+
+  font-size: 13px !important;
+  font-weight: 800 !important;
+
+  box-shadow:
+    0 8px 19px
+    rgba(150, 0, 24, 0.17) !important;
+}
+
+
+/* =====================================================
+   BOTÓN HUELLA
+===================================================== */
+
+html.danybot-mobile-app
+.biometric-login-button {
+  width: 100% !important;
+
+  min-height: 41px !important;
+
+  margin: 8px 0 0 !important;
+  padding: 9px 15px !important;
+
+  border:
+    1px solid
+    rgba(150, 0, 24, 0.18) !important;
+
+  border-radius: 13px !important;
+
+  background:
+    rgba(255, 255, 255, 0.60) !important;
+
+  color: var(--wine-red) !important;
+
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 8px !important;
+
+  box-shadow: none !important;
+}
+
+
+html.danybot-mobile-app
+.biometric-login-button i {
+  color: var(--deep-red) !important;
+
+  font-size: 17px !important;
+}
+
+
+html.danybot-mobile-app
+.biometric-login-button:active {
+  background: #fff1ef !important;
+  transform: scale(0.985);
+}
+
+
+html.danybot-mobile-app
+.biometric-login-button[hidden] {
+  display: none !important;
+}
+
+
+/* =====================================================
+   RECUPERAR CONTRASEÑA
+===================================================== */
+
+html.danybot-mobile-app
+.forgot-password-text {
+  margin: 11px 0 0 !important;
+
+  text-align: center !important;
+}
+
+
+html.danybot-mobile-app
+.forgot-password-button {
+  padding: 2px 4px !important;
+
+  border: 0 !important;
+
+  background: transparent !important;
+
+  color: var(--deep-red) !important;
+
+  font-size: 11px !important;
+  font-weight: 700 !important;
+
+  text-decoration: none !important;
+}
+
+
+/* =====================================================
+   CREAR CUENTA
+===================================================== */
+
+html.danybot-mobile-app
+.signup-text {
+  margin: 10px 0 0 !important;
+
+  color: var(--text-muted) !important;
+
+  text-align: center !important;
+
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+}
+
+
+html.danybot-mobile-app
+.signup-text a,
+html.danybot-mobile-app
+.signup-text .register {
+  color: var(--deep-red) !important;
+
+  font-weight: 800 !important;
+}
+
+
+/* =====================================================
+   MODAL BIOMÉTRICO
+===================================================== */
+
+html.danybot-mobile-app
+.swal2-popup.danybot-biometric-popup {
+  width: min(82vw, 300px) !important;
+
+  padding: 14px !important;
+
+  border-radius: 18px !important;
+}
+
+
+html.danybot-mobile-app
+.danybot-biometric-popup
+.swal2-icon {
+  width: 44px !important;
+  height: 44px !important;
+
+  margin: 2px auto 8px !important;
+}
+
+
+html.danybot-mobile-app
+.danybot-biometric-popup
+.swal2-icon-content {
+  font-size: 26px !important;
+}
+
+
+html.danybot-mobile-app
+.danybot-biometric-title {
+  padding: 0 5px !important;
+
+  font-size: 15px !important;
+  line-height: 1.22 !important;
+}
+
+
+html.danybot-mobile-app
+.danybot-biometric-text {
+  margin: 7px 0 0 !important;
+
+  padding: 0 4px !important;
+
+  font-size: 11.5px !important;
+  line-height: 1.35 !important;
+}
+
+
+html.danybot-mobile-app
+.danybot-biometric-actions {
+  width: 100% !important;
+
+  margin: 12px 0 0 !important;
+
+  gap: 7px !important;
+}
+
+
+html.danybot-mobile-app
+.danybot-biometric-confirm,
+html.danybot-mobile-app
+.danybot-biometric-cancel {
+  min-height: 36px !important;
+
+  margin: 0 !important;
+  padding: 8px 11px !important;
+
+  border-radius: 10px !important;
+
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+}
+
+
+html.danybot-mobile-app
+.danybot-biometric-confirm {
+  background: var(--dark-red) !important;
+}
+
+
+html.danybot-mobile-app
+.danybot-biometric-cancel {
+  background: #fff1ef !important;
+  color: var(--dark-red) !important;
+}
+
+
+/* =====================================================
+   PANTALLAS BAJAS
+   Reduce ligeramente, pero conserva separación
+===================================================== */
+
+@media (max-height: 700px) {
+
+  html.danybot-mobile-app
+  .login-form-panel {
+    padding-top:
+      calc(
+        8px +
+        env(safe-area-inset-top, 0px)
+      ) !important;
+
+    padding-bottom:
+      calc(
+        8px +
+        env(safe-area-inset-bottom, 0px)
+      ) !important;
+  }
+
+
+  html.danybot-mobile-app
+  .card-header {
+    margin-bottom: 10px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .logo-container {
+    width: 46px !important;
+    height: 46px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .logo-container img {
+    width: 36px !important;
+    max-width: 36px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .login-kicker {
+    padding: 4px 8px !important;
+
+    font-size: 9.5px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .card-header h1 {
+    font-size: 17px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .card-header p {
+    font-size: 10.5px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .login-divider {
+    margin: 8px auto !important;
+  }
+
+
+  html.danybot-mobile-app
+  .form-fields > label:not(:first-child) {
+    margin-top: 6px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .form button[type="submit"] {
+    margin-top: 9px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .biometric-login-button {
+    margin-top: 6px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .forgot-password-text {
+    margin-top: 7px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signup-text {
+    margin-top: 6px !important;
+  }
+}
+
+/* =====================================================
+   RECUPERACIÓN DE CONTRASEÑA - ANDROID
+   Solo afecta la app nativa
+===================================================== */
+
+/* Primer paso: solicitar correo */
+html.danybot-mobile-app
+.swal2-popup.danybot-password-reset-popup {
+  width: min(84vw, 300px) !important;
+  max-width: 300px !important;
+
+  padding: 16px 15px 15px !important;
+
+  border-radius: 18px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* Segundo paso: código + nueva contraseña */
+html.danybot-mobile-app
+.swal2-popup.danybot-password-change-popup {
+  width: min(88vw, 330px) !important;
+  max-width: 330px !important;
+
+  padding: 16px 15px 15px !important;
+
+  border-radius: 18px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* Título compartido */
+html.danybot-mobile-app
+.danybot-password-reset-title {
+  margin: 0 !important;
+  padding: 0 4px !important;
+
+  color: var(--dark-red) !important;
+
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+}
+
+/* Texto del primer paso */
+html.danybot-mobile-app
+.danybot-password-reset-text {
+  margin: 8px 0 0 !important;
+  padding: 0 4px !important;
+
+  color: var(--text-muted) !important;
+
+  font-size: 11.5px !important;
+  line-height: 1.35 !important;
+}
+
+/* Campo correo: anula dimensiones genéricas de SweetAlert */
+html.danybot-mobile-app
+.swal2-popup.danybot-password-reset-popup
+input.swal2-input.danybot-password-reset-input {
+  display: block !important;
+
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+
+  height: 40px !important;
+  min-height: 40px !important;
+
+  margin: 12px 0 0 !important;
+  padding: 9px 11px !important;
+
+  border: 1px solid rgba(150, 0, 24, 0.18) !important;
+  border-radius: 11px !important;
+
+  background: #ffffff !important;
+  color: var(--dark-red) !important;
+
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 12px !important;
+
+  box-sizing: border-box !important;
+  align-self: stretch !important;
+
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+html.danybot-mobile-app
+.swal2-popup.danybot-password-reset-popup
+input.swal2-input.danybot-password-reset-input:focus {
+  border-color: var(--coral-red) !important;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(203, 76, 70, 0.10) !important;
+}
+
+/* Contenido del segundo paso */
+html.danybot-mobile-app
+.danybot-password-change-content {
+  width: 100% !important;
+
+  margin: 8px 0 0 !important;
+  padding: 0 !important;
+
+  color: var(--text-muted) !important;
+
+  font-size: 11.5px !important;
+  line-height: 1.35 !important;
+
+  box-sizing: border-box !important;
+}
+
+html.danybot-mobile-app
+.danybot-password-change-content p {
+  margin: 0 0 3px !important;
+}
+
+html.danybot-mobile-app
+.danybot-password-change-content strong {
+  display: block;
+
+  margin-bottom: 10px !important;
+
+  color: var(--wine-red) !important;
+
+  font-size: 11.5px !important;
+  word-break: break-word;
+}
+
+/* Inputs del segundo paso */
+html.danybot-mobile-app
+.danybot-password-change-content
+input.swal2-input {
+  display: block !important;
+
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+
+  height: 40px !important;
+  min-height: 40px !important;
+
+  margin: 7px 0 0 !important;
+  padding: 9px 11px !important;
+
+  border: 1px solid rgba(150, 0, 24, 0.18) !important;
+  border-radius: 11px !important;
+
+  background: #ffffff !important;
+  color: var(--dark-red) !important;
+
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 12px !important;
+
+  box-sizing: border-box !important;
+
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+html.danybot-mobile-app
+.danybot-password-change-content
+input.swal2-input:focus {
+  border-color: var(--coral-red) !important;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(203, 76, 70, 0.10) !important;
+}
+
+/* Acciones compartidas */
+html.danybot-mobile-app
+.danybot-password-reset-actions {
+  width: 100% !important;
+
+  margin: 14px 0 0 !important;
+
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+
+  gap: 7px !important;
+}
+
+html.danybot-mobile-app
+.danybot-password-reset-confirm,
+html.danybot-mobile-app
+.danybot-password-reset-cancel {
+  flex: 1 1 0 !important;
+
+  min-width: 0 !important;
+  min-height: 37px !important;
+
+  margin: 0 !important;
+  padding: 8px 7px !important;
+
+  border: 0 !important;
+  border-radius: 10px !important;
+
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1.15 !important;
+  font-weight: 700 !important;
+
+  white-space: nowrap !important;
+}
+
+html.danybot-mobile-app
+.danybot-password-reset-confirm {
+  background: var(--dark-red) !important;
+  color: #ffffff !important;
+}
+
+html.danybot-mobile-app
+.danybot-password-reset-cancel {
+  background: #fff1ef !important;
+  color: var(--dark-red) !important;
+}
+
+/* Mensajes de validación */
+html.danybot-mobile-app
+.danybot-password-reset-popup
+.swal2-validation-message,
+html.danybot-mobile-app
+.danybot-password-change-popup
+.swal2-validation-message {
+  margin: 10px 0 0 !important;
+  padding: 8px 10px !important;
+
+  border-radius: 10px !important;
+
+  font-size: 10.5px !important;
+  line-height: 1.3 !important;
+}
+
+/* Pantallas especialmente estrechas */
+@media (max-width: 360px) {
+  html.danybot-mobile-app
+  .swal2-popup.danybot-password-reset-popup,
+  html.danybot-mobile-app
+  .swal2-popup.danybot-password-change-popup {
+    width: 90vw !important;
+    padding-left: 13px !important;
+    padding-right: 13px !important;
+  }
+
+  html.danybot-mobile-app
+  .danybot-password-reset-confirm,
+  html.danybot-mobile-app
+  .danybot-password-reset-cancel {
+    font-size: 10.5px !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+}
