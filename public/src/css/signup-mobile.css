@@ -1,0 +1,860 @@
+/* =====================================================
+   DANYBOT - CREAR CUENTA NATIVO ANDROID
+
+   SOLO se aplica cuando existe:
+   html.danybot-mobile-app
+
+   No modifica el diseño web.
+===================================================== */
+
+
+/* =====================================================
+   PANTALLA
+===================================================== */
+
+html.danybot-mobile-app,
+html.danybot-mobile-app body {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100dvh !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  overflow: hidden !important;
+
+  -webkit-text-size-adjust: 100%;
+}
+
+
+html.danybot-mobile-app body {
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+
+  font-family: "Montserrat", sans-serif !important;
+
+  background:
+    radial-gradient(
+      circle at 14% 5%,
+      rgba(255, 132, 120, 0.18),
+      transparent 29%
+    ),
+    radial-gradient(
+      circle at 94% 96%,
+      rgba(150, 0, 24, 0.07),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      #fff4f2 0%,
+      #ffffff 50%,
+      #fff8f7 100%
+    ) !important;
+}
+
+
+/* =====================================================
+   CONTENEDOR GENERAL
+===================================================== */
+
+html.danybot-mobile-app
+.signup-layout {
+  width: 100% !important;
+  max-width: none !important;
+
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+
+  display: block !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  background: transparent !important;
+
+  box-shadow: none !important;
+
+  overflow: hidden !important;
+}
+
+
+/* Panel de escritorio */
+
+html.danybot-mobile-app
+.signup-visual-panel {
+  display: none !important;
+}
+
+
+/* =====================================================
+   PANEL DEL REGISTRO
+===================================================== */
+
+html.danybot-mobile-app
+.signup-form-panel {
+  width: 100% !important;
+  max-width: 440px !important;
+
+  height: 100dvh !important;
+  min-height: 0 !important;
+
+  margin: 0 auto !important;
+
+  padding:
+    calc(8px + env(safe-area-inset-top, 0px))
+    18px
+    calc(8px + env(safe-area-inset-bottom, 0px))
+    !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  justify-content: center !important;
+
+  overflow: hidden !important;
+}
+
+
+/* =====================================================
+   CABECERA
+===================================================== */
+
+html.danybot-mobile-app
+.signup-header {
+  width: 100% !important;
+
+  margin: 0 0 10px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+
+  text-align: center !important;
+}
+
+
+/* Logo */
+
+html.danybot-mobile-app
+.signup-header .logo-container {
+  width: 46px !important;
+  height: 46px !important;
+
+  margin: 0 0 5px !important;
+
+  border-radius: 14px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #ffc7c1
+    ) !important;
+
+  box-shadow:
+    0 6px 16px
+    rgba(150, 0, 24, 0.12) !important;
+}
+
+
+html.danybot-mobile-app
+.signup-header .logo-container img {
+  width: 36px !important;
+  max-width: 36px !important;
+
+  border-radius: 11px !important;
+}
+
+
+/* Crear cuenta */
+
+html.danybot-mobile-app
+.signup-kicker {
+  margin: 0 0 4px !important;
+
+  padding: 4px 9px !important;
+
+  border-radius: 999px !important;
+
+  background:
+    rgba(255, 199, 193, 0.34) !important;
+
+  color: var(--deep-red) !important;
+
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+
+  line-height: 1.2 !important;
+}
+
+
+/* Título */
+
+html.danybot-mobile-app
+.signup-header h1 {
+  max-width: 330px !important;
+
+  margin: 0 !important;
+
+  color: var(--dark-red) !important;
+
+  font-size: 16.5px !important;
+  line-height: 1.16 !important;
+
+  letter-spacing: 0 !important;
+
+  font-weight: 800 !important;
+}
+
+
+/* Descripción */
+
+html.danybot-mobile-app
+.signup-header p {
+  max-width: 350px !important;
+
+  margin: 4px 0 0 !important;
+
+  color: var(--text-muted) !important;
+
+  font-size: 10px !important;
+  line-height: 1.28 !important;
+}
+
+
+/* =====================================================
+   FORMULARIO
+===================================================== */
+
+html.danybot-mobile-app
+.signup-form {
+  width: 100% !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 7px !important;
+}
+
+
+/* =====================================================
+   FILAS
+===================================================== */
+
+html.danybot-mobile-app
+.form-row {
+  width: 100% !important;
+
+  margin: 0 !important;
+
+  display: grid !important;
+
+  grid-template-columns: 1fr !important;
+
+  gap: 7px !important;
+}
+
+
+/*
+   Fecha + teléfono juntos.
+
+   Ahorra altura sin comprimir:
+   nombre, correo o contraseñas.
+*/
+
+html.danybot-mobile-app
+.signup-form > .form-row:nth-child(2) {
+  grid-template-columns:
+    minmax(0, 0.92fr)
+    minmax(0, 1.08fr)
+    !important;
+
+  gap: 8px !important;
+}
+
+
+/* =====================================================
+   CADA CAMPO
+===================================================== */
+
+html.danybot-mobile-app
+.form-col {
+  width: 100% !important;
+  min-width: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 3px !important;
+}
+
+
+/* Etiquetas */
+
+html.danybot-mobile-app
+.form-col label {
+  margin: 0 !important;
+
+  color: var(--wine-red) !important;
+
+  font-size: 10.5px !important;
+  line-height: 1.15 !important;
+
+  font-weight: 700 !important;
+}
+
+
+/* =====================================================
+   CAMPOS GENERALES
+===================================================== */
+
+html.danybot-mobile-app
+.form-col > input,
+html.danybot-mobile-app
+.form-col input[type="text"],
+html.danybot-mobile-app
+.form-col input[type="email"],
+html.danybot-mobile-app
+.form-col input[type="date"],
+html.danybot-mobile-app
+.form-col input[type="tel"],
+html.danybot-mobile-app
+.form-col input[type="password"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+
+  height: 38px !important;
+  min-height: 38px !important;
+
+  margin: 0 !important;
+
+  padding: 8px 11px !important;
+
+  border:
+    1px solid
+    rgba(150, 0, 24, 0.15) !important;
+
+  border-radius: 11px !important;
+
+  background:
+    rgba(255, 255, 255, 0.96) !important;
+
+  color: var(--dark-red) !important;
+
+  font-family:
+    "Montserrat",
+    sans-serif !important;
+
+  font-size: 12px !important;
+
+  line-height: 1.2 !important;
+
+  outline: none !important;
+
+  box-sizing: border-box !important;
+
+  box-shadow:
+    0 3px 9px
+    rgba(60, 0, 0, 0.025) !important;
+
+  transform: none !important;
+}
+
+
+html.danybot-mobile-app
+.form-col input::placeholder {
+  color: #b6a0a0 !important;
+
+  opacity: 1 !important;
+
+  font-size: 11.5px !important;
+}
+
+
+/* Focus */
+
+html.danybot-mobile-app
+.form-col input:focus {
+  border-color:
+    var(--coral-red) !important;
+
+  box-shadow:
+    0 0 0 2px
+    rgba(203, 76, 70, 0.09) !important;
+
+  transform: none !important;
+}
+
+
+/* =====================================================
+   FECHA
+===================================================== */
+
+html.danybot-mobile-app
+#date-of-birth {
+  width: 100% !important;
+
+  padding:
+    7px
+    7px
+    7px
+    9px !important;
+
+  font-size: 11px !important;
+
+  appearance: auto !important;
+
+  color: var(--dark-red) !important;
+}
+
+
+/* =====================================================
+   TELÉFONO
+
+   intl-tel-input necesita espacio propio
+   para bandera y prefijo.
+===================================================== */
+
+html.danybot-mobile-app
+.iti {
+  position: relative !important;
+
+  display: block !important;
+
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+
+html.danybot-mobile-app
+.iti input,
+html.danybot-mobile-app
+#phone {
+  width: 100% !important;
+  max-width: 100% !important;
+
+  height: 38px !important;
+  min-height: 38px !important;
+
+  /*
+     IMPORTANTE:
+     evita que el número quede debajo
+     de bandera / indicativo.
+  */
+
+  padding-top: 7px !important;
+  padding-right: 8px !important;
+  padding-bottom: 7px !important;
+  padding-left: 68px !important;
+
+  border-radius: 11px !important;
+
+  font-size: 11.5px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+html.danybot-mobile-app
+.iti__country-container {
+  height: 38px !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+}
+
+
+html.danybot-mobile-app
+.iti__selected-country {
+  height: 38px !important;
+
+  padding-left: 8px !important;
+  padding-right: 6px !important;
+}
+
+
+/* =====================================================
+   CONTRASEÑAS
+===================================================== */
+
+html.danybot-mobile-app
+.password-wrapper {
+  width: 100% !important;
+}
+
+
+html.danybot-mobile-app
+.input-group {
+  position: relative !important;
+
+  width: 100% !important;
+
+  min-height: 38px !important;
+
+  display: flex !important;
+  align-items: center !important;
+}
+
+
+html.danybot-mobile-app
+.input-group input,
+html.danybot-mobile-app
+.input-group input[type="password"],
+html.danybot-mobile-app
+.input-group input[type="text"] {
+  width: 100% !important;
+
+  height: 38px !important;
+  min-height: 38px !important;
+
+  padding:
+    8px
+    41px
+    8px
+    11px !important;
+
+  border-radius: 11px !important;
+
+  font-size: 12px !important;
+}
+
+
+/* Ojo */
+
+html.danybot-mobile-app
+.toggle-password {
+  position: absolute !important;
+
+  top: 50% !important;
+  right: 4px !important;
+
+  transform:
+    translateY(-50%) !important;
+
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border: 0 !important;
+
+  border-radius: 9px !important;
+
+  background:
+    #fff1ef !important;
+
+  color:
+    var(--deep-red) !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  box-shadow: none !important;
+}
+
+
+html.danybot-mobile-app
+.toggle-password i {
+  font-size: 12px !important;
+
+  line-height: 1 !important;
+
+  pointer-events: none !important;
+}
+
+
+/* =====================================================
+   BOTONES
+===================================================== */
+
+html.danybot-mobile-app
+.form-actions {
+  width: 100% !important;
+
+  margin: 3px 0 0 !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(0, 0.78fr)
+    minmax(0, 1.22fr)
+    !important;
+
+  gap: 7px !important;
+}
+
+
+html.danybot-mobile-app
+.btn-cancel,
+html.danybot-mobile-app
+.btn-submit {
+  width: 100% !important;
+
+  height: 39px !important;
+  min-height: 39px !important;
+
+  margin: 0 !important;
+
+  padding: 8px 9px !important;
+
+  border: 0 !important;
+
+  border-radius: 11px !important;
+
+  font-family:
+    "Montserrat",
+    sans-serif !important;
+
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+
+  line-height: 1.2 !important;
+
+  box-shadow: none !important;
+}
+
+
+/* Cancelar */
+
+html.danybot-mobile-app
+.btn-cancel {
+  background:
+    #fff1ef !important;
+
+  color:
+    var(--wine-red) !important;
+}
+
+
+/* Crear cuenta */
+
+html.danybot-mobile-app
+.btn-submit {
+  background:
+    linear-gradient(
+      135deg,
+      var(--dark-red),
+      var(--deep-red),
+      var(--coral-red)
+    ) !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    0 6px 15px
+    rgba(150, 0, 24, 0.14) !important;
+}
+
+
+html.danybot-mobile-app
+.btn-cancel:active,
+html.danybot-mobile-app
+.btn-submit:active {
+  transform:
+    scale(0.985) !important;
+}
+
+
+/* =====================================================
+   YA TIENES CUENTA
+===================================================== */
+
+html.danybot-mobile-app
+.signin-text {
+  width: 100% !important;
+
+  margin: 7px 0 0 !important;
+
+  color:
+    var(--text-muted) !important;
+
+  text-align: center !important;
+
+  font-size: 10px !important;
+  line-height: 1.25 !important;
+}
+
+
+html.danybot-mobile-app
+.signin-text a {
+  color:
+    var(--deep-red) !important;
+
+  font-weight: 800 !important;
+
+  text-decoration: none !important;
+}
+
+
+/* =====================================================
+   AUTOCOMPLETADO
+===================================================== */
+
+html.danybot-mobile-app
+input:-webkit-autofill {
+  box-shadow:
+    0 0 0 1000px
+    #fff8f7
+    inset !important;
+
+  -webkit-text-fill-color:
+    var(--dark-red) !important;
+}
+
+
+/* =====================================================
+   PANTALLAS DE POCA ALTURA
+===================================================== */
+
+@media (max-height: 700px) {
+
+  html.danybot-mobile-app
+  .signup-form-panel {
+    padding-top:
+      calc(
+        5px +
+        env(safe-area-inset-top, 0px)
+      ) !important;
+
+    padding-bottom:
+      calc(
+        5px +
+        env(safe-area-inset-bottom, 0px)
+      ) !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signup-header {
+    margin-bottom: 7px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signup-header .logo-container {
+    width: 40px !important;
+    height: 40px !important;
+
+    margin-bottom: 3px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signup-header .logo-container img {
+    width: 31px !important;
+    max-width: 31px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signup-kicker {
+    margin-bottom: 3px !important;
+
+    padding: 3px 7px !important;
+
+    font-size: 8.5px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signup-header h1 {
+    font-size: 15px !important;
+  }
+
+
+  /*
+     En pantallas realmente bajas quitamos
+     solamente el texto explicativo largo.
+     El formulario completo permanece visible.
+  */
+
+  html.danybot-mobile-app
+  .signup-header p {
+    display: none !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signup-form {
+    gap: 5px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .form-row {
+    gap: 5px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .form-col {
+    gap: 2px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signin-text {
+    margin-top: 4px !important;
+  }
+}
+
+
+/* =====================================================
+   TELÉFONOS MUY ANGOSTOS
+===================================================== */
+
+@media (max-width: 360px) {
+
+  html.danybot-mobile-app
+  .signup-form-panel {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signup-header h1 {
+    font-size: 15.5px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .form-col label {
+    font-size: 9.8px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .signup-form > .form-row:nth-child(2) {
+    grid-template-columns:
+      minmax(0, 0.88fr)
+      minmax(0, 1.12fr)
+      !important;
+
+    gap: 6px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .iti input,
+  html.danybot-mobile-app
+  #phone {
+    padding-left: 62px !important;
+
+    font-size: 10.5px !important;
+  }
+
+
+  html.danybot-mobile-app
+  .btn-cancel,
+  html.danybot-mobile-app
+  .btn-submit {
+    font-size: 10.8px !important;
+  }
+}
