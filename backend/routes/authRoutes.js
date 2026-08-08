@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 const dns = require('dns').promises;
 const nodemailer = require('nodemailer');
+const https = require('https');
 
 const router = express.Router();
 
@@ -283,10 +284,222 @@ function createEmailTransporter() {
   });
 }
 
-async function sendVerificationEmail(email, code) {
-  const transporter = createEmailTransporter();
+function parseBrevoSender(from) {
+  const value = String(from || '').trim();
 
-  await transporter.sendMail({
+  const match = value.match(
+    /^(.*?)\s*<([^>]+)>$/
+  );
+
+  if (match) {
+    return {
+      name:
+        match[1]
+          .replace(/^["']|["']$/g, '')
+          .trim() || 'DanyBot',
+
+      email:
+        match[2].trim()
+    };
+  }
+
+  return {
+    name: 'DanyBot',
+    email: value
+  };
+}
+
+
+function sendBrevoApiEmail({
+  from,
+  to,
+  subject,
+  text,
+  html
+}) {
+  return new Promise((resolve, reject) => {
+    const apiKey =
+      process.env.BREVO_API_KEY;
+
+    if (!apiKey) {
+      return reject(
+        new Error(
+          'BREVO_API_KEY no está configurada.'
+        )
+      );
+    }
+
+    const sender =
+      parseBrevoSender(from);
+
+    if (!sender.email) {
+      return reject(
+        new Error(
+          'SMTP_FROM no está configurado.'
+        )
+      );
+    }
+
+    const payload =
+      JSON.stringify({
+        sender,
+        to: [
+          {
+            email: to
+          }
+        ],
+        subject,
+        textContent: text,
+        htmlContent: html
+      });
+
+    const request =
+      https.request(
+        {
+          hostname: 'api.brevo.com',
+          port: 443,
+          path: '/v3/smtp/email',
+          method: 'POST',
+
+          headers: {
+            accept:
+              'application/json',
+
+            'api-key':
+              apiKey,
+
+            'content-type':
+              'application/json',
+
+            'content-length':
+              Buffer.byteLength(payload)
+          },
+
+          timeout: 15000
+        },
+
+        (response) => {
+          let responseBody = '';
+
+          response.setEncoding('utf8');
+
+          response.on(
+            'data',
+            (chunk) => {
+              responseBody += chunk;
+            }
+          );
+
+          response.on(
+            'end',
+            () => {
+              let parsedBody = {};
+
+              try {
+                parsedBody =
+                  responseBody
+                    ? JSON.parse(responseBody)
+                    : {};
+              } catch (error) {
+                parsedBody = {
+                  raw: responseBody
+                };
+              }
+
+              if (
+                response.statusCode >= 200 &&
+                response.statusCode < 300
+              ) {
+                console.log(
+                  '📧 Correo enviado con Brevo API:',
+                  parsedBody.messageId ||
+                  'OK'
+                );
+
+                resolve(parsedBody);
+                return;
+              }
+
+              reject(
+                new Error(
+                  `Brevo API respondió ${
+                    response.statusCode
+                  }: ${
+                    parsedBody.message ||
+                    responseBody ||
+                    'Error desconocido'
+                  }`
+                )
+              );
+            }
+          );
+        }
+      );
+
+    request.on(
+      'timeout',
+      () => {
+        request.destroy(
+          new Error(
+            'Tiempo de espera agotado al conectar con Brevo API.'
+          )
+        );
+      }
+    );
+
+    request.on(
+      'error',
+      (error) => {
+        reject(error);
+      }
+    );
+
+    request.write(payload);
+    request.end();
+  });
+}
+
+
+async function sendTransactionalEmail({
+  from,
+  to,
+  subject,
+  text,
+  html
+}) {
+  /*
+   * Producción / Railway:
+   * usa HTTPS mediante Brevo API.
+   */
+  if (process.env.BREVO_API_KEY) {
+    return sendBrevoApiEmail({
+      from,
+      to,
+      subject,
+      text,
+      html
+    });
+  }
+
+  /*
+   * Respaldo:
+   * conserva el SMTP que DANYBOT
+   * ya utilizaba anteriormente.
+   */
+  const transporter =
+    createEmailTransporter();
+
+  return transporter.sendMail({
+    from,
+    to,
+    subject,
+    text,
+    html
+  });
+}
+
+async function sendVerificationEmail(email, code) {
+  await sendTransactionalEmail({
     from: process.env.SMTP_FROM,
     to: email,
     subject: 'Código de verificación - DanyBot',
@@ -318,9 +531,7 @@ async function sendVerificationEmail(email, code) {
 }
 
 async function sendPasswordResetEmail(email, code) {
-  const transporter = createEmailTransporter();
-
-  await transporter.sendMail({
+  await sendTransactionalEmail({
     from: process.env.SMTP_FROM,
     to: email,
     subject: 'Recuperación de contraseña - DanyBot',
