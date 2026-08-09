@@ -1,54 +1,126 @@
 apply plugin: 'com.android.application'
 
+// ======================================================
+// FIRMA RELEASE DANYBOT
+// Las credenciales se leen desde variables de entorno.
+// No se guardan contraseñas ni rutas privadas en Git.
+// ======================================================
+
+def danybotStoreFile = System.getenv("DANYBOT_STORE_FILE")
+def danybotStorePassword = System.getenv("DANYBOT_STORE_PASSWORD")
+def danybotKeyAlias = System.getenv("DANYBOT_KEY_ALIAS")
+def danybotKeyPassword = System.getenv("DANYBOT_KEY_PASSWORD")
+
+def hasDanybotReleaseSigning =
+        danybotStoreFile &&
+        danybotStorePassword &&
+        danybotKeyAlias &&
+        danybotKeyPassword
+
+
 android {
     namespace "com.danybot.agenda"
     compileSdk rootProject.ext.compileSdkVersion
+
     defaultConfig {
         applicationId "com.danybot.agenda"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
         aaptOptions {
-             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
-             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            // Files and dirs to omit from the packaged assets dir,
+            // modified to accommodate modern web apps.
+            // Default:
+            // https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+
+
+    // ==================================================
+    // CONFIGURACIÓN DE FIRMA RELEASE
+    // Solo se activa cuando existen las 4 variables.
+    // Así no afecta compilaciones debug normales.
+    // ==================================================
+
+    signingConfigs {
+        if (hasDanybotReleaseSigning) {
+            release {
+                storeFile file(danybotStoreFile)
+                storePassword danybotStorePassword
+                keyAlias danybotKeyAlias
+                keyPassword danybotKeyPassword
+            }
+        }
+    }
+
+
     buildTypes {
         release {
+            if (hasDanybotReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            proguardFiles(
+                    getDefaultProguardFile('proguard-android.txt'),
+                    'proguard-rules.pro'
+            )
         }
     }
 }
 
+
 repositories {
-    flatDir{
+    flatDir {
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
 }
 
+
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(
+            include: ['*.jar'],
+            dir: 'libs'
+    )
+
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+
     implementation project(':capacitor-android')
+
     testImplementation "junit:junit:$junitVersion"
+
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+
     implementation project(':capacitor-cordova-android-plugins')
 }
 
+
 apply from: 'capacitor.build.gradle'
+
 
 try {
     def servicesJSON = file('google-services.json')
+
     if (servicesJSON.text) {
         apply plugin: 'com.google.gms.google-services'
     }
-} catch(Exception e) {
-    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+
+} catch (Exception e) {
+    logger.info(
+            "google-services.json not found, google-services plugin not applied. Push Notifications won't work"
+    )
 }

@@ -21,3 +21,8 @@ Thumbs.db
 backend/uploads/
 _respaldos_fuera_de_public/
 *.bak
+
+# Firma Android DANYBOT
+*.jks
+*.keystore
+keystore.properties
