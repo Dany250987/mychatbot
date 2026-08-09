@@ -70,7 +70,7 @@ async function loginWithDanyBotNativeGoogle() {
     if (!SocialLogin) {
       await showAuthMessage({
         title: "Google no disponible",
-        text: "El login nativo de Google no estÃ¡ disponible en este dispositivo.",
+        text: "El login nativo de Google no está disponible en este dispositivo.",
         icon: "warning"
       });
       return;
@@ -91,7 +91,7 @@ async function loginWithDanyBotNativeGoogle() {
     const credential = login && login.result ? login.result.idToken : null;
 
     if (!credential) {
-      throw new Error("Google no devolviÃ³ un idToken vÃ¡lido.");
+      throw new Error("Google no devolvio un idToken válido.");
     }
 
     const apiResponse = await fetch("/api/auth/google-login", {
@@ -108,8 +108,8 @@ async function loginWithDanyBotNativeGoogle() {
 
     if (!apiResponse.ok || !data.user || !data.token) {
       await showAuthMessage({
-        title: "No se pudo iniciar sesiÃ³n",
-        text: data.message || data.error || "OcurriÃ³ un error al validar tu cuenta de Google.",
+        title: "No se pudo iniciar sesión",
+        text: data.message || data.error || "Ocurrió un error al validar tu cuenta de Google.",
         icon: "error"
       });
       return;
@@ -140,7 +140,7 @@ async function loginWithDanyBotNativeGoogle() {
 
       await showAuthMessage({
         title: "Error con Google",
-        text: error.message || "No fue posible iniciar sesiÃ³n con Google.",
+        text: error.message || "No fue posible iniciar sesión con Google.",
         icon: "error"
       });
 
