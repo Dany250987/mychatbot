@@ -801,9 +801,6 @@ router.post('/google-login', async (req, res) => {
     let statusCode = 200;
 
     if (users.length === 0) {
-      const crypto = require('crypto');
-      const generatedPassword = crypto.randomBytes(32).toString('hex');
-      const googlePasswordHash = await bcrypt.hash(generatedPassword, 10);
 
       await queryAsync(
         `
@@ -814,7 +811,7 @@ router.post('/google-login', async (req, res) => {
         [
           googleUser.name,
           normalizedEmail,
-          googlePasswordHash,
+          null,
           null,
           null
         ]
