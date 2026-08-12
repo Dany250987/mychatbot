@@ -18,6 +18,10 @@ const {
   deleteStoredEvidenceCollection
 } = require('../services/evidenceStorageService');
 
+const {
+  deleteStoredDocumentCollection
+} = require('../services/documentStorageService');
+
 // ===============================
 // Helpers de autenticación
 // ===============================
@@ -1084,6 +1088,7 @@ router.delete('/account', authMiddleware, async (req, res) => {
   let transactionStarted = false;
   let transactionConnection = null;
   let evidenceFiles = [];
+  let documentFiles = [];
 
   try {
     const users = await queryAsync(
@@ -1134,6 +1139,25 @@ router.delete('/account', authMiddleware, async (req, res) => {
       [userId]
     );
 
+    documentFiles = await queryAsync(
+      `
+        SELECT
+          file_path,
+          storage_provider,
+          cloudinary_public_id,
+          cloudinary_resource_type,
+          cloudinary_delivery_type,
+          cloudinary_format
+        FROM personal_documents
+        WHERE user_id = ?
+          AND (
+            file_path IS NOT NULL
+            OR cloudinary_public_id IS NOT NULL
+          )
+      `,
+      [userId]
+    );
+
     transactionConnection =
       await getConnectionAsync();
 
@@ -1177,6 +1201,12 @@ router.delete('/account', authMiddleware, async (req, res) => {
     );
 
     await queryAsync(
+      'DELETE FROM personal_documents WHERE user_id = ?',
+      [userId],
+      transactionConnection
+    );
+
+    await queryAsync(
       'DELETE FROM reminders WHERE user_id = ?',
       [userId],
       transactionConnection
@@ -1215,6 +1245,27 @@ router.delete('/account', authMiddleware, async (req, res) => {
             '?? No se pudo eliminar una evidencia al borrar la cuenta:',
             {
               evidenceIndex: index,
+              error:
+                result.reason?.message ||
+                result.reason
+            }
+          );
+        }
+      }
+    );
+
+    const documentDeletionResults =
+      await deleteStoredDocumentCollection(
+        documentFiles
+      );
+
+    documentDeletionResults.forEach(
+      (result, index) => {
+        if (result.status === 'rejected') {
+          console.error(
+            'No se pudo eliminar un documento al borrar la cuenta:',
+            {
+              documentIndex: index,
               error:
                 result.reason?.message ||
                 result.reason
