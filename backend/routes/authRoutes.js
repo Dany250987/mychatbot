@@ -3,7 +3,6 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 const dns = require('dns').promises;
 const nodemailer = require('nodemailer');
@@ -57,29 +56,6 @@ function validateJwtConfig(res) {
   }
 
   return null;
-}
-
-function getEmailHash(email) {
-  return crypto
-    .createHash('sha256')
-    .update(String(email).trim().toLowerCase())
-    .digest('hex');
-}
-
-async function isDeletedAccountEmail(email) {
-  const emailHash = getEmailHash(email);
-
-  const results = await queryAsync(
-    `
-      SELECT id
-      FROM deleted_accounts
-      WHERE email_hash = ?
-      LIMIT 1
-    `,
-    [emailHash]
-  );
-
-  return results.length > 0;
 }
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -611,14 +587,6 @@ router.post('/send-verification-code', async (req, res) => {
       });
     }
 
-    const isDeletedAccount = await isDeletedAccountEmail(normalizedEmail);
-
-    if (isDeletedAccount) {
-      return res.status(403).json({
-        error: 'Esta cuenta fue eliminada anteriormente y no puede registrarse de nuevo.'
-      });
-    }
-
     const verificationCode = createVerificationCode();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     const expiresAtMySQL = formatDateTimeForMySQL(expiresAt);
@@ -783,14 +751,6 @@ router.post('/google-login', async (req, res) => {
   try {
     const googleUser = await verifyGoogleCredential(credential);
     const normalizedEmail = googleUser.email.trim().toLowerCase();
-
-    const isDeletedAccount = await isDeletedAccountEmail(normalizedEmail);
-
-    if (isDeletedAccount) {
-      return res.status(403).json({
-        error: 'Esta cuenta fue eliminada anteriormente. No se puede iniciar sesión nuevamente con este correo.'
-      });
-    }
 
     let users = await queryAsync(
       'SELECT * FROM users WHERE email = ?',
@@ -1163,22 +1123,6 @@ router.delete('/account', authMiddleware, async (req, res) => {
     );
 
     transactionStarted = true;
-
-    await queryAsync(
-      `
-        INSERT INTO deleted_accounts (email_hash, reason)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE 
-          deleted_at = CURRENT_TIMESTAMP,
-          reason = VALUES(reason)
-      `,
-      [
-        getEmailHash(user.email),
-        'user_deleted_account'
-      ],
-      transactionConnection
-    );
-
     await queryAsync(
       'DELETE FROM additional_incomes WHERE user_id = ?',
       [userId],
