@@ -1160,6 +1160,18 @@ router.delete('/account', authMiddleware, async (req, res) => {
     );
 
     await queryAsync(
+      'DELETE FROM password_resets WHERE email = ?',
+      [user.email],
+      transactionConnection
+    );
+
+    await queryAsync(
+      'DELETE FROM email_verifications WHERE email = ?',
+      [user.email],
+      transactionConnection
+    );
+
+    await queryAsync(
       'DELETE FROM users WHERE id = ?',
       [userId],
       transactionConnection
