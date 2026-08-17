@@ -1159,14 +1159,58 @@ async function editReminder(reminderId) {
       return;
     }
 
+    /*
+    * Después de actualizar, conservamos la actividad
+    * como objetivo para que el render pueda localizarla.
+    */
+    if (
+      typeof pendingCreatedReminderId !==
+      "undefined"
+    ) {
+      pendingCreatedReminderId = reminderId;
+    }
+
+    /*
+    * Nos aseguramos de usar un filtro donde la actividad
+    * actualizada pueda verse.
+    */
+    if (
+      typeof currentReminderFilter !==
+      "undefined"
+    ) {
+      currentReminderFilter =
+        result.value.status === "papelera" ||
+        result.value.status === "completado"
+          ? "papelera"
+          : "todos";
+    }
+
+    if (
+      typeof currentActivitiesPage !==
+      "undefined"
+    ) {
+      currentActivitiesPage = 1;
+    }
+
     await loadReminders();
 
-    Swal.fire({
+    await Swal.fire({
       title: "Recordatorio actualizado",
       text: "Los cambios fueron guardados correctamente.",
       icon: "success",
       confirmButtonColor: "#960018"
     });
+
+    /*
+    * Al cerrar la confirmación, abrimos, centramos
+    * y resaltamos la card que acabamos de modificar.
+    */
+    if (
+      typeof scrollToCreatedReminderCard ===
+      "function"
+    ) {
+      scrollToCreatedReminderCard(reminderId);
+    }
 
   } catch (error) {
     console.error("Error al editar recordatorio:", error);
