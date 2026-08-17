@@ -702,10 +702,13 @@ async function saveVoiceReminder(reminderData) {
   }
 
   if (
-    typeof currentReminderFilter !==
-    "undefined"
+    typeof activityDateFilter !== "undefined" &&
+    typeof activityPriorityFilter !== "undefined" &&
+    typeof activityStatusFilter !== "undefined"
   ) {
-    currentReminderFilter = "activos";
+    activityDateFilter = "all";
+    activityPriorityFilter = "all";
+    activityStatusFilter = "todos";
   }
 
   if (

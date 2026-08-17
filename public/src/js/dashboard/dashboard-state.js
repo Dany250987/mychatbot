@@ -3,7 +3,9 @@ let currentUserId = null;
 let editingTaskId = null;
 
 let currentTaskFilter = "pendiente";
-let currentReminderFilter = "activos";
+let activityDateFilter = "all";
+let activityPriorityFilter = "all";
+let activityStatusFilter = "todos";
 
 let reminders = [];
 let lastDetectedReminder = null;

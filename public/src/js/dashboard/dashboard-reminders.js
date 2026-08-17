@@ -580,7 +580,7 @@ function renderRemindersList() {
     );
 
     trashBulkActions.hidden =
-      currentReminderFilter !== "papelera" ||
+      activityStatusFilter !== "eliminados" ||
       !hasTrashItems;
   }
 
@@ -1174,16 +1174,14 @@ async function editReminder(reminderId) {
     * Nos aseguramos de usar un filtro donde la actividad
     * actualizada pueda verse.
     */
-    if (
-      typeof currentReminderFilter !==
-      "undefined"
-    ) {
-      currentReminderFilter =
-        result.value.status === "papelera" ||
-        result.value.status === "completado"
-          ? "papelera"
-          : "todos";
-    }
+    activityDateFilter = "all";
+    activityPriorityFilter = "all";
+
+    activityStatusFilter =
+      result.value.status === "papelera" ||
+      result.value.status === "completado"
+        ? "eliminados"
+        : "todos";
 
     if (
       typeof currentActivitiesPage !==
@@ -1922,11 +1920,13 @@ async function completeReminder(
      * Mostramos la actividad en el lugar
      * donde quedó después de completarla.
      */
-    if (isRecurring) {
-      currentReminderFilter = "activos";
-    } else {
-      currentReminderFilter = "papelera";
-    }
+    activityDateFilter = "all";
+    activityPriorityFilter = "all";
+
+    activityStatusFilter =
+      isRecurring
+        ? "todos"
+        : "eliminados";
 
     currentActivitiesPage = 1;
 
@@ -2114,77 +2114,234 @@ function renderRemindersSection() {
 
       <div id="detectedReminderBox" class="detected-reminder-box" style="display: none;"></div>
 
-      <div class="reminders-list-panel">
-        <div class="reminders-list-header">
-          <h3>Mis actividades</h3>
-        </div>
+     <div class="reminders-list-panel">
 
-        <div class="activities-toolbar">
-  <div class="activity-search-box">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <input 
-      type="search"
-      id="activitySearchInput"
-      placeholder="Buscar por título, descripción, categoría o prioridad..."
-      autocomplete="off"
-    >
-  </div>
-
-  <div class="reminder-filters">
-        
-
-        <button type="button" class="reminder-filter-button" data-filter="hoy">
-          Hoy
-        </button>
-
-        <button type="button" class="reminder-filter-button" data-filter="vencidos">
-          Vencidos
-        </button>
-
-        <button type="button" class="reminder-filter-button" data-filter="alta">
-          Alta
-        </button>
-
-        <button type="button" class="reminder-filter-button" data-filter="media">
-          Media
-        </button>
-
-        <button type="button" class="reminder-filter-button" data-filter="baja">
-          Baja
-        </button>
-
-        <button type="button" class="reminder-filter-button" data-filter="papelera">
-          Papelera
-        </button>
-
-        <button type="button" class="reminder-filter-button" data-filter="todos">
-          Todos
-        </button>
-        </div>
-
-        </div>
-
-        
-
-        <div id="remindersList" class="reminders-list">
-          <p class="empty-reminders">Aún no tienes recordatorios registrados.</p>
-        </div>
-        <div
-          id="trashBulkActions"
-          class="trash-bulk-actions"
-          hidden
-        >
-          <button
-            type="button"
-            class="empty-trash-button"
-            onclick="emptyReminderTrash()"
-          >
-            <i class="fa-solid fa-trash-can"></i>
-            Vaciar eliminados
-          </button>
-        </div>
-        <div id="activitiesPagination" class="activities-pagination"></div>
+      <div class="reminders-list-header">
+        <h3>Mis actividades</h3>
       </div>
+
+
+      <div class="activities-toolbar">
+
+        <div class="activity-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+
+          <input
+            type="search"
+            id="activitySearchInput"
+            placeholder="Buscar por título, descripción, categoría o prioridad..."
+            autocomplete="off"
+          >
+        </div>
+
+
+        <div class="reminder-filters activity-filter-bar">
+
+          <!-- =========================
+              FECHA
+              ========================= -->
+          <div
+            class="activity-filter-dropdown"
+            data-filter-group="date"
+          >
+            <button
+              type="button"
+              class="activity-filter-trigger"
+              data-filter-trigger="date"
+            >
+              <span data-filter-label="date">
+                Fecha
+              </span>
+
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+
+
+            <div
+              class="activity-filter-menu"
+              data-filter-menu="date"
+              hidden
+            >
+              <button
+                type="button"
+                data-filter-value="all"
+              >
+                Todas las fechas
+              </button>
+
+              <button
+                type="button"
+                data-filter-value="today"
+              >
+                Hoy
+              </button>
+
+              <button
+                type="button"
+                data-filter-value="week"
+              >
+                Esta semana
+              </button>
+
+              <button
+                type="button"
+                data-filter-value="month"
+              >
+                Este mes
+              </button>
+            </div>
+          </div>
+
+
+          <!-- =========================
+              PRIORIDAD
+              ========================= -->
+          <div
+            class="activity-filter-dropdown"
+            data-filter-group="priority"
+          >
+            <button
+              type="button"
+              class="activity-filter-trigger"
+              data-filter-trigger="priority"
+            >
+              <span data-filter-label="priority">
+                Prioridad
+              </span>
+
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+
+
+            <div
+              class="activity-filter-menu"
+              data-filter-menu="priority"
+              hidden
+            >
+              <button
+                type="button"
+                data-filter-value="all"
+              >
+                Todas
+              </button>
+
+              <button
+                type="button"
+                data-filter-value="alta"
+              >
+                Alta
+              </button>
+
+              <button
+                type="button"
+                data-filter-value="media"
+              >
+                Media
+              </button>
+
+              <button
+                type="button"
+                data-filter-value="baja"
+              >
+                Baja
+              </button>
+            </div>
+          </div>
+
+
+          <!-- =========================
+              ESTADO
+              ========================= -->
+          <div
+            class="activity-filter-dropdown"
+            data-filter-group="status"
+          >
+            <button
+              type="button"
+              class="activity-filter-trigger"
+              data-filter-trigger="status"
+            >
+              <span data-filter-label="status">
+                Estado
+              </span>
+
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+
+
+            <div
+              class="activity-filter-menu"
+              data-filter-menu="status"
+              hidden
+            >
+              <button
+                type="button"
+                data-filter-value="todos"
+              >
+                Todos
+              </button>
+
+              <button
+                type="button"
+                data-filter-value="vencidos"
+              >
+                Vencidos
+              </button>
+
+              <button
+                type="button"
+                data-filter-value="eliminados"
+              >
+                Eliminados
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =============================
+          LISTADO DE ACTIVIDADES
+          ============================= -->
+      <div
+        id="remindersList"
+        class="reminders-list"
+      >
+        <p class="empty-reminders">
+          Aún no tienes recordatorios registrados.
+        </p>
+      </div>
+
+
+      <!-- =============================
+          ACCIONES DE ELIMINADOS
+          ============================= -->
+      <div
+        id="trashBulkActions"
+        class="trash-bulk-actions"
+        hidden
+      >
+        <button
+          type="button"
+          class="empty-trash-button"
+          onclick="emptyReminderTrash()"
+        >
+          <i class="fa-solid fa-trash-can"></i>
+          Vaciar eliminados
+        </button>
+      </div>
+
+
+      <!-- =============================
+          PAGINACIÓN
+          ============================= -->
+      <div
+        id="activitiesPagination"
+        class="activities-pagination"
+      ></div>
+
     </div>
   `;
 
@@ -2237,15 +2394,16 @@ function renderRemindersSection() {
 
   const reminderSearchTarget = getReminderSearchTarget();
 
-  if (reminderSearchTarget.type === "reminder") {
-    if (
-      reminderSearchTarget.status === "papelera" ||
-      reminderSearchTarget.status === "completado"
-    ) {
-      currentReminderFilter = "papelera";
-    } else {
-      currentReminderFilter = "todos";
-    }
+  activityDateFilter = "all";
+  activityPriorityFilter = "all";
+
+  if (
+    reminderSearchTarget.status === "papelera" ||
+    reminderSearchTarget.status === "completado"
+  ) {
+    activityStatusFilter = "eliminados";
+  } else {
+    activityStatusFilter = "todos";
   }
 
   setupReminderFilters();
@@ -2446,28 +2604,248 @@ pendingCreatedReminderId = createdReminderId;
 }
 
 function setupReminderFilters() {
-  const filterButtons = document.querySelectorAll(".reminder-filter-button");
+  const dropdowns =
+    document.querySelectorAll(
+      ".activity-filter-dropdown"
+    );
 
-  filterButtons.forEach((button) => {
-    button.classList.remove("active");
+  if (!dropdowns.length) {
+    return;
+  }
 
-    if (button.dataset.filter === currentReminderFilter) {
-      button.classList.add("active");
-    }
 
-    button.addEventListener("click", () => {
-      currentReminderFilter = button.dataset.filter;
-      currentActivitiesPage = 1;
-
-      filterButtons.forEach((item) => {
-        item.classList.remove("active");
+  function closeActivityFilterMenus() {
+    document
+      .querySelectorAll(
+        ".activity-filter-menu"
+      )
+      .forEach((menu) => {
+        menu.hidden = true;
       });
 
-      button.classList.add("active");
+    document
+      .querySelectorAll(
+        ".activity-filter-trigger"
+      )
+      .forEach((trigger) => {
+        trigger.classList.remove(
+          "is-open"
+        );
+      });
+  }
 
-      renderRemindersList();
+
+  function updateActivityFilterLabels() {
+    const labelConfig = {
+      date: {
+        value: activityDateFilter,
+        defaultValue: "all",
+        labels: {
+          all: "Fecha",
+          today: "Hoy",
+          week: "Esta semana",
+          month: "Este mes"
+        }
+      },
+
+      priority: {
+        value: activityPriorityFilter,
+        defaultValue: "all",
+        labels: {
+          all: "Prioridad",
+          alta: "Alta",
+          media: "Media",
+          baja: "Baja"
+        }
+      },
+
+      status: {
+        value: activityStatusFilter,
+        defaultValue: "todos",
+        labels: {
+          todos: "Estado",
+          vencidos: "Vencidos",
+          eliminados: "Eliminados"
+        }
+      }
+    };
+
+
+    dropdowns.forEach((dropdown) => {
+      const group =
+        dropdown.dataset.filterGroup;
+
+      const config =
+        labelConfig[group];
+
+      if (!config) {
+        return;
+      }
+
+      const label =
+        dropdown.querySelector(
+          `[data-filter-label="${group}"]`
+        );
+
+      const trigger =
+        dropdown.querySelector(
+          ".activity-filter-trigger"
+        );
+
+      const selectedValue =
+        config.value;
+
+
+      if (label) {
+        label.textContent =
+          config.labels[selectedValue] ||
+          config.labels[
+            config.defaultValue
+          ];
+      }
+
+
+      dropdown
+        .querySelectorAll(
+          "[data-filter-value]"
+        )
+        .forEach((option) => {
+          option.classList.toggle(
+            "is-selected",
+            option.dataset.filterValue ===
+              selectedValue
+          );
+        });
+
+
+      if (trigger) {
+        const hasSelection =
+          selectedValue !==
+          config.defaultValue;
+
+        trigger.classList.toggle(
+          "has-selection",
+          hasSelection
+        );
+      }
     });
+  }
+
+
+  dropdowns.forEach((dropdown) => {
+    const group =
+      dropdown.dataset.filterGroup;
+
+    const trigger =
+      dropdown.querySelector(
+        ".activity-filter-trigger"
+      );
+
+    const menu =
+      dropdown.querySelector(
+        ".activity-filter-menu"
+      );
+
+    if (!trigger || !menu) {
+      return;
+    }
+
+
+    trigger.addEventListener(
+      "click",
+      (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const shouldOpen =
+          menu.hidden;
+
+        closeActivityFilterMenus();
+
+        if (shouldOpen) {
+          menu.hidden = false;
+
+          trigger.classList.add(
+            "is-open"
+          );
+        }
+      }
+    );
+
+
+    menu
+      .querySelectorAll(
+        "[data-filter-value]"
+      )
+      .forEach((option) => {
+        option.addEventListener(
+          "click",
+          (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const value =
+              option.dataset.filterValue;
+
+
+            if (group === "date") {
+              activityDateFilter =
+                value;
+            }
+
+
+            if (group === "priority") {
+              activityPriorityFilter =
+                value;
+            }
+
+
+            if (group === "status") {
+              activityStatusFilter =
+                value;
+            }
+
+
+            currentActivitiesPage = 1;
+
+            closeActivityFilterMenus();
+
+            updateActivityFilterLabels();
+
+            renderRemindersList();
+          }
+        );
+      });
   });
+
+
+  /*
+   * Evita acumular listeners si la sección
+   * de Actividades se vuelve a construir.
+   */
+  if (
+    window.activityFilterDocumentClickHandler
+  ) {
+    document.removeEventListener(
+      "click",
+      window.activityFilterDocumentClickHandler
+    );
+  }
+
+
+  window.activityFilterDocumentClickHandler =
+    () => {
+      closeActivityFilterMenus();
+    };
+
+
+  document.addEventListener(
+    "click",
+    window.activityFilterDocumentClickHandler
+  );
+
+
+  updateActivityFilterLabels();
 }
 
 function isReminderInTrash(reminder) {
@@ -2506,70 +2884,342 @@ function isReminderDueForTodayFilter(reminder, today) {
   return getReminderDateValue(reminder.reminder_date) === today;
 }
 
+function formatActivityLocalDate(date) {
+  if (!(date instanceof Date)) {
+    return "";
+  }
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+
+  const year =
+    date.getFullYear();
+
+  const month =
+    String(
+      date.getMonth() + 1
+    ).padStart(2, "0");
+
+  const day =
+    String(
+      date.getDate()
+    ).padStart(2, "0");
+
+
+  return `${year}-${month}-${day}`;
+}
+
+
+function getActivityWeekRange(today) {
+  if (
+    !today ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(today)
+  ) {
+    return {
+      start: "",
+      end: ""
+    };
+  }
+
+
+  /*
+   * Se usa mediodía para evitar cambios
+   * de fecha por zona horaria.
+   */
+  const currentDate =
+    new Date(
+      `${today}T12:00:00`
+    );
+
+
+  if (
+    Number.isNaN(
+      currentDate.getTime()
+    )
+  ) {
+    return {
+      start: "",
+      end: ""
+    };
+  }
+
+
+  const dayOfWeek =
+    currentDate.getDay();
+
+
+  /*
+   * Semana:
+   * lunes = inicio
+   * domingo = final
+   */
+  const daysFromMonday =
+    dayOfWeek === 0
+      ? 6
+      : dayOfWeek - 1;
+
+
+  const monday =
+    new Date(currentDate);
+
+  monday.setDate(
+    currentDate.getDate() -
+    daysFromMonday
+  );
+
+
+  const sunday =
+    new Date(monday);
+
+  sunday.setDate(
+    monday.getDate() + 6
+  );
+
+
+  return {
+    start:
+      formatActivityLocalDate(
+        monday
+      ),
+
+    end:
+      formatActivityLocalDate(
+        sunday
+      )
+  };
+}
+
+
+function matchesActivityDateFilter(
+  reminder,
+  today
+) {
+  /*
+   * Sin filtro de fecha.
+   */
+  if (
+    activityDateFilter === "all"
+  ) {
+    return true;
+  }
+
+
+  const reminderDate =
+    getReminderDateValue(
+      reminder.reminder_date
+    );
+
+
+  if (!reminderDate) {
+    return false;
+  }
+
+
+  /*
+   * Hoy.
+   */
+  if (
+    activityDateFilter === "today"
+  ) {
+    return reminderDate === today;
+  }
+
+
+  /*
+   * Semana actual:
+   * lunes a domingo.
+   */
+  if (
+    activityDateFilter === "week"
+  ) {
+    const weekRange =
+      getActivityWeekRange(today);
+
+
+    if (
+      !weekRange.start ||
+      !weekRange.end
+    ) {
+      return false;
+    }
+
+
+    return (
+      reminderDate >=
+        weekRange.start &&
+      reminderDate <=
+        weekRange.end
+    );
+  }
+
+
+  /*
+   * Mes actual.
+   */
+  if (
+    activityDateFilter === "month"
+  ) {
+    return (
+      reminderDate.slice(0, 7) ===
+      today.slice(0, 7)
+    );
+  }
+
+
+  return true;
+}
+
+
+function matchesActivityPriorityFilter(
+  reminder
+) {
+  if (
+    activityPriorityFilter ===
+    "all"
+  ) {
+    return true;
+  }
+
+
+  /*
+   * Los registros antiguos sin prioridad
+   * se consideran prioridad media,
+   * igual que hacía la lógica anterior.
+   */
+  const priority =
+    reminder.priority ||
+    "media";
+
+
+  return (
+    priority ===
+    activityPriorityFilter
+  );
+}
+
+
+function matchesActivityStatusFilter(
+  reminder
+) {
+  /*
+   * Eliminados:
+   * mantiene la lógica actual donde
+   * papelera y completado pertenecen
+   * a esta vista.
+   */
+  if (
+    activityStatusFilter ===
+    "eliminados"
+  ) {
+    return isReminderInTrash(
+      reminder
+    );
+  }
+
+
+  /*
+   * Vencidos:
+   * utiliza exactamente la misma
+   * función con la que la card decide
+   * si una actividad está vencida.
+   */
+  if (
+    activityStatusFilter ===
+    "vencidos"
+  ) {
+    return (
+      reminder.status ===
+        "activo" &&
+      isReminderOverdue(
+        reminder
+      )
+    );
+  }
+
+
+  /*
+   * Todos:
+   * muestra actividades activas
+   * y excluye papelera/completadas.
+   */
+  return (
+    reminder.status ===
+      "activo" &&
+    !isReminderInTrash(
+      reminder
+    )
+  );
+}
+
+
 function getFilteredReminders() {
-  const today = getTodayDate();
+  const today =
+    getTodayDate();
 
-  let filteredReminders = reminders;
 
-  if (currentReminderFilter === "activos") {
-    filteredReminders = reminders.filter((reminder) => {
-      return reminder.status === "activo"
-        && (
-          shouldShowReminderOnBoard(reminder, today) ||
-          isPendingCreatedReminder(reminder)
-        );
-    });
-  }
+  /*
+   * Partimos siempre del conjunto
+   * completo recibido del backend.
+   */
+  const filteredReminders =
+    reminders.filter(
+      (reminder) => {
 
-  if (currentReminderFilter === "hoy") {
-    filteredReminders = reminders.filter((reminder) => {
-      return reminder.status === "activo"
-        && isReminderDueForTodayFilter(reminder, today);
-    });
-  }
+        const matchesStatus =
+          matchesActivityStatusFilter(
+            reminder
+          );
 
-  if (currentReminderFilter === "vencidos") {
-    filteredReminders = reminders.filter((reminder) => {
-      return isActivityOverdue(reminder);
-    });
-  }
 
-  if (currentReminderFilter === "alta") {
-    filteredReminders = reminders.filter((reminder) => {
-      return reminder.status === "activo"
-        && (reminder.priority || "media") === "alta";
-    });
-  }
+        if (!matchesStatus) {
+          return false;
+        }
 
-  if (currentReminderFilter === "media") {
-    filteredReminders = reminders.filter((reminder) => {
-      return reminder.status === "activo"
-        && (!reminder.priority || reminder.priority === "media");
-    });
-  }
 
-  if (currentReminderFilter === "baja") {
-    filteredReminders = reminders.filter((reminder) => {
-      return reminder.status === "activo"
-        && reminder.priority === "baja";
-    });
-  }
+        const matchesDate =
+          matchesActivityDateFilter(
+            reminder,
+            today
+          );
 
-  if (currentReminderFilter === "papelera") {
-    filteredReminders = reminders.filter((reminder) => {
-      return isReminderInTrash(reminder);
-    });
-  }
 
-  if (currentReminderFilter === "todos") {
-    filteredReminders = reminders.filter((reminder) => {
-      return !isReminderInTrash(reminder);
-    });
-  }
+        if (!matchesDate) {
+          return false;
+        }
 
-  filteredReminders = filteredReminders.filter(matchesActivitySearch);
 
-  return sortReminders(filteredReminders);
+        const matchesPriority =
+          matchesActivityPriorityFilter(
+            reminder
+          );
+
+
+        if (!matchesPriority) {
+          return false;
+        }
+
+
+        const matchesSearch =
+          matchesActivitySearch(
+            reminder
+          );
+
+
+        if (!matchesSearch) {
+          return false;
+        }
+
+
+        return true;
+      }
+    );
+
+
+  return sortReminders(
+    filteredReminders
+  );
 }
 
 function sortReminders(reminderList) {
@@ -2586,65 +3236,131 @@ function sortReminders(reminderList) {
 }
 
 function getEmptyRemindersMessage() {
-  if (currentReminderFilter === "activos") {
-    return {
-      icon: "fa-bell",
-      title: "No tienes avisos activos",
-      text: "Los recordatorios pendientes aparecerán aquí."
-    };
-  }
-
-  if (currentReminderFilter === "hoy") {
-    return {
-      icon: "fa-calendar-day",
-      title: "No tienes avisos para hoy",
-      text: "Los recordatorios activos con fecha de hoy aparecerán aquí."
-    };
-  }
-
-  if (currentReminderFilter === "papelera") {
+  if (
+    activityStatusFilter ===
+    "eliminados"
+  ) {
     return {
       icon: "fa-trash-can",
-      title: "La papelera está vacía",
-      text: "Los recordatorios completados o eliminados aparecerán aquí durante 30 días."
+      title:
+        "No hay actividades eliminadas",
+      text:
+        "No se encontraron actividades eliminadas con los filtros seleccionados."
     };
   }
 
-    if (currentReminderFilter === "vencidos") {
+
+  if (
+    activityStatusFilter ===
+    "vencidos"
+  ) {
     return {
-      icon: "fa-triangle-exclamation",
-      title: "No tienes actividades vencidas",
-      text: "Las actividades activas con fecha límite vencida aparecerán aquí."
+      icon:
+        "fa-triangle-exclamation",
+      title:
+        "No hay actividades vencidas",
+      text:
+        "No se encontraron actividades vencidas con los filtros seleccionados."
     };
   }
 
-  if (currentReminderFilter === "alta") {
+
+  if (
+    activityDateFilter ===
+    "today"
+  ) {
     return {
-      icon: "fa-flag",
-      title: "No tienes actividades de alta prioridad",
-      text: "Las actividades marcadas como alta prioridad aparecerán aquí."
+      icon:
+        "fa-calendar-day",
+      title:
+        "No hay actividades para hoy",
+      text:
+        "No se encontraron actividades para hoy con los filtros seleccionados."
     };
   }
 
-  if (currentReminderFilter === "media") {
+
+  if (
+    activityDateFilter ===
+    "week"
+  ) {
     return {
-      icon: "fa-flag",
-      title: "No tienes actividades de prioridad media",
-      text: "Las actividades marcadas como prioridad media aparecerán aquí."
+      icon:
+        "fa-calendar-week",
+      title:
+        "No hay actividades esta semana",
+      text:
+        "No se encontraron actividades para esta semana con los filtros seleccionados."
     };
   }
 
-  if (currentReminderFilter === "baja") {
+
+  if (
+    activityDateFilter ===
+    "month"
+  ) {
     return {
-      icon: "fa-flag",
-      title: "No tienes actividades de baja prioridad",
-      text: "Las actividades marcadas como baja prioridad aparecerán aquí."
+      icon:
+        "fa-calendar",
+      title:
+        "No hay actividades este mes",
+      text:
+        "No se encontraron actividades para este mes con los filtros seleccionados."
     };
   }
+
+
+  if (
+    activityPriorityFilter ===
+    "alta"
+  ) {
+    return {
+      icon:
+        "fa-flag",
+      title:
+        "No hay actividades de prioridad alta",
+      text:
+        "No se encontraron actividades de prioridad alta con los filtros seleccionados."
+    };
+  }
+
+
+  if (
+    activityPriorityFilter ===
+    "media"
+  ) {
+    return {
+      icon:
+        "fa-flag",
+      title:
+        "No hay actividades de prioridad media",
+      text:
+        "No se encontraron actividades de prioridad media con los filtros seleccionados."
+    };
+  }
+
+
+  if (
+    activityPriorityFilter ===
+    "baja"
+  ) {
+    return {
+      icon:
+        "fa-flag",
+      title:
+        "No hay actividades de prioridad baja",
+      text:
+        "No se encontraron actividades de prioridad baja con los filtros seleccionados."
+    };
+  }
+
 
   return {
-    icon: "fa-bell-slash",
-    title: "No tienes avisos registrados",
-    text: "Cuando crees un recordatorio por voz, aparecerá en esta agenda."
+    icon:
+      "fa-bell-slash",
+    title:
+      "No hay actividades para mostrar",
+    text:
+      "Cuando registres una actividad, aparecerá aquí."
   };
 }

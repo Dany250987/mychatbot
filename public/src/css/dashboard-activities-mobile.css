@@ -1403,3 +1403,577 @@ html.danybot-mobile-app.danybot-activities-view
     animation: none !important;
   }
 }
+
+/* ==================================================
+   ACTIVIDADES MÓVIL - FILTROS AGRUPADOS
+   Fecha | Prioridad | Estado
+   ================================================== */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filters.activity-filter-bar {
+  width: 100% !important;
+
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+
+  gap: 8px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  overflow: visible !important;
+}
+
+
+/* Contenedor individual */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-dropdown {
+  position: relative;
+  min-width: 0;
+}
+
+
+/* Botones principales:
+   Fecha | Prioridad | Estado */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 36px !important;
+
+  padding: 7px 6px !important;
+
+  font-size: 10.5px !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger span {
+  min-width: 0;
+
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger:active {
+  transform: scale(0.97);
+}
+
+
+/* Filtro abierto */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger.is-open {
+  background: #960018;
+  border-color: #ff8478;
+}
+
+
+/* Flecha */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger i {
+  flex: 0 0 auto;
+
+  color: #ffb0a8;
+  font-size: 9px;
+
+  transition: transform 0.18s ease;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger.is-open i {
+  transform: rotate(180deg);
+}
+
+
+
+
+/* ========================================
+   MENÚ DESPLEGABLE
+   ======================================== */
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu {
+  position: absolute;
+  z-index: 120;
+
+  top: calc(100% + 7px);
+
+  min-width: 155px;
+  padding: 6px;
+
+  border: 1px solid rgba(255, 176, 168, 0.28);
+  border-radius: 14px;
+
+  background: #3c0000;
+
+  box-shadow:
+    0 12px 28px rgba(60, 0, 0, 0.34);
+}
+
+
+/* Fecha: alinear a la izquierda */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-dropdown[data-filter-group="date"]
+.activity-filter-menu {
+  left: 0;
+}
+
+
+/* Prioridad: centrar */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-dropdown[data-filter-group="priority"]
+.activity-filter-menu {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
+/* Estado: alinear a la derecha */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-dropdown[data-filter-group="status"]
+.activity-filter-menu {
+  right: 0;
+}
+
+
+/* Respetar atributo hidden */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu[hidden] {
+  display: none !important;
+}
+
+
+/* Opciones */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  margin: 0;
+  padding: 9px 10px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: transparent;
+  color: #ffc7c1;
+
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 700;
+
+  text-align: left;
+  white-space: nowrap;
+
+  cursor: pointer;
+}
+
+
+/* Separación suave */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu button + button {
+  margin-top: 2px;
+}
+
+
+/* Opción seleccionada */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu button.is-selected {
+  background: #cb4c46;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+
+/* Pulsación móvil */
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu button:active {
+  background: #960018;
+  color: #ffffff;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger.has-selection {
+  background: #960018;
+  border-color: #ff8478;
+  color: #ffffff;
+}
+
+/* ==================================================
+   ACTIVIDADES MÓVIL
+   FILTROS: FECHA | PRIORIDAD | ESTADO
+   ================================================== */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminder-filters.activity-filter-bar {
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr))
+    !important;
+
+  width: 100% !important;
+
+  gap: 8px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  overflow: visible !important;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-dropdown {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger {
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 36px !important;
+
+  gap: 5px !important;
+
+  margin: 0 !important;
+  padding: 7px 6px !important;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      176,
+      168,
+      0.36
+    ) !important;
+
+  border-radius:
+    999px !important;
+
+  background:
+    #670010 !important;
+
+  color:
+    #fff1ef !important;
+
+  font-family:
+    inherit !important;
+
+  font-size:
+    10.5px !important;
+
+  line-height:
+    1 !important;
+
+  font-weight:
+    800 !important;
+
+  box-shadow:
+    none !important;
+
+  cursor:
+    pointer;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger span {
+  min-width: 0;
+
+  white-space:
+    nowrap !important;
+
+  overflow:
+    visible !important;
+
+  text-overflow:
+    clip !important;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger i {
+  flex:
+    0 0 auto;
+
+  color:
+    #ffb0a8 !important;
+
+  font-size:
+    9px !important;
+
+  transition:
+    transform
+    0.18s ease;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger.is-open i {
+  transform:
+    rotate(180deg);
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger.is-open,
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-trigger.has-selection {
+  background:
+    #960018 !important;
+
+  border-color:
+    #ff8478 !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* ===============================
+   MENÚS
+   =============================== */
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu {
+  position:
+    absolute !important;
+
+  z-index:
+    500 !important;
+
+  top:
+    calc(100% + 7px);
+
+  min-width:
+    150px;
+
+  padding:
+    6px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      176,
+      168,
+      0.30
+    );
+
+  border-radius:
+    14px;
+
+  background:
+    #3c0000;
+
+  box-shadow:
+    0 12px 28px
+    rgba(
+      60,
+      0,
+      0,
+      0.42
+    );
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu[hidden] {
+  display:
+    none !important;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-dropdown[data-filter-group="date"]
+.activity-filter-menu {
+  left:
+    0;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-dropdown[data-filter-group="priority"]
+.activity-filter-menu {
+  left:
+    50%;
+
+  transform:
+    translateX(-50%);
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-dropdown[data-filter-group="status"]
+.activity-filter-menu {
+  right:
+    0;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu button {
+  display:
+    block;
+
+  width:
+    100%;
+
+  margin:
+    0;
+
+  padding:
+    9px 10px;
+
+  border:
+    0;
+
+  border-radius:
+    9px;
+
+  background:
+    transparent;
+
+  color:
+    #ffc7c1;
+
+  font-family:
+    inherit;
+
+  font-size:
+    11px;
+
+  font-weight:
+    700;
+
+  line-height:
+    1.2;
+
+  text-align:
+    left;
+
+  white-space:
+    nowrap;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu button + button {
+  margin-top:
+    2px;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.activity-filter-menu button.is-selected {
+  background:
+    #cb4c46;
+
+  color:
+    #ffffff;
+
+  font-weight:
+    800;
+}
+
+
+/* ===============================
+   ESTADO VACÍO
+   =============================== */
+
+html.danybot-mobile-app.danybot-activities-view
+.reminders-list
+.empty-reminders {
+  display:
+    flex !important;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  width:
+    100%;
+
+  min-height:
+    220px;
+
+  padding:
+    30px 20px;
+
+  text-align:
+    center;
+
+  color:
+    #fff1ef !important;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.reminders-list
+.empty-reminders i {
+  margin-bottom:
+    12px;
+
+  color:
+    #cb4c46 !important;
+
+  font-size:
+    32px;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.reminders-list
+.empty-reminders h3 {
+  margin:
+    0 0 8px;
+
+  color:
+    #fff1ef !important;
+
+  font-size:
+    15px !important;
+
+  line-height:
+    1.25;
+}
+
+
+html.danybot-mobile-app.danybot-activities-view
+.reminders-list
+.empty-reminders p {
+  max-width:
+    280px;
+
+  margin:
+    0;
+
+  color:
+    #ffc7c1 !important;
+
+  font-size:
+    12px !important;
+
+  line-height:
+    1.45;
+}
