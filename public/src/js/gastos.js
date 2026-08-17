@@ -2072,11 +2072,21 @@ async function downloadExpensesExcel() {
     return sum + Number(income.amount);
   }, 0);
 
-  const savings = currentIncomeAmount + totalAdditionalIncomes - totalExpenses;
+  const totalIncome =
+    Number(currentIncomeAmount || 0) +
+    totalAdditionalIncomes;
+
+  const savings = totalIncome - totalExpenses;
+
+  const totalIncomeMovements =
+    additionalIncomes.length +
+    (Number(currentIncomeAmount || 0) > 0 ? 1 : 0);
+
+  const totalMovements =
+    totalIncomeMovements + expenses.length;
 
   if (
-    currentIncomeAmount === 0 &&
-    totalAdditionalIncomes === 0 &&
+    totalIncome === 0 &&
     totalExpenses === 0
   ) {
     Swal.fire({
@@ -2089,76 +2099,204 @@ async function downloadExpensesExcel() {
     return;
   }
 
+  const monthLabelRaw = getSelectedMonthLabel();
+  const monthLabel = monthLabelRaw
+    ? monthLabelRaw.charAt(0).toUpperCase() + monthLabelRaw.slice(1)
+    : selectedMonth;
+
   const workbook = XLSX.utils.book_new();
 
   const moneyFormat = '"$"#,##0';
 
+  const palette = {
+    wine: '3C0000',
+    darkWine: '670010',
+    red: '960018',
+    coral: 'CB4C46',
+    salmon: 'FF8478',
+    rose: 'FFB0A8',
+    blush: 'FFC7C1',
+    pale: 'FFF1EF',
+    white: 'FFFFFF',
+    text: '3C0000',
+    muted: '7A5A5A',
+    border: 'E8C5C0'
+  };
+
+  const thinBorder = {
+    top: { style: 'thin', color: { rgb: palette.border } },
+    bottom: { style: 'thin', color: { rgb: palette.border } },
+    left: { style: 'thin', color: { rgb: palette.border } },
+    right: { style: 'thin', color: { rgb: palette.border } }
+  };
+
   const styles = {
     title: {
-      font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 16 },
-      fill: { fgColor: { rgb: '463CEC' } },
-      alignment: { horizontal: 'center', vertical: 'center' }
+      font: {
+        bold: true,
+        color: { rgb: palette.white },
+        sz: 17
+      },
+      fill: { fgColor: { rgb: palette.wine } },
+      alignment: {
+        horizontal: 'center',
+        vertical: 'center'
+      }
     },
+
+    subtitle: {
+      font: {
+        bold: true,
+        color: { rgb: palette.darkWine },
+        sz: 11
+      },
+      fill: { fgColor: { rgb: palette.pale } },
+      alignment: {
+        horizontal: 'center',
+        vertical: 'center'
+      },
+      border: thinBorder
+    },
+
+    section: {
+      font: {
+        bold: true,
+        color: { rgb: palette.white },
+        sz: 11
+      },
+      fill: { fgColor: { rgb: palette.darkWine } },
+      alignment: {
+        horizontal: 'center',
+        vertical: 'center'
+      },
+      border: thinBorder
+    },
+
     header: {
-      font: { bold: true, color: { rgb: 'FFFFFF' } },
-      fill: { fgColor: { rgb: '463CEC' } },
-      alignment: { horizontal: 'center', vertical: 'center' },
-      border: {
-        top: { style: 'thin', color: { rgb: 'D1D5DB' } },
-        bottom: { style: 'thin', color: { rgb: 'D1D5DB' } },
-        left: { style: 'thin', color: { rgb: 'D1D5DB' } },
-        right: { style: 'thin', color: { rgb: 'D1D5DB' } }
-      }
+      font: {
+        bold: true,
+        color: { rgb: palette.white }
+      },
+      fill: { fgColor: { rgb: palette.red } },
+      alignment: {
+        horizontal: 'center',
+        vertical: 'center',
+        wrapText: true
+      },
+      border: thinBorder
     },
+
     label: {
-      font: { bold: true, color: { rgb: '111827' } },
-      fill: { fgColor: { rgb: 'EEF2FF' } },
-      border: {
-        top: { style: 'thin', color: { rgb: 'D1D5DB' } },
-        bottom: { style: 'thin', color: { rgb: 'D1D5DB' } },
-        left: { style: 'thin', color: { rgb: 'D1D5DB' } },
-        right: { style: 'thin', color: { rgb: 'D1D5DB' } }
-      }
+      font: {
+        bold: true,
+        color: { rgb: palette.text }
+      },
+      fill: { fgColor: { rgb: palette.pale } },
+      alignment: {
+        vertical: 'center',
+        wrapText: true
+      },
+      border: thinBorder
     },
+
     normal: {
-      alignment: { vertical: 'center' },
-      border: {
-        top: { style: 'thin', color: { rgb: 'E5E7EB' } },
-        bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
-        left: { style: 'thin', color: { rgb: 'E5E7EB' } },
-        right: { style: 'thin', color: { rgb: 'E5E7EB' } }
-      }
+      font: {
+        color: { rgb: palette.text }
+      },
+      alignment: {
+        vertical: 'center',
+        wrapText: true
+      },
+      border: thinBorder
     },
+
     money: {
+      font: {
+        color: { rgb: palette.text }
+      },
       numFmt: moneyFormat,
-      alignment: { horizontal: 'right', vertical: 'center' },
-      border: {
-        top: { style: 'thin', color: { rgb: 'E5E7EB' } },
-        bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
-        left: { style: 'thin', color: { rgb: 'E5E7EB' } },
-        right: { style: 'thin', color: { rgb: 'E5E7EB' } }
-      }
+      alignment: {
+        horizontal: 'right',
+        vertical: 'center'
+      },
+      border: thinBorder
     },
+
     total: {
-      font: { bold: true, color: { rgb: '111827' } },
-      fill: { fgColor: { rgb: 'DBEAFE' } },
-      numFmt: moneyFormat,
+      font: {
+        bold: true,
+        color: { rgb: palette.wine }
+      },
+      fill: { fgColor: { rgb: palette.blush } },
+      alignment: {
+        vertical: 'center'
+      },
       border: {
-        top: { style: 'thin', color: { rgb: '93C5FD' } },
-        bottom: { style: 'thin', color: { rgb: '93C5FD' } },
-        left: { style: 'thin', color: { rgb: '93C5FD' } },
-        right: { style: 'thin', color: { rgb: '93C5FD' } }
+        top: { style: 'medium', color: { rgb: palette.red } },
+        bottom: { style: 'thin', color: { rgb: palette.red } },
+        left: { style: 'thin', color: { rgb: palette.red } },
+        right: { style: 'thin', color: { rgb: palette.red } }
       }
     },
-    positive: {
-      font: { bold: true, color: { rgb: '166534' } },
-      fill: { fgColor: { rgb: 'DCFCE7' } },
-      numFmt: moneyFormat
+
+    totalMoney: {
+      font: {
+        bold: true,
+        color: { rgb: palette.wine }
+      },
+      fill: { fgColor: { rgb: palette.blush } },
+      numFmt: moneyFormat,
+      alignment: {
+        horizontal: 'right',
+        vertical: 'center'
+      },
+      border: {
+        top: { style: 'medium', color: { rgb: palette.red } },
+        bottom: { style: 'thin', color: { rgb: palette.red } },
+        left: { style: 'thin', color: { rgb: palette.red } },
+        right: { style: 'thin', color: { rgb: palette.red } }
+      }
     },
-    negative: {
-      font: { bold: true, color: { rgb: '991B1B' } },
-      fill: { fgColor: { rgb: 'FEE2E2' } },
-      numFmt: moneyFormat
+
+    balancePositive: {
+      font: {
+        bold: true,
+        color: { rgb: palette.darkWine }
+      },
+      fill: { fgColor: { rgb: palette.rose } },
+      numFmt: moneyFormat,
+      alignment: {
+        horizontal: 'right',
+        vertical: 'center'
+      },
+      border: thinBorder
+    },
+
+    balanceNegative: {
+      font: {
+        bold: true,
+        color: { rgb: palette.white }
+      },
+      fill: { fgColor: { rgb: palette.coral } },
+      numFmt: moneyFormat,
+      alignment: {
+        horizontal: 'right',
+        vertical: 'center'
+      },
+      border: thinBorder
+    },
+
+    empty: {
+      font: {
+        italic: true,
+        color: { rgb: palette.muted }
+      },
+      fill: { fgColor: { rgb: palette.pale } },
+      alignment: {
+        horizontal: 'center',
+        vertical: 'center'
+      },
+      border: thinBorder
     }
   };
 
@@ -2168,139 +2306,302 @@ async function downloadExpensesExcel() {
     }
   }
 
-  function applyTableStyle(worksheet, moneyColumns = []) {
-    if (!worksheet['!ref']) return;
-
-    const range = XLSX.utils.decode_range(worksheet['!ref']);
-
-    for (let row = range.s.r; row <= range.e.r; row++) {
-      for (let col = range.s.c; col <= range.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-
-        if (!worksheet[cellAddress]) continue;
-
-        worksheet[cellAddress].s = styles.normal;
-
-        const columnLetter = XLSX.utils.encode_col(col);
-
-        if (moneyColumns.includes(columnLetter)) {
-          worksheet[cellAddress].s = styles.money;
-        }
-      }
-    }
-  }
-
-  function applyHeaderStyle(worksheet, rowNumber, startColumn, endColumn) {
+  function applyRowStyle(
+    worksheet,
+    rowNumber,
+    startColumn,
+    endColumn,
+    style
+  ) {
     for (let col = startColumn; col <= endColumn; col++) {
       const cellAddress = XLSX.utils.encode_cell({
         r: rowNumber - 1,
         c: col
       });
 
-      applyStyle(worksheet, cellAddress, styles.header);
+      applyStyle(worksheet, cellAddress, style);
     }
   }
 
-  // Hoja 1: Resumen
+  function applyDataRows(
+    worksheet,
+    startRow,
+    endRow,
+    startColumn,
+    endColumn,
+    moneyColumns = []
+  ) {
+    if (endRow < startRow) {
+      return;
+    }
+
+    for (let row = startRow; row <= endRow; row++) {
+      for (let col = startColumn; col <= endColumn; col++) {
+        const cellAddress = XLSX.utils.encode_cell({
+          r: row - 1,
+          c: col
+        });
+
+        const columnLetter = XLSX.utils.encode_col(col);
+
+        applyStyle(
+          worksheet,
+          cellAddress,
+          moneyColumns.includes(columnLetter)
+            ? styles.money
+            : styles.normal
+        );
+      }
+    }
+  }
+
+  // ==================================================
+  // HOJA 1: RESUMEN
+  // ==================================================
   const summaryData = [
-    ['REPORTE MENSUAL DANYBOT', ''],
-    [],
-    ['Mes', selectedMonth],
-    ['Ingreso mensual principal', currentIncomeAmount],
-    ['Descripción ingreso mensual', incomeDescription.value || 'Sin descripción'],
-    ['Total ingresos adicionales', totalAdditionalIncomes],
-    ['Total gastos', totalExpenses],
-    ['Ahorro final', savings]
+    ['REPORTE MENSUAL - DÍA EN ORDEN', '', '', ''],
+    [`Mes: ${monthLabel}`, '', '', ''],
+    ['', '', '', ''],
+    ['INGRESOS', '', 'GASTOS Y BALANCE', ''],
+    [
+      'Ingreso mensual',
+      Number(currentIncomeAmount || 0),
+      'Total gastos',
+      totalExpenses
+    ],
+    [
+      'Otros ingresos',
+      totalAdditionalIncomes,
+      'Balance / ahorro',
+      savings
+    ],
+    [
+      'Total ingresos',
+      totalIncome,
+      'Movimientos del mes',
+      totalMovements
+    ],
+    ['', '', '', ''],
+    ['DETALLE DEL INGRESO MENSUAL', '', '', ''],
+    [
+      'Descripción',
+      incomeDescription.value || 'Sin descripción registrada',
+      '',
+      ''
+    ]
   ];
 
-  const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+  const summaryWorksheet =
+    XLSX.utils.aoa_to_sheet(summaryData);
 
   summaryWorksheet['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+    { s: { r: 3, c: 0 }, e: { r: 3, c: 1 } },
+    { s: { r: 3, c: 2 }, e: { r: 3, c: 3 } },
+    { s: { r: 8, c: 0 }, e: { r: 8, c: 3 } },
+    { s: { r: 9, c: 1 }, e: { r: 9, c: 3 } }
   ];
 
   summaryWorksheet['!cols'] = [
-    { wch: 35 },
-    { wch: 30 }
+    { wch: 25 },
+    { wch: 23 },
+    { wch: 25 },
+    { wch: 22 }
   ];
 
-  applyStyle(summaryWorksheet, 'A1', styles.title);
+  applyRowStyle(summaryWorksheet, 1, 0, 3, styles.title);
+  applyRowStyle(summaryWorksheet, 2, 0, 3, styles.subtitle);
+  applyRowStyle(summaryWorksheet, 4, 0, 3, styles.section);
 
-  ['A3', 'A4', 'A5', 'A6', 'A7', 'A8'].forEach((cell) => {
+  ['A5', 'A6', 'A7', 'C5', 'C6', 'C7'].forEach((cell) => {
     applyStyle(summaryWorksheet, cell, styles.label);
   });
 
-  ['B3', 'B5'].forEach((cell) => {
-    applyStyle(summaryWorksheet, cell, styles.normal);
-  });
-
-  ['B4', 'B6', 'B7'].forEach((cell) => {
+  ['B5', 'B6', 'B7', 'D5'].forEach((cell) => {
     applyStyle(summaryWorksheet, cell, styles.money);
   });
 
-  applyStyle(summaryWorksheet, 'B8', savings >= 0 ? styles.positive : styles.negative);
+  applyStyle(
+    summaryWorksheet,
+    'D6',
+    savings >= 0
+      ? styles.balancePositive
+      : styles.balanceNegative
+  );
 
-  XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'Resumen');
+  applyStyle(summaryWorksheet, 'D7', styles.normal);
 
-  // Hoja 2: Ingresos adicionales
-  const additionalIncomeRows = [
-    ['Fecha', 'Descripción', 'Valor', 'Origen']
+  applyRowStyle(summaryWorksheet, 9, 0, 3, styles.section);
+  applyStyle(summaryWorksheet, 'A10', styles.label);
+  applyStyle(summaryWorksheet, 'B10', styles.normal);
+  applyStyle(summaryWorksheet, 'C10', styles.normal);
+  applyStyle(summaryWorksheet, 'D10', styles.normal);
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    summaryWorksheet,
+    'Resumen'
+  );
+
+  // ==================================================
+  // HOJA 2: INGRESOS
+  // ==================================================
+  const incomeRows = [
+    ['INGRESOS - DÍA EN ORDEN', '', '', '', ''],
+    [`Mes: ${monthLabel}`, '', '', '', ''],
+    ['', '', '', '', ''],
+    ['Tipo', 'Fecha / Mes', 'Descripción', 'Valor', 'Origen']
   ];
 
-  if (additionalIncomes.length > 0) {
-    additionalIncomes.forEach((income) => {
-      additionalIncomeRows.push([
-        formatDate(income.income_date),
-        income.description,
-        Number(income.amount),
-        getSourceLabel(income.source)
-      ]);
-    });
+  let incomeDataCount = 0;
 
-    additionalIncomeRows.push([]);
-    additionalIncomeRows.push([
-      '',
-      'TOTAL INGRESOS ADICIONALES',
-      totalAdditionalIncomes,
-      ''
+  if (
+    Number(currentIncomeAmount || 0) > 0 ||
+    String(incomeDescription.value || '').trim()
+  ) {
+    incomeRows.push([
+      'Mensual',
+      monthLabel,
+      incomeDescription.value || 'Ingreso mensual principal',
+      Number(currentIncomeAmount || 0),
+      'Mensual'
     ]);
-  } else {
-    additionalIncomeRows.push([
-      '',
-      'No hay ingresos adicionales registrados para este mes',
-      '',
-      ''
-    ]);
+
+    incomeDataCount++;
   }
 
-  const additionalIncomeWorksheet = XLSX.utils.aoa_to_sheet(additionalIncomeRows);
+  additionalIncomes.forEach((income) => {
+    incomeRows.push([
+      'Adicional',
+      formatDate(income.income_date),
+      income.description,
+      Number(income.amount),
+      getSourceLabel(income.source)
+    ]);
 
-  additionalIncomeWorksheet['!cols'] = [
-    { wch: 14 },
-    { wch: 45 },
-    { wch: 16 },
-    { wch: 14 }
+    incomeDataCount++;
+  });
+
+  let incomeEmptyRow = null;
+
+  if (incomeDataCount === 0) {
+    incomeRows.push([
+      'No hay ingresos registrados para este mes',
+      '',
+      '',
+      '',
+      ''
+    ]);
+
+    incomeEmptyRow = incomeRows.length;
+  }
+
+  incomeRows.push([
+    'TOTAL INGRESOS',
+    '',
+    '',
+    totalIncome,
+    ''
+  ]);
+
+  const incomeTotalRow = incomeRows.length;
+
+  const incomeWorksheet =
+    XLSX.utils.aoa_to_sheet(incomeRows);
+
+  incomeWorksheet['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
+    { s: { r: incomeTotalRow - 1, c: 0 }, e: { r: incomeTotalRow - 1, c: 2 } }
   ];
 
-  additionalIncomeWorksheet['!autofilter'] = {
-    ref: 'A1:D1'
+  if (incomeEmptyRow) {
+    incomeWorksheet['!merges'].push({
+      s: { r: incomeEmptyRow - 1, c: 0 },
+      e: { r: incomeEmptyRow - 1, c: 4 }
+    });
+  }
+
+  incomeWorksheet['!cols'] = [
+    { wch: 14 },
+    { wch: 20 },
+    { wch: 42 },
+    { wch: 18 },
+    { wch: 16 }
+  ];
+
+  incomeWorksheet['!autofilter'] = {
+    ref: 'A4:E4'
   };
 
-  applyTableStyle(additionalIncomeWorksheet, ['C']);
-  applyHeaderStyle(additionalIncomeWorksheet, 1, 0, 3);
+  applyRowStyle(incomeWorksheet, 1, 0, 4, styles.title);
+  applyRowStyle(incomeWorksheet, 2, 0, 4, styles.subtitle);
+  applyRowStyle(incomeWorksheet, 4, 0, 4, styles.header);
 
-  if (additionalIncomes.length > 0) {
-    const totalRowNumber = additionalIncomeRows.length;
-    applyStyle(additionalIncomeWorksheet, `B${totalRowNumber}`, styles.total);
-    applyStyle(additionalIncomeWorksheet, `C${totalRowNumber}`, styles.total);
+  const incomeDataStartRow = 5;
+  const incomeDataEndRow = incomeTotalRow - 1;
+
+  if (incomeDataCount > 0) {
+    applyDataRows(
+      incomeWorksheet,
+      incomeDataStartRow,
+      incomeDataEndRow,
+      0,
+      4,
+      ['D']
+    );
   }
 
-  XLSX.utils.book_append_sheet(workbook, additionalIncomeWorksheet, 'Ingresos adicionales');
+  if (incomeEmptyRow) {
+    applyRowStyle(
+      incomeWorksheet,
+      incomeEmptyRow,
+      0,
+      4,
+      styles.empty
+    );
+  }
 
-  // Hoja 3: Gastos
+  applyRowStyle(
+    incomeWorksheet,
+    incomeTotalRow,
+    0,
+    4,
+    styles.total
+  );
+
+  applyStyle(
+    incomeWorksheet,
+    `D${incomeTotalRow}`,
+    styles.totalMoney
+  );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    incomeWorksheet,
+    'Ingresos'
+  );
+
+  // ==================================================
+  // HOJA 3: GASTOS
+  // ==================================================
   const expenseRows = [
-    ['Fecha', 'Categoría', 'Descripción', 'Valor', 'Evidencia', 'Origen', 'Fecha de registro']
+    ['GASTOS - DÍA EN ORDEN', '', '', '', '', '', ''],
+    [`Mes: ${monthLabel}`, '', '', '', '', '', ''],
+    ['', '', '', '', '', '', ''],
+    [
+      'Fecha',
+      'Categoría',
+      'Descripción',
+      'Valor',
+      'Evidencia',
+      'Origen',
+      'Fecha de registro'
+    ]
   ];
+
+  let expenseEmptyRow = null;
 
   if (expenses.length > 0) {
     expenses.forEach((expense) => {
@@ -2314,58 +2615,109 @@ async function downloadExpensesExcel() {
         formatDate(expense.created_at)
       ]);
     });
-
-    expenseRows.push([]);
-    expenseRows.push([
-      '',
-      '',
-      'TOTAL GASTOS DEL MES',
-      totalExpenses,
-      '',
-      '',
-      ''
-    ]);
   } else {
     expenseRows.push([
-      '',
-      '',
       'No hay gastos registrados para este mes',
       '',
       '',
       '',
+      '',
+      '',
       ''
     ]);
+
+    expenseEmptyRow = expenseRows.length;
   }
 
-  const expensesWorksheet = XLSX.utils.aoa_to_sheet(expenseRows);
+  expenseRows.push([
+    'TOTAL GASTOS DEL MES',
+    '',
+    '',
+    totalExpenses,
+    '',
+    '',
+    ''
+  ]);
+
+  const expenseTotalRow = expenseRows.length;
+
+  const expensesWorksheet =
+    XLSX.utils.aoa_to_sheet(expenseRows);
+
+  expensesWorksheet['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } },
+    { s: { r: expenseTotalRow - 1, c: 0 }, e: { r: expenseTotalRow - 1, c: 2 } }
+  ];
+
+  if (expenseEmptyRow) {
+    expensesWorksheet['!merges'].push({
+      s: { r: expenseEmptyRow - 1, c: 0 },
+      e: { r: expenseEmptyRow - 1, c: 6 }
+    });
+  }
 
   expensesWorksheet['!cols'] = [
-    { wch: 14 },
+    { wch: 15 },
     { wch: 18 },
-    { wch: 45 },
-    { wch: 16 },
-    { wch: 12 },
-    { wch: 14 },
-    { wch: 18 }
+    { wch: 42 },
+    { wch: 18 },
+    { wch: 13 },
+    { wch: 15 },
+    { wch: 20 }
   ];
 
   expensesWorksheet['!autofilter'] = {
-    ref: 'A1:G1'
+    ref: 'A4:G4'
   };
 
-  applyTableStyle(expensesWorksheet, ['D']);
-  applyHeaderStyle(expensesWorksheet, 1, 0, 6);
+  applyRowStyle(expensesWorksheet, 1, 0, 6, styles.title);
+  applyRowStyle(expensesWorksheet, 2, 0, 6, styles.subtitle);
+  applyRowStyle(expensesWorksheet, 4, 0, 6, styles.header);
 
   if (expenses.length > 0) {
-    const totalRowNumber = expenseRows.length;
-    applyStyle(expensesWorksheet, `C${totalRowNumber}`, styles.total);
-    applyStyle(expensesWorksheet, `D${totalRowNumber}`, styles.total);
+    applyDataRows(
+      expensesWorksheet,
+      5,
+      expenseTotalRow - 1,
+      0,
+      6,
+      ['D']
+    );
   }
 
-  XLSX.utils.book_append_sheet(workbook, expensesWorksheet, 'Gastos');
+  if (expenseEmptyRow) {
+    applyRowStyle(
+      expensesWorksheet,
+      expenseEmptyRow,
+      0,
+      6,
+      styles.empty
+    );
+  }
 
-    const fileName =
-    `reporte-mensual-${selectedMonth}.xlsx`;
+  applyRowStyle(
+    expensesWorksheet,
+    expenseTotalRow,
+    0,
+    6,
+    styles.total
+  );
+
+  applyStyle(
+    expensesWorksheet,
+    `D${expenseTotalRow}`,
+    styles.totalMoney
+  );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    expensesWorksheet,
+    'Gastos'
+  );
+
+  const fileName =
+    `dia-en-orden-reporte-${selectedMonth}.xlsx`;
 
   const isNativeApp =
     window.Capacitor &&
@@ -2375,7 +2727,6 @@ async function downloadExpensesExcel() {
 
   /*
    * WEB
-   * Conserva la descarga actual del navegador.
    */
   if (!isNativeApp) {
     XLSX.writeFile(workbook, fileName);
@@ -2393,8 +2744,6 @@ async function downloadExpensesExcel() {
 
   /*
    * ANDROID
-   * Genera el Excel en base64, lo guarda temporalmente
-   * y abre el menú nativo para guardar o compartir.
    */
   try {
     const CapacitorPlugins =
@@ -2434,9 +2783,9 @@ async function downloadExpensesExcel() {
       });
 
     await Share.share({
-      title: 'Reporte mensual DANYBOT',
+      title: 'Reporte mensual - Día en Orden',
       text:
-        `Reporte financiero correspondiente a ${selectedMonth}.`,
+        `Reporte financiero de Día en Orden correspondiente a ${monthLabel}.`,
       url: fileInfo.uri,
       dialogTitle:
         'Guardar o compartir reporte'
