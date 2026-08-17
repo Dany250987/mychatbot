@@ -33,22 +33,26 @@ function getGlobalSearchTypeLabel(type) {
     reminder: "Actividad",
     expense: "Gasto",
     monthly_income: "Ingreso mensual",
-    additional_income: "Ingreso adicional"
+    additional_income: "Ingreso adicional",
+    document: "Documento"
   };
 
   return labels[type] || "Resultado";
 }
-
 
 function getGlobalSearchTypeIcon(type) {
   const icons = {
     reminder: "fa-bell",
     expense: "fa-wallet",
     monthly_income: "fa-piggy-bank",
-    additional_income: "fa-circle-plus"
+    additional_income: "fa-circle-plus",
+    document: "fa-file-lines"
   };
 
-  return icons[type] || "fa-magnifying-glass";
+  return (
+    icons[type] ||
+    "fa-magnifying-glass"
+  );
 }
 
 function getGlobalSearchTypeClass(type) {
@@ -56,11 +60,17 @@ function getGlobalSearchTypeClass(type) {
     reminder: "search-reminder",
     expense: "search-expense",
     monthly_income: "search-income",
-    additional_income: "search-income"
+    additional_income: "search-income",
+    document: "search-document"
   };
 
-  return classes[type] || "search-default";
+  return (
+    classes[type] ||
+    "search-default"
+  );
 }
+
+
 function formatGlobalSearchDate(value) {
   if (!value) {
     return "";
@@ -167,30 +177,85 @@ function buildDashboardSearchUrl(result, section) {
 }
 
 function goToGlobalSearchResult(result) {
+  /*
+   * ACTIVIDADES
+   */
   if (result.type === "reminder") {
-    window.location.href = buildDashboardSearchUrl(result, "recordatorios");
+    window.location.href =
+      buildDashboardSearchUrl(
+        result,
+        "recordatorios"
+      );
+
     return;
   }
 
+
+  /*
+   * DOCUMENTOS
+   */
+  if (result.type === "document") {
+    const params =
+      new URLSearchParams();
+
+    params.set(
+      "type",
+      "document"
+    );
+
+    params.set(
+      "id",
+      result.id
+    );
+
+    window.location.href =
+      `./documentos.html?${params.toString()}`;
+
+    return;
+  }
+
+
+  /*
+   * MOVIMIENTOS
+   */
   if (
     result.type === "expense" ||
     result.type === "monthly_income" ||
     result.type === "additional_income"
   ) {
-    const params = new URLSearchParams();
+    const params =
+      new URLSearchParams();
 
-    const resultMonth = getSearchResultMonth(result);
+    const resultMonth =
+      getSearchResultMonth(result);
+
 
     if (resultMonth) {
-      params.set("month", resultMonth);
+      params.set(
+        "month",
+        resultMonth
+      );
     }
 
-    params.set("type", result.type);
-    params.set("id", result.id);
 
-    window.location.href = `./gastos.html?${params.toString()}`;
+    params.set(
+      "type",
+      result.type
+    );
+
+    params.set(
+      "id",
+      result.id
+    );
+
+
+    window.location.href =
+      `./gastos.html?${params.toString()}`;
+
+    return;
   }
 }
+
 function renderGlobalSearchResults(data) {
   const resultsContainer = document.getElementById("globalSearchResults");
 

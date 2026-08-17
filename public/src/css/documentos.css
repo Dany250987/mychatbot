@@ -804,3 +804,44 @@ body.document-modal-open {
     padding: 22px;
   }
 }
+
+/* ==================================================
+   DOCUMENTO ENCONTRADO DESDE BUSCADOR GLOBAL
+   ================================================== */
+
+.document-card.document-search-target {
+  position: relative;
+
+  border:
+    2px solid
+    #cb4c46 !important;
+
+  background:
+    #fff1ef !important;
+
+  box-shadow:
+    0 0 0 4px
+      rgba(
+        203,
+        76,
+        70,
+        0.16
+      ),
+    0 18px 38px
+      rgba(
+        60,
+        0,
+        0,
+        0.16
+      ) !important;
+
+  transform:
+    translateY(-2px)
+    scale(1.01);
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}

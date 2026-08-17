@@ -28,25 +28,35 @@ function runQuery(sql, params = []) {
 // GET /api/search?q=texto
 router.get('/', async (req, res) => {
   const userId = req.user.id;
-  const searchText = String(req.query.q || '').trim();
+
+  const searchText =
+    String(req.query.q || '').trim();
 
   if (!searchText) {
     return res.status(400).json({
-      mensaje: 'Debes ingresar un texto para buscar.'
+      mensaje:
+        'Debes ingresar un texto para buscar.'
     });
   }
 
-  const searchLike = `%${searchText}%`;
+  const searchLike =
+    `%${searchText}%`;
 
   try {
-    
+
+    // =====================================
+    // ACTIVIDADES
+    // =====================================
 
     const remindersSql = `
       SELECT
         id,
         'reminder' AS type,
         title,
-        COALESCE(description, original_text) AS description,
+        COALESCE(
+          description,
+          original_text
+        ) AS description,
         category,
         priority,
         repeat_type,
@@ -65,15 +75,36 @@ router.get('/', async (req, res) => {
           OR priority LIKE ?
           OR repeat_type LIKE ?
           OR status LIKE ?
-          OR DATE_FORMAT(reminder_date, '%Y-%m-%d') LIKE ?
-          OR DATE_FORMAT(reminder_date, '%d/%m/%Y') LIKE ?
-          OR DATE_FORMAT(due_date, '%Y-%m-%d') LIKE ?
-          OR DATE_FORMAT(due_date, '%d/%m/%Y') LIKE ?
+          OR DATE_FORMAT(
+            reminder_date,
+            '%Y-%m-%d'
+          ) LIKE ?
+          OR DATE_FORMAT(
+            reminder_date,
+            '%d/%m/%Y'
+          ) LIKE ?
+          OR DATE_FORMAT(
+            due_date,
+            '%Y-%m-%d'
+          ) LIKE ?
+          OR DATE_FORMAT(
+            due_date,
+            '%d/%m/%Y'
+          ) LIKE ?
         )
-      ORDER BY COALESCE(due_date, reminder_date) ASC, reminder_time ASC
+      ORDER BY
+        COALESCE(
+          due_date,
+          reminder_date
+        ) ASC,
+        reminder_time ASC
       LIMIT 10
     `;
-    
+
+
+    // =====================================
+    // GASTOS
+    // =====================================
 
     const expensesSql = `
       SELECT
@@ -94,19 +125,36 @@ router.get('/', async (req, res) => {
           description LIKE ?
           OR category LIKE ?
           OR source LIKE ?
-          OR CAST(amount AS CHAR) LIKE ?
-          OR DATE_FORMAT(expense_date, '%Y-%m-%d') LIKE ?
-          OR DATE_FORMAT(expense_date, '%d/%m/%Y') LIKE ?
+          OR CAST(
+            amount AS CHAR
+          ) LIKE ?
+          OR DATE_FORMAT(
+            expense_date,
+            '%Y-%m-%d'
+          ) LIKE ?
+          OR DATE_FORMAT(
+            expense_date,
+            '%d/%m/%Y'
+          ) LIKE ?
         )
-      ORDER BY expense_date DESC
+      ORDER BY
+        expense_date DESC
       LIMIT 10
     `;
+
+
+    // =====================================
+    // INGRESO MENSUAL
+    // =====================================
 
     const monthlyIncomesSql = `
       SELECT
         id,
         'monthly_income' AS type,
-        COALESCE(description, 'Ingreso mensual') AS title,
+        COALESCE(
+          description,
+          'Ingreso mensual'
+        ) AS title,
         description,
         'Ingreso principal' AS category,
         NULL AS source,
@@ -120,11 +168,19 @@ router.get('/', async (req, res) => {
         AND (
           month_key LIKE ?
           OR description LIKE ?
-          OR CAST(amount AS CHAR) LIKE ?
+          OR CAST(
+            amount AS CHAR
+          ) LIKE ?
         )
-      ORDER BY month_key DESC
+      ORDER BY
+        month_key DESC
       LIMIT 10
     `;
+
+
+    // =====================================
+    // INGRESOS ADICIONALES
+    // =====================================
 
     const additionalIncomesSql = `
       SELECT
@@ -144,88 +200,171 @@ router.get('/', async (req, res) => {
         AND (
           description LIKE ?
           OR source LIKE ?
-          OR CAST(amount AS CHAR) LIKE ?
+          OR CAST(
+            amount AS CHAR
+          ) LIKE ?
           OR month_key LIKE ?
-          OR DATE_FORMAT(income_date, '%Y-%m-%d') LIKE ?
-          OR DATE_FORMAT(income_date, '%d/%m/%Y') LIKE ?
+          OR DATE_FORMAT(
+            income_date,
+            '%Y-%m-%d'
+          ) LIKE ?
+          OR DATE_FORMAT(
+            income_date,
+            '%d/%m/%Y'
+          ) LIKE ?
         )
-      ORDER BY income_date DESC
+      ORDER BY
+        income_date DESC
       LIMIT 10
     `;
+
+
+    // =====================================
+    // DOCUMENTOS PERSONALES
+    // =====================================
+
+    const documentsSql = `
+      SELECT
+        id,
+        'document' AS type,
+        document_name AS title,
+        file_name AS description,
+        'Documento personal' AS category,
+        file_mime_type AS source,
+        updated_at AS date_value,
+        NULL AS time_value,
+        NULL AS status,
+        NULL AS amount,
+        created_at
+      FROM personal_documents
+      WHERE user_id = ?
+        AND (
+          document_name LIKE ?
+          OR file_name LIKE ?
+        )
+      ORDER BY
+        updated_at DESC,
+        id DESC
+      LIMIT 10
+    `;
+
+
+    // =====================================
+    // EJECUTAR BÚSQUEDAS
+    // =====================================
 
     const [
       reminders,
       expenses,
       monthlyIncomes,
-      additionalIncomes
+      additionalIncomes,
+      documents
     ] = await Promise.all([
-      runQuery(remindersSql, [
-        userId,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike
-      ]),
 
-      runQuery(expensesSql, [
-        userId,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike
-      ]),
+      runQuery(
+        remindersSql,
+        [
+          userId,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike
+        ]
+      ),
 
-      runQuery(monthlyIncomesSql, [
-        userId,
-        searchLike,
-        searchLike,
-        searchLike
-      ]),
+      runQuery(
+        expensesSql,
+        [
+          userId,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike
+        ]
+      ),
 
-      runQuery(additionalIncomesSql, [
-        userId,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike,
-        searchLike
-      ])
+      runQuery(
+        monthlyIncomesSql,
+        [
+          userId,
+          searchLike,
+          searchLike,
+          searchLike
+        ]
+      ),
+
+      runQuery(
+        additionalIncomesSql,
+        [
+          userId,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike,
+          searchLike
+        ]
+      ),
+
+      runQuery(
+        documentsSql,
+        [
+          userId,
+          searchLike,
+          searchLike
+        ]
+      )
     ]);
+
+
+    // =====================================
+    // UNIFICAR RESULTADOS
+    // =====================================
 
     const results = [
       ...reminders,
       ...expenses,
       ...monthlyIncomes,
-      ...additionalIncomes
+      ...additionalIncomes,
+      ...documents
     ];
+
 
     return res.json({
       query: searchText,
-      total: results.length,
+
+      total:
+        results.length,
+
       resultsByType: {
         reminders,
         expenses,
         monthlyIncomes,
-        additionalIncomes
+        additionalIncomes,
+        documents
       },
+
       results
     });
 
   } catch (error) {
-    console.error('Error en buscador global:', error);
+    console.error(
+      'Error en buscador global:',
+      error
+    );
 
     return res.status(500).json({
-      mensaje: 'Ocurrió un error al realizar la búsqueda global.'
+      mensaje:
+        'Ocurrió un error al realizar la búsqueda global.'
     });
   }
 });

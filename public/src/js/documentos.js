@@ -416,6 +416,95 @@ function openEditDocumentModal(documentId) {
   openDocumentModal();
 }
 
+function getDocumentGlobalSearchTarget() {
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const type =
+    params.get('type');
+
+  const id =
+    Number(
+      params.get('id')
+    );
+
+  if (
+    type !== 'document' ||
+    !Number.isInteger(id) ||
+    id <= 0
+  ) {
+    return null;
+  }
+
+  return {
+    type,
+    id
+  };
+}
+
+
+function focusDocumentGlobalSearchTarget() {
+  const target =
+    getDocumentGlobalSearchTarget();
+
+  if (!target) {
+    return;
+  }
+
+  const targetCard =
+    documentsList?.querySelector(
+      `[data-document-id="${target.id}"]`
+    );
+
+  if (!targetCard) {
+    return;
+  }
+
+  targetCard.classList.add(
+    'document-search-target'
+  );
+
+  window.requestAnimationFrame(() => {
+    targetCard.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+  });
+
+  window.setTimeout(() => {
+    targetCard.classList.remove(
+      'document-search-target'
+    );
+  }, 2600);
+
+
+  /*
+   * Consumimos el parámetro después
+   * de localizar el documento.
+   *
+   * Así, si luego se recargan los
+   * documentos por editar, eliminar,
+   * etc., no vuelve a enfocar la card.
+   */
+  const url =
+    new URL(
+      window.location.href
+    );
+
+  url.searchParams.delete('type');
+  url.searchParams.delete('id');
+
+  const cleanUrl =
+    `${url.pathname}${url.search}${url.hash}`;
+
+  window.history.replaceState(
+    {},
+    '',
+    cleanUrl
+  );
+}
 
 // =====================================================
 // CONSULTA Y RENDERIZADO
@@ -429,17 +518,22 @@ async function loadDocuments() {
   documentsList.innerHTML = `
     <div class="documents-loading">
       <i class="fa-solid fa-spinner fa-spin"></i>
-      <p>Cargando documentos...</p>
+
+      <p>
+        Cargando documentos...
+      </p>
     </div>
   `;
 
   try {
-    const response = await fetch(
-      DOCUMENTS_API_URL,
-      {
-        headers: getDocumentsAuthHeaders()
-      }
-    );
+    const response =
+      await fetch(
+        DOCUMENTS_API_URL,
+        {
+          headers:
+            getDocumentsAuthHeaders()
+        }
+      );
 
     const data =
       await parseDocumentJsonResponse(
@@ -450,6 +544,7 @@ async function loadDocuments() {
       await handleDocumentsUnauthorizedSession(
         data
       );
+
       return;
     }
 
@@ -461,11 +556,28 @@ async function loadDocuments() {
     }
 
     currentDocuments =
-      Array.isArray(data.documents)
+      Array.isArray(
+        data.documents
+      )
         ? data.documents
         : [];
 
+
+    /*
+     * Renderiza normalmente todos
+     * los documentos.
+     */
     applyDocumentsSearch();
+
+
+    /*
+     * Si llegamos desde el buscador
+     * global, localizamos la card
+     * después de haberla renderizado.
+     */
+    window.setTimeout(() => {
+      focusDocumentGlobalSearchTarget();
+    }, 80);
 
   } catch (error) {
     console.error(
@@ -475,9 +587,13 @@ async function loadDocuments() {
 
     documentsList.innerHTML = `
       <div class="documents-empty-state">
-        <i class="fa-solid fa-circle-exclamation"></i>
+        <i
+          class="fa-solid fa-circle-exclamation"
+        ></i>
 
-        <h3>No pudimos cargar tus documentos</h3>
+        <h3>
+          No pudimos cargar tus documentos
+        </h3>
 
         <p>
           Revisa tu conexión e inténtalo nuevamente.
@@ -494,7 +610,9 @@ async function loadDocuments() {
     `;
 
     document
-      .getElementById('retryDocumentsButton')
+      .getElementById(
+        'retryDocumentsButton'
+      )
       ?.addEventListener(
         'click',
         loadDocuments
