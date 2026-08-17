@@ -441,7 +441,7 @@ function showBrowserReminderNotification(reminder) {
     return;
   }
 
-  new Notification("Agenda Personal Inteligente", {
+  new Notification("Día en Orden", {
   body: `${reminder.title} · ${formatReminderTime(reminder.reminder_time)}`,
   icon: "./src/img/danybot.png",
   tag: `reminder-${reminder.id}`,

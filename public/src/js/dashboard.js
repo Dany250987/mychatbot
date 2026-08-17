@@ -198,7 +198,7 @@ function showDanyBotInitialLoader() {
         >
       </div>
 
-      <p>Preparando tu agenda</p>
+      <p>Preparando tu día...</p>
 
       <div
         class="danybot-initial-loader-dots"

@@ -259,6 +259,36 @@ router.put('/:id', (req, res) => {
   });
 });
 
+// Vaciar definitivamente la papelera del usuario autenticado
+// DELETE http://localhost:3000/api/reminders/trash/permanent
+router.delete('/trash/permanent', (req, res) => {
+  const userId = req.user.id;
+
+  const sql = `
+    DELETE FROM reminders
+    WHERE user_id = ?
+    AND status IN ('papelera', 'completado')
+  `;
+
+  connection.query(sql, [userId], (error, result) => {
+    if (error) {
+      console.error(
+        'Error al vaciar la papelera de recordatorios:',
+        error
+      );
+
+      return res.status(500).json({
+        mensaje:
+          'Error al vaciar la papelera de recordatorios'
+      });
+    }
+
+    res.json({
+      mensaje: 'Papelera vaciada correctamente',
+      eliminados: result.affectedRows
+    });
+  });
+});
 
 // Enviar recordatorio a papelera del usuario autenticado
 // DELETE http://localhost:3000/api/reminders/1

@@ -561,6 +561,47 @@ html.danybot-mobile-app.danybot-activities-view
 
 /* Acciones */
 
+/* ========================================
+   PAPELERA: VACIAR ELIMINADOS
+======================================== */
+
+html.danybot-mobile-app.danybot-activities-view
+.trash-bulk-actions {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin: 12px 0 4px !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.trash-bulk-actions[hidden] {
+  display: none !important;
+}
+
+html.danybot-mobile-app.danybot-activities-view
+.empty-trash-button {
+  min-height: 32px !important;
+  padding: 6px 10px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+
+  border: 1px solid rgba(255, 199, 193, 0.28) !important;
+  border-radius: 10px !important;
+
+  background: #670010 !important;
+  color: #ffffff !important;
+
+  font-size: 9.5px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+
 html.danybot-mobile-app.danybot-activities-view
 .mobile-activity-details
 .reminder-actions {

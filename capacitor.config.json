@@ -1,6 +1,6 @@
 {
   "appId": "com.danybot.agenda",
-  "appName": "Agenda Personal Inteligente",
+  "appName": "Día en Orden",
   "webDir": "public",
   "server": {
     "androidScheme": "http",

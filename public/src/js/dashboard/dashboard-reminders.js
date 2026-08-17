@@ -194,6 +194,14 @@ async function loadReminders() {
     updateDashboardRemindersCount();
     updateDashboardTodayEventsCount();
 
+    /*
+    * Si Android abrió la aplicación porque
+    * el usuario pulsó "Completar" en una
+    * notificación, procesamos la acción
+    * después de tener los recordatorios cargados.
+    */
+    await processDanyBotPendingNotificationAction();
+
     } catch (error) {
     console.error(
       "Error al consultar recordatorios:",
@@ -204,6 +212,82 @@ async function loadReminders() {
     hideMobileActivitiesLoader();
   }
 }
+
+async function processDanyBotPendingNotificationAction() {
+  if (
+    typeof window.consumeDanyBotPendingNotificationAction !==
+    "function"
+  ) {
+    return;
+  }
+
+  const action =
+    window.consumeDanyBotPendingNotificationAction();
+
+  if (
+    !action ||
+    action.type !== "complete-reminder"
+  ) {
+    return;
+  }
+
+  const reminderId = Number(action.reminderId);
+
+  if (
+    !Number.isInteger(reminderId) ||
+    reminderId <= 0
+  ) {
+    return;
+  }
+
+  const reminder = reminders.find(
+    (item) =>
+      Number(item.id) === reminderId
+  );
+
+  if (!reminder) {
+    console.warn(
+      "No se encontró la actividad asociada a la notificación:",
+      reminderId
+    );
+    return;
+  }
+
+  /*
+   * Si ya no está activa, no intentamos
+   * completarla otra vez.
+   */
+  if (reminder.status !== "activo") {
+    return;
+  }
+
+  await completeReminder(
+    reminder,
+    false
+  );
+}
+
+window.addEventListener(
+  "danybot:notification-action",
+  async () => {
+    /*
+     * Si Actividades ya está renderizada,
+     * refrescamos para procesar inmediatamente
+     * la acción que acaba de llegar.
+     *
+     * Si todavía no está renderizada,
+     * el cambio de hash abrirá la sección
+     * y loadReminders() la procesará después.
+     */
+    if (
+      document.getElementById(
+        "remindersList"
+      )
+    ) {
+      await loadReminders();
+    }
+  }
+);
 
 function renderDetectedReminder(reminder) {
   const box = document.getElementById("detectedReminderBox");
@@ -485,7 +569,20 @@ function renderRemindersList() {
     return;
   }
 
- const sortedReminders = getFilteredReminders();
+  const sortedReminders = getFilteredReminders();
+
+  const trashBulkActions =
+    document.getElementById("trashBulkActions");
+
+  if (trashBulkActions) {
+    const hasTrashItems = reminders.some(
+      (reminder) => isReminderInTrash(reminder)
+    );
+
+    trashBulkActions.hidden =
+      currentReminderFilter !== "papelera" ||
+      !hasTrashItems;
+  }
 
   const searchTarget = getReminderSearchTarget();
 
@@ -670,7 +767,6 @@ const paginatedActivities = getPaginatedActivities(sortedReminders);
   );
 }
 
-
 function scrollToCreatedReminderCard(reminderId) {
   if (!reminderId) return;
 
@@ -679,20 +775,66 @@ function scrollToCreatedReminderCard(reminderId) {
 
   function tryScroll() {
     const card = document.querySelector(
-      `.reminder-timeline-card[data-reminder-id="${reminderId}"]`
+      `.reminder-timeline-card[data-reminder-id="${reminderId}"],
+       .mobile-activity-card[data-reminder-id="${reminderId}"]`
     );
 
     if (card) {
+      /*
+       * En móvil dejamos abierta automáticamente
+       * la actividad que acaba de ser creada.
+       */
+      if (card.classList.contains("mobile-activity-card")) {
+        const summaryButton =
+          card.querySelector(".mobile-activity-summary");
+
+        const details =
+          card.querySelector(".mobile-activity-details");
+
+        const chevron =
+          card.querySelector(".mobile-activity-chevron");
+
+        if (summaryButton && details) {
+          summaryButton.setAttribute(
+            "aria-expanded",
+            "true"
+          );
+
+          details.hidden = false;
+
+          card.classList.add("is-expanded");
+
+          if (chevron) {
+            chevron.classList.remove(
+              "fa-chevron-down"
+            );
+
+            chevron.classList.add(
+              "fa-chevron-up"
+            );
+          }
+        }
+      }
+
+      /*
+       * Centramos la card recién creada
+       * y la resaltamos temporalmente.
+       */
       setTimeout(() => {
         card.scrollIntoView({
           behavior: "smooth",
           block: "center"
         });
 
-        card.classList.add("dashboard-search-highlight");
+        card.classList.add(
+          "dashboard-search-highlight"
+        );
 
         setTimeout(() => {
-          card.classList.remove("dashboard-search-highlight");
+          card.classList.remove(
+            "dashboard-search-highlight"
+          );
+
           pendingCreatedReminderId = null;
         }, 4000);
       }, 300);
@@ -700,6 +842,10 @@ function scrollToCreatedReminderCard(reminderId) {
       return;
     }
 
+    /*
+     * Si la lista todavía se está renderizando,
+     * esperamos un momento y volvemos a buscar.
+     */
     attempts++;
 
     if (attempts < maxAttempts) {
@@ -1035,15 +1181,23 @@ async function editReminder(reminderId) {
 }
 
 async function deleteReminder(reminderId) {
+  const reminder = getReminderById(reminderId);
+
   const result = await Swal.fire({
-    title: "¿Eliminar recordatorio?",
-    text: "Esta acción no se puede deshacer.",
+    title: "¿Eliminar actividad?",
+    text:
+      "La actividad se moverá a Eliminados y podrás restaurarla mientras permanezca allí.",
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Sí, eliminar",
+    confirmButtonText: "Eliminar",
     cancelButtonText: "Cancelar",
-    confirmButtonColor: "#960018",
-    cancelButtonColor: "#6b7280"
+    buttonsStyling: false,
+    customClass: {
+      popup: "reminder-swal-popup",
+      actions: "reminder-swal-actions",
+      confirmButton: "reminder-swal-confirm",
+      cancelButton: "reminder-swal-cancel"
+    }
   });
 
   if (!result.isConfirmed) {
@@ -1051,10 +1205,13 @@ async function deleteReminder(reminderId) {
   }
 
   try {
-    const response = await fetch(`${REMINDERS_API_URL}/${reminderId}`, {
-      method: "DELETE",
-      headers: getReminderAuthHeaders()
-    });
+    const response = await fetch(
+      `${REMINDERS_API_URL}/${reminderId}`,
+      {
+        method: "DELETE",
+        headers: getReminderAuthHeaders()
+      }
+    );
 
     const data = await response.json();
 
@@ -1064,25 +1221,77 @@ async function deleteReminder(reminderId) {
     }
 
     if (!response.ok) {
-      Swal.fire({
+      await Swal.fire({
         title: "No se pudo eliminar",
-        text: data.mensaje || "No se pudo eliminar el recordatorio.",
+        text:
+          data.mensaje ||
+          "No se pudo eliminar la actividad.",
         icon: "error",
-        confirmButtonColor: "#960018"
+        confirmButtonText: "Aceptar",
+        buttonsStyling: false,
+        customClass: {
+          popup: "reminder-swal-popup",
+          actions: "reminder-swal-actions",
+          confirmButton: "reminder-swal-confirm"
+        }
       });
+
       return;
+    }
+
+    /*
+     * Una actividad eliminada ya no debe
+     * conservar una alarma pendiente en Android.
+     */
+    if (
+      typeof window.cancelDanyBotLocalNotification ===
+      "function"
+    ) {
+      await window.cancelDanyBotLocalNotification(
+        reminderId
+      );
     }
 
     await loadReminders();
 
-  } catch (error) {
-    console.error("Error al eliminar recordatorio:", error);
+    /*
+     * Confirmación breve y compacta,
+     * usando los mismos estilos de Día en Orden.
+     */
+    await Swal.fire({
+      title: "Actividad eliminada",
+      text:
+        reminder?.title
+          ? `"${reminder.title}" se movió a Eliminados.`
+          : "La actividad se movió a Eliminados.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+      buttonsStyling: false,
+      customClass: {
+        popup: "reminder-swal-popup",
+        actions: "reminder-swal-actions",
+        confirmButton: "reminder-swal-confirm"
+      }
+    });
 
-    Swal.fire({
+  } catch (error) {
+    console.error(
+      "Error al eliminar recordatorio:",
+      error
+    );
+
+    await Swal.fire({
       title: "Error",
-      text: "Ocurrió un error al eliminar el recordatorio.",
+      text:
+        "Ocurrió un error al eliminar la actividad.",
       icon: "error",
-      confirmButtonColor: "#960018"
+      confirmButtonText: "Aceptar",
+      buttonsStyling: false,
+      customClass: {
+        popup: "reminder-swal-popup",
+        actions: "reminder-swal-actions",
+        confirmButton: "reminder-swal-confirm"
+      }
     });
   }
 }
@@ -1150,15 +1359,23 @@ async function restoreReminder(reminderId) {
 }
 
 async function deleteReminderPermanently(reminderId) {
+  const reminder = getReminderById(reminderId);
+
   const result = await Swal.fire({
     title: "¿Eliminar definitivamente?",
-    text: "Esta acción borrará el recordatorio de forma permanente.",
+    text:
+      "Esta actividad se borrará de forma permanente y ya no podrá recuperarse.",
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Sí, eliminar definitivo",
+    confirmButtonText: "Eliminar",
     cancelButtonText: "Cancelar",
-    confirmButtonColor: "#960018",
-    cancelButtonColor: "#6b7280"
+    buttonsStyling: false,
+    customClass: {
+      popup: "reminder-swal-popup",
+      actions: "reminder-swal-actions",
+      confirmButton: "reminder-swal-confirm",
+      cancelButton: "reminder-swal-cancel"
+    }
   });
 
   if (!result.isConfirmed) {
@@ -1166,10 +1383,14 @@ async function deleteReminderPermanently(reminderId) {
   }
 
   try {
-    const response = await fetch(`${REMINDERS_API_URL}/${reminderId}/permanent`, {
-      method: "DELETE",
-      headers: getReminderAuthHeaders()
-    });
+    const response = await fetch(
+      `${REMINDERS_API_URL}/${reminderId}/permanent`,
+      {
+        method: "DELETE",
+        headers: getReminderAuthHeaders()
+      }
+    );
+
     const data = await response.json();
 
     if (response.status === 401) {
@@ -1178,27 +1399,202 @@ async function deleteReminderPermanently(reminderId) {
     }
 
     if (!response.ok) {
-      Swal.fire({
+      await Swal.fire({
         title: "No se pudo eliminar",
-        text: data.mensaje || "No se pudo eliminar definitivamente el recordatorio.",
+        text:
+          data.mensaje ||
+          "No se pudo eliminar definitivamente la actividad.",
         icon: "error",
-        confirmButtonColor: "#960018"
+        confirmButtonText: "Aceptar",
+        buttonsStyling: false,
+        customClass: {
+          popup: "reminder-swal-popup",
+          actions: "reminder-swal-actions",
+          confirmButton: "reminder-swal-confirm"
+        }
       });
+
       return;
+    }
+
+    /*
+     * Por seguridad, eliminamos cualquier
+     * notificación local que pudiera seguir pendiente.
+     */
+    if (
+      typeof window.cancelDanyBotLocalNotification ===
+      "function"
+    ) {
+      await window.cancelDanyBotLocalNotification(
+        reminderId
+      );
     }
 
     await loadReminders();
 
-    
+    await Swal.fire({
+      title: "Actividad eliminada",
+      text:
+        reminder?.title
+          ? `"${reminder.title}" se eliminó definitivamente.`
+          : "La actividad se eliminó definitivamente.",
+      icon: "success",
+      confirmButtonText: "Aceptar",
+      buttonsStyling: false,
+      customClass: {
+        popup: "reminder-swal-popup",
+        actions: "reminder-swal-actions",
+        confirmButton: "reminder-swal-confirm"
+      }
+    });
 
   } catch (error) {
-    console.error("Error al eliminar definitivamente:", error);
+    console.error(
+      "Error al eliminar definitivamente:",
+      error
+    );
 
-    Swal.fire({
+    await Swal.fire({
       title: "Error",
-      text: "Ocurrió un error al eliminar definitivamente el recordatorio.",
+      text:
+        "Ocurrió un error al eliminar definitivamente la actividad.",
       icon: "error",
-      confirmButtonColor: "#960018"
+      confirmButtonText: "Aceptar",
+      buttonsStyling: false,
+      customClass: {
+        popup: "reminder-swal-popup",
+        actions: "reminder-swal-actions",
+        confirmButton: "reminder-swal-confirm"
+      }
+    });
+  }
+}
+
+async function emptyReminderTrash() {
+  const trashReminders = reminders.filter(
+    (reminder) => isReminderInTrash(reminder)
+  );
+
+  if (trashReminders.length === 0) {
+    return;
+  }
+
+  const result = await Swal.fire({
+    title: "¿Vaciar eliminados?",
+    text:
+      `Se eliminarán definitivamente ${trashReminders.length} ${
+        trashReminders.length === 1
+          ? "actividad"
+          : "actividades"
+      }.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Vaciar",
+    cancelButtonText: "Cancelar",
+    buttonsStyling: false,
+    customClass: {
+      popup: "reminder-swal-popup",
+      actions: "reminder-swal-actions",
+      confirmButton: "reminder-swal-confirm",
+      cancelButton: "reminder-swal-cancel"
+    }
+  });
+
+  if (!result.isConfirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${REMINDERS_API_URL}/trash/permanent`,
+      {
+        method: "DELETE",
+        headers: getReminderAuthHeaders()
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      await handleReminderUnauthorizedSession(
+        data
+      );
+      return;
+    }
+
+    if (!response.ok) {
+      await Swal.fire({
+        title: "No se pudo vaciar",
+        text:
+          data.mensaje ||
+          "No se pudieron eliminar las actividades.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+        buttonsStyling: false,
+        customClass: {
+          popup: "reminder-swal-popup",
+          actions: "reminder-swal-actions",
+          confirmButton: "reminder-swal-confirm"
+        }
+      });
+
+      return;
+    }
+
+    /*
+     * Eliminamos también cualquier alarma local
+     * que pudiera haber quedado asociada a
+     * actividades antiguas de la papelera.
+     */
+    if (
+      typeof window.cancelDanyBotLocalNotification ===
+      "function"
+    ) {
+      for (const reminder of trashReminders) {
+        await window.cancelDanyBotLocalNotification(
+          reminder.id
+        );
+      }
+    }
+
+    currentActivitiesPage = 1;
+
+    await loadReminders();
+
+    await Swal.fire({
+      title: "Eliminados vaciados",
+      text:
+        data.eliminados === 1
+          ? "Se eliminó 1 actividad definitivamente."
+          : `Se eliminaron ${data.eliminados} actividades definitivamente.`,
+      icon: "success",
+      confirmButtonText: "Aceptar",
+      buttonsStyling: false,
+      customClass: {
+        popup: "reminder-swal-popup",
+        actions: "reminder-swal-actions",
+        confirmButton: "reminder-swal-confirm"
+      }
+    });
+
+  } catch (error) {
+    console.error(
+      "Error al vaciar eliminados:",
+      error
+    );
+
+    await Swal.fire({
+      title: "Error",
+      text:
+        "Ocurrió un error al vaciar las actividades eliminadas.",
+      icon: "error",
+      confirmButtonText: "Aceptar",
+      buttonsStyling: false,
+      customClass: {
+        popup: "reminder-swal-popup",
+        actions: "reminder-swal-actions",
+        confirmButton: "reminder-swal-confirm"
+      }
     });
   }
 }
@@ -1304,71 +1700,251 @@ async function toggleReminderStatus(reminderId) {
   await completeReminder(reminder, true);
 }
 
-async function completeReminder(reminder, showSuccessMessage = true) {
-  const isRecurring = isRecurringReminder(reminder);
+async function completeReminder(
+  reminder,
+  showSuccessMessage = true
+) {
+  const isRecurring =
+    isRecurringReminder(reminder);
 
-    const nextReminderDate = isRecurring
-    ? getNextReminderDate(reminder.reminder_date, reminder.repeat_type)
-    : getReminderDateValue(reminder.reminder_date);
+  const nextReminderDate = isRecurring
+    ? getNextReminderDate(
+        reminder.reminder_date,
+        reminder.repeat_type
+      )
+    : getReminderDateValue(
+        reminder.reminder_date
+      );
 
-    const updatedReminder = {
-      title: reminder.title,
-      original_text: reminder.original_text || reminder.title,
-      description: reminder.description || null,
-      reminder_date: nextReminderDate,
-      due_date: reminder.due_date
-        ? getReminderDateValue(reminder.due_date)
-        : nextReminderDate,
-      reminder_time: reminder.reminder_time || null,
-      category: reminder.category || "personal",
-      priority: reminder.priority || "media",
-      repeat_type: reminder.repeat_type || "una_vez",
-      status: isRecurring ? "activo" : "papelera"
-    };
+  /*
+   * Calculamos cuál habría sido la fecha límite
+   * automática de la ocurrencia actual.
+   */
+  const currentAutoDueDate =
+    getLastDayOfReminderMonth(
+      reminder.reminder_date
+    );
+
+  /*
+   * Consideramos automática la fecha límite si:
+   * - no existe una fecha límite guardada, o
+   * - coincide con el último día del mes de
+   *   la ocurrencia actual.
+   *
+   * Si el usuario eligió otra fecha manualmente,
+   * la conservamos.
+   */
+  const dueDateWasAutomatic =
+    !reminder.due_date ||
+    getReminderDateValue(
+      reminder.due_date
+    ) === currentAutoDueDate;
+
+  const updatedReminder = {
+    title: reminder.title,
+
+    original_text:
+      reminder.original_text ||
+      reminder.title,
+
+    description:
+      reminder.description || null,
+
+    reminder_date:
+      nextReminderDate,
+
+    /*
+     * Para actividades recurrentes:
+     *
+     * - Si la fecha límite era automática,
+     *   se actualiza al último día del mes
+     *   de la siguiente ocurrencia.
+     *
+     * - Si fue elegida manualmente,
+     *   se conserva.
+     *
+     * Para actividades no recurrentes,
+     * mantenemos su fecha límite actual.
+     */
+    due_date: isRecurring
+      ? (
+          dueDateWasAutomatic
+            ? getLastDayOfReminderMonth(
+                nextReminderDate
+              )
+            : getReminderDateValue(
+                reminder.due_date
+              )
+        )
+      : (
+          reminder.due_date
+            ? getReminderDateValue(
+                reminder.due_date
+              )
+            : getLastDayOfReminderMonth(
+                nextReminderDate
+              )
+        ),
+
+    reminder_time:
+      reminder.reminder_time || null,
+
+    category:
+      reminder.category || "personal",
+
+    priority:
+      reminder.priority || "media",
+
+    repeat_type:
+      reminder.repeat_type || "una_vez",
+
+    status:
+      isRecurring
+        ? "activo"
+        : "papelera"
+  };
 
   try {
-    const response = await fetch(`${REMINDERS_API_URL}/${reminder.id}`, {
-      method: "PUT",
-      headers: getReminderAuthHeaders(true),
-      body: JSON.stringify(updatedReminder)
-    });
+    const response = await fetch(
+      `${REMINDERS_API_URL}/${reminder.id}`,
+      {
+        method: "PUT",
+        headers:
+          getReminderAuthHeaders(true),
+        body:
+          JSON.stringify(updatedReminder)
+      }
+    );
 
-    const data = await response.json();
+    const data =
+      await response.json();
+
     if (response.status === 401) {
-      await handleReminderUnauthorizedSession(data);
+      await handleReminderUnauthorizedSession(
+        data
+      );
+
       return;
     }
 
     if (!response.ok) {
       Swal.fire({
         title: "No se pudo completar",
-        text: data.mensaje || "No se pudo completar el recordatorio.",
+        text:
+          data.mensaje ||
+          "No se pudo completar el recordatorio.",
         icon: "error",
         confirmButtonColor: "#960018"
       });
+
       return;
     }
 
+    /*
+     * La alarma correspondiente a la
+     * ocurrencia que acabamos de completar
+     * ya no debe permanecer pendiente.
+     */
+    if (
+      typeof window
+        .cancelDanyBotLocalNotification ===
+      "function"
+    ) {
+      await window
+        .cancelDanyBotLocalNotification(
+          reminder.id
+        );
+    }
+
+    /*
+     * Si es recurrente, programamos
+     * inmediatamente su siguiente aviso.
+     */
+    if (
+      isRecurring &&
+      updatedReminder.reminder_time &&
+      typeof window
+        .scheduleDanyBotReminderNotification ===
+        "function"
+    ) {
+      await window
+        .scheduleDanyBotReminderNotification({
+          ...updatedReminder,
+          id: reminder.id
+        });
+    }
+
+    /*
+     * Mostramos la actividad en el lugar
+     * donde quedó después de completarla.
+     */
+    if (isRecurring) {
+      currentReminderFilter = "activos";
+    } else {
+      currentReminderFilter = "papelera";
+    }
+
+    currentActivitiesPage = 1;
+
     await loadReminders();
 
+    /*
+     * Esperamos el render y llevamos
+     * al usuario directamente a la
+     * card actualizada.
+     */
+    window.setTimeout(() => {
+      scrollToCreatedReminderCard(
+        reminder.id
+      );
+    }, 250);
+
+    /*
+     * Si la función fue llamada desde
+     * la notificación, no mostramos
+     * un segundo modal.
+     */
     if (!showSuccessMessage) {
       return;
     }
 
-    
-
   } catch (error) {
-    console.error("Error al completar recordatorio:", error);
+    console.error(
+      "Error al completar recordatorio:",
+      error
+    );
 
     Swal.fire({
       title: "Error",
-      text: "Ocurrió un error al completar el recordatorio.",
+      text:
+        "Ocurrió un error al completar el recordatorio.",
       icon: "error",
       confirmButtonColor: "#960018"
     });
   }
 }
 
+function getLastDayOfReminderMonth(dateValue) {
+  if (!dateValue) {
+    return "";
+  }
+
+  const [year, month] = String(dateValue)
+    .substring(0, 10)
+    .split("-")
+    .map(Number);
+
+  if (!year || !month) {
+    return "";
+  }
+
+  const lastDay = new Date(year, month, 0);
+
+  const lastDayNumber =
+    String(lastDay.getDate()).padStart(2, "0");
+
+  return `${year}-${String(month).padStart(2, "0")}-${lastDayNumber}`;
+}
 
 
 function renderRemindersSection() {
@@ -1422,13 +1998,6 @@ function renderRemindersSection() {
               </select>
             </div>
 
-            <div class="manual-reminder-field">
-              <label for="manualReminderDueDate">Fecha límite</label>
-              <input 
-                type="date" 
-                id="manualReminderDueDate"
-              >
-            </div>
 
             <div class="manual-reminder-field">
               <label for="manualReminderCategory">Categoría</label>
@@ -1448,6 +2017,14 @@ function renderRemindersSection() {
                 type="date" 
                 id="manualReminderDate" 
                 required
+              >
+            </div>
+
+            <div class="manual-reminder-field">
+              <label for="manualReminderDueDate">Fecha límite</label>
+              <input 
+                type="date" 
+                id="manualReminderDueDate"
               >
             </div>
 
@@ -1539,11 +2116,28 @@ function renderRemindersSection() {
         <button type="button" class="reminder-filter-button" data-filter="todos">
           Todos
         </button>
-      </div>
-    </div>
+        </div>
+
+        </div>
+
+        
 
         <div id="remindersList" class="reminders-list">
           <p class="empty-reminders">Aún no tienes recordatorios registrados.</p>
+        </div>
+        <div
+          id="trashBulkActions"
+          class="trash-bulk-actions"
+          hidden
+        >
+          <button
+            type="button"
+            class="empty-trash-button"
+            onclick="emptyReminderTrash()"
+          >
+            <i class="fa-solid fa-trash-can"></i>
+            Vaciar eliminados
+          </button>
         </div>
         <div id="activitiesPagination" class="activities-pagination"></div>
       </div>
@@ -1552,6 +2146,42 @@ function renderRemindersSection() {
 
   const voiceButton = document.getElementById("voiceReminderButton");
   const manualReminderForm = document.getElementById("manualReminderForm");
+  
+  const manualReminderDate =
+  document.getElementById("manualReminderDate");
+
+  const manualReminderDueDate =
+    document.getElementById("manualReminderDueDate");
+
+  if (manualReminderDate && manualReminderDueDate) {
+    manualReminderDate.addEventListener("change", () => {
+      /*
+      * Solo recalculamos si la fecha límite está vacía
+      * o fue generada automáticamente anteriormente.
+      */
+      if (
+        !manualReminderDueDate.value ||
+        manualReminderDueDate.dataset.autoGenerated === "true"
+      ) {
+        manualReminderDueDate.value =
+          getLastDayOfReminderMonth(
+            manualReminderDate.value
+          );
+
+        manualReminderDueDate.dataset.autoGenerated =
+          "true";
+      }
+    });
+
+    manualReminderDueDate.addEventListener("change", () => {
+      /*
+      * Si el usuario selecciona manualmente una fecha,
+      * dejamos de considerarla automática.
+      */
+      manualReminderDueDate.dataset.autoGenerated =
+        "false";
+    });
+  }
 
   if (voiceButton) {
     voiceButton.addEventListener("click", startVoiceReminder);
@@ -1629,7 +2259,7 @@ async function handleManualReminderSubmit(event) {
     description: description || null,
     category,
     priority,
-    due_date: dueDate || reminderDate,
+    due_date: dueDate || getLastDayOfReminderMonth(reminderDate),
     reminder_date: reminderDate,
     reminder_time: reminderTime ? `${reminderTime}:00` : null,
     repeat_type: repeatType
@@ -1675,7 +2305,64 @@ async function handleManualReminderSubmit(event) {
 
     const createdReminderId = data.reminder_id;
 
-    pendingCreatedReminderId = createdReminderId;
+    /*
+    * En Android programamos también la notificación nativa.
+    * La base de datos sigue siendo la fuente principal del recordatorio.
+    */
+    if (
+      reminderData.reminder_time &&
+      typeof window.scheduleDanyBotReminderNotification === "function"
+    ) {
+      const notificationResult =
+        await window.scheduleDanyBotReminderNotification({
+          ...reminderData,
+          id: createdReminderId
+        });
+
+      /*
+      * En Android moderno puede ser necesario habilitar
+      * manualmente "Alarmas y recordatorios".
+      */
+      if (
+        !notificationResult.scheduled &&
+        notificationResult.exactAlarmRequired
+      ) {
+        const exactAlarmResult = await Swal.fire({
+          title: "Permitir avisos exactos",
+          text:
+            "Para avisarte exactamente a la hora programada, Día en Orden necesita permiso para usar alarmas y recordatorios.",
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonText: "Ir a configuración",
+          cancelButtonText: "Ahora no",
+          confirmButtonColor: "#960018",
+          cancelButtonColor: "#6b7280"
+        });
+
+        if (
+          exactAlarmResult.isConfirmed &&
+          typeof window.openDanyBotExactAlarmSettings === "function"
+        ) {
+          await window.openDanyBotExactAlarmSettings();
+
+          /*
+          * Cuando el usuario regresa desde Configuración,
+          * comprobamos otra vez y reintentamos programar.
+          */
+          const exactPermission =
+            await window.checkDanyBotExactAlarmPermission();
+
+          if (exactPermission.granted) {
+            await window.scheduleDanyBotReminderNotification({
+              ...reminderData,
+              id: createdReminderId
+            });
+          }
+        }
+      }
+    }
+
+pendingCreatedReminderId = createdReminderId;
 
     event.target.reset();
     document.getElementById("manualReminderTime").value = "07:00";
