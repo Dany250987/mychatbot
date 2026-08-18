@@ -68,94 +68,221 @@ function getDateForTimeOnly(reminderTime) {
 }
 
 function detectReminderTitle(text) {
-  let title = text.toLowerCase().trim();
-
-  title = title
-    .replace(/\b(crea|crear|agrega|agregar|anota|anotar|programa|programar)\b/g, "")
-    .replace(/\b(recuerdame|recordarme|recordame|acuerdame|dejame|recordatorio|agenda)\b/g, "")
-    .replace(/\b(quiero que me recuerdes|necesito que me recuerdes|me recuerdas|me recuerde)\b/g, "")
-    .replace(/\b(que debo|debo|tengo que|necesito que|quiero que|quiero|para que|que)\b/g, "")
+  let title = String(text || "")
+    .toLowerCase()
     .trim();
 
-  title = extractTitleAfterDate(title);
-
-  title = title
-    .replace(/\ba las\s+\d{1,2}(?:(?::|\s+y\s+|\s+con\s+)\d{1,2})?\s*(de la manana|por la manana|de la tarde|de la noche|am|pm|a m|p m)?/g, "")
-    .replace(/\b\d{1,2}(?:(?::|\s+y\s+|\s+con\s+)\d{1,2})\s*(am|pm|a m|p m)?\b/g, "")
-    .replace(/\b\d{1,2}\s*(am|pm|a m|p m)\b/g, "")
-    .replace(/\bhoy\b/g, "")
-    .replace(/\bpasado manana\b/g, "")
-    .replace(/\bmanana\b/g, "")
-    .replace(/\b(el|los|las)?\s*(lunes|martes|miercoles|jueves|viernes|sabado|domingo)\b/g, "")
-    .replace(/\bpara el dia\s+\d{1,2}\s*(de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/g, "")
-    .replace(/\bpara el\s+\d{1,2}\s*(de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/g, "")
-    .replace(/\bel dia\s+\d{1,2}\s*(de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/g, "")
-    .replace(/\bel\s+\d{1,2}\s*(de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/g, "")
-    .replace(/\b\d{1,2}\s*(de\s+)?(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/g, "")
-    .replace(/\bpara el dia\s+\d{1,2}\b/g, "")
-    .replace(/\bpara el\s+\d{1,2}\b/g, "")
-    .replace(/\bel dia\s+\d{1,2}\b/g, "")
-    .replace(/\bel\s+\d{1,2}\b/g, "")
-    .replace(/\btodos los dias\b/g, "")
-    .replace(/\bcada dia\b/g, "")
-    .replace(/\bdiariamente\b/g, "")
-    .replace(/\ba diario\b/g, "")
-    .replace(/\bcada semana\b/g, "")
-    .replace(/\bsemanalmente\b/g, "")
-    .replace(/\bsemanal\b/g, "")
-    .replace(/\btodos los meses\b/g, "")
-    .replace(/\bcada mes\b/g, "")
-    .replace(/\bmensualmente\b/g, "")
-    .replace(/\bmensual\b/g, "")
-    .replace(/\bcada 1 mes\b/g, "")
-    .replace(/\bcada un mes\b/g, "")
-    .replace(/\buna vez al mes\b/g, "")
-    .replace(/\buna vez por mes\b/g, "")
-    .replace(/\btodos los anos\b/g, "")
-    .replace(/\btodas los anos\b/g, "")
-    .replace(/\bcada ano\b/g, "")
-    .replace(/\banualmente\b/g, "")
-    .replace(/\banual\b/g, "")
-    .replace(/\bcada 1 ano\b/g, "")
-    .replace(/\bcada un ano\b/g, "")
-    .replace(/\buna vez al ano\b/g, "")
-    .replace(/\buna vez por ano\b/g, "")
-    .replace(/\bcada aniversario\b/g, "")
-    .replace(/\bpara\s*$/g, "")
-    .replace(/^para\s+/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  const fillerWords = [
-    "por favor",
-    "porfa",
-    "favor",
-    "me",
-    "mi",
-    "mis",
-    "el",
-    "la",
-    "los",
-    "las",
-    "un",
-    "una"
-  ];
-
-  fillerWords.forEach((word) => {
-    title = title.replace(new RegExp(`^${word}\\s+`, "g"), "").trim();
-  });
-
-  if (!title || title.length <= 2) {
+  if (!title) {
     return "Recordatorio";
   }
 
-  const words = title.split(" ").filter(Boolean);
+  title = title
+    .replace(/[¿?¡!.,;]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  if (words.length > 6) {
-    title = words.slice(0, 6).join(" ");
+
+  /*
+   * Quitar expresiones usadas para iniciar
+   * una orden por voz.
+   *
+   * No eliminamos verbos importantes como:
+   * pagar, llamar, enviar, comprar, llevar,
+   * ir, revisar, entregar, etc.
+   */
+  title = title
+    .replace(
+      /^(?:por favor\s+)?(?:quiero que me recuerdes|necesito que me recuerdes|me recuerdas|me recuerde|recu[eé]rdame|recordame|recordarme|acu[eé]rdame|dejame|déjame)\s+(?:que\s+)?/i,
+      ""
+    )
+    .replace(
+      /^(?:crea|crear|agrega|agregar|anota|anotar|programa|programar|agenda|agendar)\s+(?:un\s+)?(?:recordatorio\s+)?(?:para\s+)?/i,
+      ""
+    )
+    .replace(
+      /^(?:recordatorio\s+)(?:para\s+)?/i,
+      ""
+    )
+    .replace(
+      /^(?:que\s+)?(?:debo|tengo que|tengo|hay que|necesito que|necesito|quiero que|quiero|me falta|tengo pendiente|tenemos pendiente|queda pendiente)\s+/i,
+      ""
+    )
+    .trim();
+
+
+  /*
+   * Quitar horas completas.
+   *
+   * Se hace antes de quitar "mañana"
+   * para no dejar residuos como
+   * "de la mañana".
+   */
+  title = title
+    .replace(
+      /\ba las\s+\d{1,2}(?:(?::|\s+y\s+|\s+con\s+)\d{1,2})?\s*(?:de la ma[nñ]ana|por la ma[nñ]ana|de la tarde|de la noche|a\.?\s*m\.?|p\.?\s*m\.?)?/gi,
+      " "
+    )
+    .replace(
+      /\ba las\s+(?:una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce)\s*(?:de la ma[nñ]ana|por la ma[nñ]ana|de la tarde|de la noche)?/gi,
+      " "
+    )
+    .replace(
+      /\b\d{1,2}(?:(?::|\s+y\s+|\s+con\s+)\d{1,2})\s*(?:a\.?\s*m\.?|p\.?\s*m\.?)?\b/gi,
+      " "
+    )
+    .replace(
+      /\b\d{1,2}\s*(?:a\.?\s*m\.?|p\.?\s*m\.?|de la ma[nñ]ana|por la ma[nñ]ana|de la tarde|de la noche)\b/gi,
+      " "
+    );
+
+
+  /*
+   * Quitar fechas explícitas.
+   */
+  title = title
+    .replace(
+      /\b(?:para\s+)?(?:el\s+)?(?:d[ií]a\s+)?\d{1,2}\s*(?:de\s+)?(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/gi,
+      " "
+    )
+    .replace(
+      /\b(?:el\s+)?\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?\b/gi,
+      " "
+    )
+    .replace(
+      /\b(?:para\s+)?(?:el\s+)?d[ií]a\s+\d{1,2}\b/gi,
+      " "
+    );
+
+
+  /*
+   * Quitar recurrencias.
+   *
+   * La recurrencia ya se almacena
+   * separadamente en repeat_type.
+   */
+  title = title
+    .replace(
+      /\b(?:todos los d[ií]as|cada d[ií]a|diariamente|a diario|cada semana|semanalmente|semanal|todas las semanas|todos los meses|cada mes|mensualmente|mensual|cada 1 mes|cada un mes|una vez al mes|una vez por mes|todos los a[nñ]os|cada a[nñ]o|anualmente|anual|cada 1 a[nñ]o|cada un a[nñ]o|una vez al a[nñ]o|una vez por a[nñ]o|cada aniversario)\b/gi,
+      " "
+    )
+    .replace(
+      /\b(?:todos los|cada)\s+(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\b/gi,
+      " "
+    );
+
+
+  /*
+   * Quitar fechas relativas y días
+   * de la semana.
+   */
+  title = title
+    .replace(
+      /\b(?:pasado\s+ma[nñ]ana|ma[nñ]ana|hoy)\b/gi,
+      " "
+    )
+    .replace(
+      /\b(?:para\s+)?(?:el\s+|los\s+|las\s+)?(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\b/gi,
+      " "
+    );
+
+
+  /*
+   * Limpieza final.
+   */
+  title = title
+    .replace(
+      /\b(?:por favor|porfa)\b/gi,
+      " "
+    )
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(
+      /^(?:que|para|el|la|los|las|un|una)\s+/i,
+      ""
+    )
+    .replace(
+      /\s+(?:para|a|el|la|los|las|de|del)\s*$/i,
+      ""
+    )
+    .trim();
+
+
+  if (
+    !title ||
+    title.length <= 2
+  ) {
+    return "Recordatorio";
   }
 
-  return title.charAt(0).toUpperCase() + title.slice(1);
+
+  /*
+   * Permitimos hasta 8 palabras.
+   *
+   * Es suficiente para que sea descriptivo
+   * sin convertir toda la descripción
+   * en título.
+   */
+  const words = title
+    .split(" ")
+    .filter(Boolean);
+
+  const maxWords = 8;
+
+  let titleWords =
+    words.slice(
+      0,
+      maxWords
+    );
+
+
+  /*
+   * Evitar terminar títulos truncados
+   * con conectores:
+   *
+   * "Ir al Fondo Nacional para"
+   * "Enviar informe al"
+   */
+  const danglingWords =
+    new Set([
+      "a",
+      "al",
+      "de",
+      "del",
+      "en",
+      "para",
+      "por",
+      "con",
+      "y"
+    ]);
+
+
+  while (
+    titleWords.length > 1 &&
+    danglingWords.has(
+      titleWords[
+        titleWords.length - 1
+      ]
+    )
+  ) {
+    titleWords.pop();
+  }
+
+
+  title =
+    titleWords
+      .join(" ")
+      .trim();
+
+
+  if (!title) {
+    return "Recordatorio";
+  }
+
+
+  return (
+    title.charAt(0).toUpperCase() +
+    title.slice(1)
+  );
 }
 
 function extractTitleAfterDate(text) {
@@ -1145,29 +1272,90 @@ function getVoiceReminderLastDayOfMonth(dateValue) {
 
 function parseReminderFromVoice(text) {
   const originalText = text;
-  const normalizedText = normalizeText(text);
 
-  let reminderDate = detectReminderDate(normalizedText);
-  let reminderTime = detectReminderTime(normalizedText, reminderDate || getTodayDate());
+  const normalizedText =
+    normalizeText(text);
 
-  if (!reminderDate && reminderTime) {
-    reminderDate = getDateForTimeOnly(reminderTime);
-    reminderTime = detectReminderTime(normalizedText, reminderDate);
+
+  let reminderDate =
+    detectReminderDate(
+      normalizedText
+    );
+
+
+  let reminderTime =
+    detectReminderTime(
+      normalizedText,
+      reminderDate ||
+        getTodayDate()
+    );
+
+
+  if (
+    !reminderDate &&
+    reminderTime
+  ) {
+    reminderDate =
+      getDateForTimeOnly(
+        reminderTime
+      );
+
+    reminderTime =
+      detectReminderTime(
+        normalizedText,
+        reminderDate
+      );
   }
 
-  const category = detectReminderCategory(normalizedText);
-  const repeatType = detectRepeatType(normalizedText);
-  const title = detectReminderTitle(normalizedText);
+
+  const category =
+    detectReminderCategory(
+      normalizedText
+    );
+
+
+  const repeatType =
+    detectRepeatType(
+      normalizedText
+    );
+
+
+  /*
+   * El título se genera desde
+   * la frase pronunciada.
+   *
+   * La descripción conserva
+   * exactamente el texto original.
+   */
+  const title =
+    detectReminderTitle(
+      originalText
+    );
+
 
   return {
     title,
-    original_text: originalText,
-    reminder_date: reminderDate,
+
+    original_text:
+      originalText,
+
+    reminder_date:
+      reminderDate,
+
     due_date:
-      getVoiceReminderLastDayOfMonth(reminderDate),
-    reminder_time: reminderTime,
+      getVoiceReminderLastDayOfMonth(
+        reminderDate
+      ),
+
+    reminder_time:
+      reminderTime,
+
     category,
-    repeat_type: repeatType,
-    status: "activo"
+
+    repeat_type:
+      repeatType,
+
+    status:
+      "activo"
   };
 }
