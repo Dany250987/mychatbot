@@ -2,14 +2,42 @@ apply plugin: 'com.android.application'
 
 // ======================================================
 // FIRMA RELEASE DANYBOT
-// Las credenciales se leen desde variables de entorno.
+// Prioridad:
+// 1. Variables de entorno DANYBOT_*
+// 2. Archivo privado fuera del proyecto:
+//    %USERPROFILE%\DANYBOT-keys\danybot-signing.properties
+//
 // No se guardan contraseñas ni rutas privadas en Git.
 // ======================================================
 
-def danybotStoreFile = System.getenv("DANYBOT_STORE_FILE")
-def danybotStorePassword = System.getenv("DANYBOT_STORE_PASSWORD")
-def danybotKeyAlias = System.getenv("DANYBOT_KEY_ALIAS")
-def danybotKeyPassword = System.getenv("DANYBOT_KEY_PASSWORD")
+def danybotSigningProperties = new Properties()
+
+def danybotSigningFile = new File(
+        System.getProperty("user.home"),
+        "DANYBOT-keys/danybot-signing.properties"
+)
+
+if (danybotSigningFile.exists()) {
+    danybotSigningFile.withInputStream { stream ->
+        danybotSigningProperties.load(stream)
+    }
+}
+
+def danybotStoreFile =
+        System.getenv("DANYBOT_STORE_FILE")
+        ?: danybotSigningProperties.getProperty("storeFile")
+
+def danybotStorePassword =
+        System.getenv("DANYBOT_STORE_PASSWORD")
+        ?: danybotSigningProperties.getProperty("storePassword")
+
+def danybotKeyAlias =
+        System.getenv("DANYBOT_KEY_ALIAS")
+        ?: danybotSigningProperties.getProperty("keyAlias")
+
+def danybotKeyPassword =
+        System.getenv("DANYBOT_KEY_PASSWORD")
+        ?: danybotSigningProperties.getProperty("keyPassword")
 
 def hasDanybotReleaseSigning =
         danybotStoreFile &&
@@ -19,16 +47,16 @@ def hasDanybotReleaseSigning =
 
 
 android {
-    namespace "com.danybot.agenda"
-    compileSdk rootProject.ext.compileSdkVersion
+    namespace = "com.danybot.agenda"
+    compileSdk = rootProject.ext.compileSdkVersion
 
     defaultConfig {
         applicationId "com.danybot.agenda"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        versionCode 1
-        versionName "1.0"
+        versionCode 5
+        versionName "1.2.2-internal"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -38,15 +66,14 @@ android {
             // Default:
             // https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
 
-            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
 
-
     // ==================================================
     // CONFIGURACIÓN DE FIRMA RELEASE
-    // Solo se activa cuando existen las 4 variables.
-    // Así no afecta compilaciones debug normales.
+    // Solo se activa si están disponibles las 4
+    // propiedades requeridas.
     // ==================================================
 
     signingConfigs {
@@ -59,7 +86,6 @@ android {
             }
         }
     }
-
 
     buildTypes {
         release {
@@ -76,8 +102,6 @@ android {
         }
     }
 }
-
-
 repositories {
     flatDir {
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
