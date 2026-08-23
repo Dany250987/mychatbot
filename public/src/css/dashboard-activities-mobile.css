@@ -642,7 +642,7 @@ html.danybot-mobile-app.danybot-activities-view
   position: fixed !important;
   z-index: 900 !important;
   right: 18px !important;
-  bottom: 84px !important;
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
   width: 48px !important;
   height: 48px !important;
   display: grid !important;
