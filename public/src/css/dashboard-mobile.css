@@ -2645,7 +2645,7 @@ body {
     width: 100%;
     max-width: none;
     min-height: 100vh;
-    padding-top: 0;
+    padding-top: env(safe-area-inset-top);
   }
 
   /* Cabecera principal de Movimientos */

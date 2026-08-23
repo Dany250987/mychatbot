@@ -1816,7 +1816,7 @@ html.danybot-mobile-app
   position: fixed !important;
   z-index: 900 !important;
   right: 18px !important;
-  bottom: 84px !important;
+  bottom: calc(84px + env(safe-area-inset-bottom)) !important;
 
   width: 48px !important;
   height: 48px !important;
