@@ -4,4 +4,5 @@
     <string name="title_activity_main">Día en Orden</string>
     <string name="package_name">com.danybot.agenda</string>
     <string name="custom_url_scheme">com.danybot.agenda</string>
+    <string name="admob_app_id">ca-app-pub-8021034465222600~4401929337</string>
 </resources>
