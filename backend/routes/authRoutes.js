@@ -44,7 +44,7 @@ function buildUserResponse(user, fallbackPicture = null) {
     id: user.id,
     name: user.name,
     email: user.email,
-    picture: user.picture || fallbackPicture || null
+    picture: fallbackPicture || user.picture || null
   };
 }
 
