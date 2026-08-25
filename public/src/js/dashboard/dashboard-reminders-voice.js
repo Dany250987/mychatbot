@@ -738,6 +738,13 @@ async function saveVoiceReminder(reminderData) {
       return;
     }
 
+  if (
+    window.DANYBOT_ADS &&
+    typeof window.DANYBOT_ADS.registerCreation === "function"
+  ) {
+    window.DANYBOT_ADS.registerCreation();
+  }
+
   const createdReminderId = data.reminder_id;
 
   /*

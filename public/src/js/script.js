@@ -5,11 +5,36 @@
 
 function showAuthMessage({ title, text, icon }) {
   if (typeof Swal !== "undefined") {
+    const isWelcomeMessage =
+      title === "Bienvenida";
+
     return Swal.fire({
       title,
       text,
       icon,
-      confirmButtonColor: "#3c0000"
+      confirmButtonColor: "#3c0000",
+
+      customClass: isWelcomeMessage
+        ? {
+            popup:
+              "danybot-biometric-popup",
+
+            icon:
+              "danybot-auth-welcome-icon",
+
+            title:
+              "danybot-biometric-title",
+
+            htmlContainer:
+              "danybot-biometric-text",
+
+            actions:
+              "danybot-biometric-actions",
+
+            confirmButton:
+              "danybot-biometric-confirm"
+          }
+        : {}
     });
   }
 

@@ -1049,6 +1049,14 @@ async function saveDocument(event) {
       );
     }
 
+    if (
+      !editingDocumentId &&
+      window.DANYBOT_ADS &&
+      typeof window.DANYBOT_ADS.registerCreation === "function"
+    ) {
+      window.DANYBOT_ADS.registerCreation();
+    }
+
     closeDocumentModal();
 
     await loadDocuments();

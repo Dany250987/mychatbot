@@ -1042,3 +1042,14 @@ html.danybot-mobile-app
     padding-right: 5px !important;
   }
 }
+
+/* Icono de éxito compacto para modal Bienvenida */
+html.danybot-mobile-app
+.swal2-icon.danybot-auth-welcome-icon.swal2-success {
+  width: 50px !important;
+  height: 50px !important;
+
+  font-size: 10px !important;
+
+  margin: 2px auto 8px !important;
+}

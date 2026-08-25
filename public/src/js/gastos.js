@@ -214,6 +214,14 @@ async function saveExpense(event) {
       return;
     }
 
+    if (
+      !editingId &&
+      window.DANYBOT_ADS &&
+      typeof window.DANYBOT_ADS.registerCreation === "function"
+    ) {
+      window.DANYBOT_ADS.registerCreation();
+    }
+
     const editedExpenseId = editingId;
 
     const isMobileApp =
@@ -1527,6 +1535,14 @@ async function saveVoiceExpenseAuto(expenseData) {
       });
 
       return;
+    }
+
+    if (
+      window.DANYBOT_ADS &&
+      typeof window.DANYBOT_ADS.registerCreation === 'function'
+    ) {
+      window.DANYBOT_ADS.registerCreation();
+      console.log('AdMob: gasto por voz registrado');
     }
 
     const expenseMonth = expenseData.expense_date.slice(0, 7);
@@ -2853,6 +2869,10 @@ async function saveMonthlyIncome() {
   const selectedMonth = monthFilter.value || getLocalMonth();
   const amountValue = Number(incomeAmount.value);
 
+  const isNewMonthlyIncome =
+    !currentIncomeAmount ||
+    Number(currentIncomeAmount) <= 0;
+
   if (!amountValue || amountValue < 0) {
     Swal.fire({
       title: 'Ingreso inválido',
@@ -2889,6 +2909,15 @@ async function saveMonthlyIncome() {
         confirmButtonColor: '#3c0000'
       });
       return;
+    }
+
+    if (
+      isNewMonthlyIncome &&
+      window.DANYBOT_ADS &&
+      typeof window.DANYBOT_ADS.registerCreation === 'function'
+    ) {
+      window.DANYBOT_ADS.registerCreation();
+      console.log('AdMob: ingreso mensual registrado');
     }
 
     currentIncomeAmount = amountValue;
@@ -3210,6 +3239,15 @@ async function saveAdditionalIncome(incomeSource = 'manual') {
         confirmButtonColor: '#3c0000'
       });
       return;
+    }
+
+    if (
+      !isEditing &&
+      window.DANYBOT_ADS &&
+      typeof window.DANYBOT_ADS.registerCreation === 'function'
+    ) {
+      window.DANYBOT_ADS.registerCreation();
+      console.log('AdMob: ingreso adicional registrado');
     }
 
     additionalIncomeDescription.value = '';
@@ -4433,7 +4471,26 @@ document.addEventListener('DOMContentLoaded', () => {
     startVoiceIncome
   );
 
-  downloadExcelButton.addEventListener('click', downloadExpensesExcel);
+  downloadExcelButton.addEventListener(
+    'click',
+    async () => {
+      try {
+        if (
+          window.DANYBOT_ADS &&
+          typeof window.DANYBOT_ADS.showReportInterstitial === 'function'
+        ) {
+          await window.DANYBOT_ADS.showReportInterstitial();
+        }
+      } catch (error) {
+        console.warn(
+          'AdMob: anuncio de reporte no disponible:',
+          error
+        );
+      }
+
+      await downloadExpensesExcel();
+    }
+  );
   saveIncomeButton.addEventListener(
     'click',
     saveMonthlyIncome

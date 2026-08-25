@@ -834,6 +834,14 @@ async function saveTask() {
       return;
     }
 
+    if (
+      !isEditing &&
+      window.DANYBOT_ADS &&
+      typeof window.DANYBOT_ADS.registerCreation === "function"
+    ) {
+      window.DANYBOT_ADS.registerCreation();
+    }
+
     resetTaskForm();
 
     await loadTasks();
