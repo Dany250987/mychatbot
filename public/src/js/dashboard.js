@@ -70,10 +70,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (avatar) {
     const userName = user.name || user.email || "Usuario";
 
-    if (user.picture) {
-      avatar.src = user.picture;
-      avatar.alt = userName;
-    } else {
+    const showAvatarPlaceholder = () => {
       const nameParts = userName
         .trim()
         .split(/\s+/)
@@ -102,10 +99,18 @@ window.addEventListener("DOMContentLoaded", async () => {
         </svg>
       `;
 
+      avatar.onerror = null;
       avatar.src =
         `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(initialsSvg)}`;
-
       avatar.alt = `Iniciales de ${userName}`;
+    };
+
+    if (user.picture) {
+      avatar.onerror = showAvatarPlaceholder;
+      avatar.src = user.picture;
+      avatar.alt = userName;
+    } else {
+      showAvatarPlaceholder();
     }
 
     avatar.style.display = "block";
