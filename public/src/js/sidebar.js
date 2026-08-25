@@ -88,6 +88,27 @@ const calendarMenuItem = isMobileApp
       <span>Cerrar sesión</span>
     </button>
   `;
+
+  const sidebarAvatarImage =
+    sidebar.querySelector(".sidebar-user-avatar img");
+
+  if (sidebarAvatarImage) {
+    sidebarAvatarImage.addEventListener(
+      "error",
+      () => {
+        const placeholder = document.createElement("span");
+        placeholder.className = "sidebar-user-initial";
+        placeholder.textContent = userInitial;
+
+        const avatarContainer = sidebarAvatarImage.parentElement;
+
+        if (avatarContainer) {
+          avatarContainer.replaceWith(placeholder);
+        }
+      },
+      { once: true }
+    );
+  }
 }
 
 function getUserInitials(name) {

@@ -603,6 +603,22 @@ function renderAccountSection() {
       </div>
     </div>
   `;
+
+  const accountAvatar = contentEl.querySelector(".account-avatar");
+
+  if (accountAvatar) {
+    accountAvatar.addEventListener(
+      "error",
+      () => {
+        const placeholder = document.createElement("div");
+        placeholder.className = "account-avatar-placeholder";
+        placeholder.innerHTML = '<i class="fa-solid fa-user"></i>';
+
+        accountAvatar.replaceWith(placeholder);
+      },
+      { once: true }
+    );
+  }
 }
 
 async function confirmDeleteAccount() {
