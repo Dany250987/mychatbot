@@ -1,4 +1,4 @@
-﻿/* ==================================================
+/* ==================================================
    PASO 1 - ESTRUCTURA MÃ“VIL
    ================================================== */
 
@@ -2002,4 +2002,308 @@ html.danybot-mobile-app
   .danybot-movements-loader-dots span {
     animation: none !important;
   }
+}
+
+/* =====================================================
+   DANYBOT MOVEMENT MODAL SIZE STANDARD
+   Gastos e ingresos usan tamaño de Actividades
+===================================================== */
+
+html.danybot-mobile-app
+.movement-options-content {
+  width: 100% !important;
+  max-width: none !important;
+
+  max-height: calc(100dvh - 120px) !important;
+
+  margin: 0 !important;
+
+  padding:
+    12px
+    16px
+    calc(18px + env(safe-area-inset-bottom, 0px))
+    !important;
+
+  overflow-y: auto !important;
+
+  border-radius: 22px 22px 0 0 !important;
+}
+
+html.danybot-mobile-app
+.movement-options-header {
+  gap: 10px !important;
+
+  margin-bottom: 9px !important;
+}
+
+html.danybot-mobile-app
+.movement-options-header span {
+  margin-bottom: 2px !important;
+
+  font-size: 9px !important;
+}
+
+html.danybot-mobile-app
+.movement-options-header h2 {
+  font-size: 16px !important;
+  line-height: 1.15 !important;
+}
+
+html.danybot-mobile-app
+.movement-options-close {
+  width: 34px !important;
+  height: 34px !important;
+
+  border-radius: 11px !important;
+
+  font-size: 14px !important;
+}
+
+
+/* Evita que el formulario de ingresos
+   vuelva a hacerse más pequeño por padding doble */
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box {
+  gap: 11px !important;
+
+  padding: 12px !important;
+
+  border-radius: 16px !important;
+}
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box h3 {
+  margin: 0 0 2px !important;
+
+  font-size: 16px !important;
+}
+
+
+/* =====================================================
+   DANYBOT MOVEMENT SWEETALERT STANDARD
+   Avisos compactos igual al modal de huella
+===================================================== */
+
+html.danybot-mobile-app
+.swal2-popup {
+  width: min(82vw, 300px) !important;
+
+  padding: 14px !important;
+
+  border-radius: 18px !important;
+}
+
+
+/* Icono */
+
+html.danybot-mobile-app
+.swal2-popup
+.swal2-icon {
+  width: 50px !important;
+  height: 50px !important;
+
+  margin: 2px auto 8px !important;
+
+  font-size: 10px !important;
+}
+
+html.danybot-mobile-app
+.swal2-popup
+.swal2-icon-content {
+  font-size: 26px !important;
+}
+
+
+/* Titulo */
+
+html.danybot-mobile-app
+.swal2-popup
+.swal2-title {
+  margin: 0 !important;
+
+  padding: 0 5px !important;
+
+  font-size: 15px !important;
+  line-height: 1.22 !important;
+}
+
+
+/* Texto */
+
+html.danybot-mobile-app
+.swal2-popup
+.swal2-html-container {
+  margin: 7px 0 0 !important;
+
+  padding: 0 4px !important;
+
+  font-size: 11.5px !important;
+  line-height: 1.35 !important;
+}
+
+
+/* Botones */
+
+html.danybot-mobile-app
+.swal2-popup
+.swal2-actions {
+  width: 100% !important;
+
+  margin: 12px 0 0 !important;
+
+  gap: 7px !important;
+}
+
+html.danybot-mobile-app
+.swal2-popup
+.swal2-confirm,
+
+html.danybot-mobile-app
+.swal2-popup
+.swal2-cancel {
+  min-height: 36px !important;
+
+  margin: 0 !important;
+
+  padding: 8px 11px !important;
+
+  border-radius: 10px !important;
+
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+}
+
+html.danybot-mobile-app
+.swal2-popup
+.swal2-confirm {
+  background: #960018 !important;
+}
+
+html.danybot-mobile-app
+.swal2-popup
+.swal2-cancel {
+  background: #fff1ef !important;
+
+  color: #670010 !important;
+}
+
+
+/* =====================================================
+   DANYBOT INCOME TYPOGRAPHY STANDARD
+   Misma escala visual del formulario de Actividades
+===================================================== */
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box {
+  gap: 8px !important;
+}
+
+
+/* Titulo */
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box h3 {
+  margin: 0 0 2px !important;
+
+  font-size: 16px !important;
+  line-height: 1.15 !important;
+  font-weight: 900 !important;
+}
+
+
+/* Campos */
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box
+.form-field {
+  gap: 4px !important;
+}
+
+
+/* Etiquetas */
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box label,
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box
+.form-field label {
+  margin: 0 !important;
+
+  font-size: 9.5px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+}
+
+
+/* Inputs y selects */
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box input,
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box select,
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box
+.input-shell input,
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box
+.input-shell select {
+  width: 100% !important;
+
+  min-height: 39px !important;
+  height: 39px !important;
+
+  margin: 0 !important;
+
+  padding: 8px 10px !important;
+
+  border-radius: 11px !important;
+
+  font-family: inherit !important;
+  font-size: 10.5px !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+}
+
+
+/* Botones guardar */
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box
+#saveIncomeButton,
+
+html.danybot-mobile-app
+.movement-form-host
+.income-form-box
+#saveAdditionalIncomeButton {
+  width: 100% !important;
+
+  min-height: 40px !important;
+
+  margin-top: 11px !important;
+
+  padding: 8px 12px !important;
+
+  border-radius: 12px !important;
+
+  font-family: inherit !important;
+  font-size: 10.5px !important;
+  line-height: 1.2 !important;
+  font-weight: 900 !important;
 }
