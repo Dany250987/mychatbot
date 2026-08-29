@@ -1846,42 +1846,14 @@ async function completeReminder(
   reminder,
   showSuccessMessage = true
 ) {
-  const isRecurring =
-    isRecurringReminder(reminder);
-
-  const nextReminderDate = isRecurring
-    ? getNextReminderDate(
-        reminder.reminder_date,
-        reminder.repeat_type
-      )
-    : getReminderDateValue(
-        reminder.reminder_date
-      );
-
   /*
-   * Calculamos cuál habría sido la fecha límite
-   * automática de la ocurrencia actual.
-   */
-  const currentAutoDueDate =
-    getLastDayOfReminderMonth(
-      reminder.reminder_date
-    );
-
-  /*
-   * Consideramos automática la fecha límite si:
-   * - no existe una fecha límite guardada, o
-   * - coincide con el último día del mes de
-   *   la ocurrencia actual.
+   * Completar siempre envia la actividad
+   * a la papelera.
    *
-   * Si el usuario eligió otra fecha manualmente,
-   * la conservamos.
+   * Conservamos fecha y recurrencia para
+   * que pueda restaurarse durante los
+   * siguientes 30 dias.
    */
-  const dueDateWasAutomatic =
-    !reminder.due_date ||
-    getReminderDateValue(
-      reminder.due_date
-    ) === currentAutoDueDate;
-
   const updatedReminder = {
     title: reminder.title,
 
@@ -1893,40 +1865,18 @@ async function completeReminder(
       reminder.description || null,
 
     reminder_date:
-      nextReminderDate,
+      getReminderDateValue(
+        reminder.reminder_date
+      ),
 
-    /*
-     * Para actividades recurrentes:
-     *
-     * - Si la fecha límite era automática,
-     *   se actualiza al último día del mes
-     *   de la siguiente ocurrencia.
-     *
-     * - Si fue elegida manualmente,
-     *   se conserva.
-     *
-     * Para actividades no recurrentes,
-     * mantenemos su fecha límite actual.
-     */
-    due_date: isRecurring
-      ? (
-          dueDateWasAutomatic
-            ? getLastDayOfReminderMonth(
-                nextReminderDate
-              )
-            : getReminderDateValue(
-                reminder.due_date
-              )
-        )
-      : (
-          reminder.due_date
-            ? getReminderDateValue(
-                reminder.due_date
-              )
-            : getLastDayOfReminderMonth(
-                nextReminderDate
-              )
-        ),
+    due_date:
+      reminder.due_date
+        ? getReminderDateValue(
+            reminder.due_date
+          )
+        : getLastDayOfReminderMonth(
+            reminder.reminder_date
+          ),
 
     reminder_time:
       reminder.reminder_time || null,
@@ -1940,10 +1890,7 @@ async function completeReminder(
     repeat_type:
       reminder.repeat_type || "una_vez",
 
-    status:
-      isRecurring
-        ? "activo"
-        : "papelera"
+    status: "papelera"
   };
 
   try {
@@ -1971,9 +1918,16 @@ async function completeReminder(
 
     if (!response.ok) {
       Swal.fire({
-        title: activityT("activities.completeFailedTitle", "No se pudo completar"),
+        title: activityT(
+          "activities.completeFailedTitle",
+          "No se pudo completar"
+        ),
         text:
-          getActivityResponseText(data, "activities.completeFailedText", "No se pudo completar la actividad."),
+          getActivityResponseText(
+            data,
+            "activities.completeFailedText",
+            "No se pudo completar la actividad."
+          ),
         icon: "error",
         confirmButtonColor: "#960018"
       });
@@ -1982,9 +1936,8 @@ async function completeReminder(
     }
 
     /*
-     * La alarma correspondiente a la
-     * ocurrencia que acabamos de completar
-     * ya no debe permanecer pendiente.
+     * Al quedar completada ya no debe
+     * conservar ninguna alarma pendiente.
      */
     if (
       typeof window
@@ -1998,44 +1951,16 @@ async function completeReminder(
     }
 
     /*
-     * Si es recurrente, programamos
-     * inmediatamente su siguiente aviso.
-     */
-    if (
-      isRecurring &&
-      updatedReminder.reminder_time &&
-      typeof window
-        .scheduleDanyBotReminderNotification ===
-        "function"
-    ) {
-      await window
-        .scheduleDanyBotReminderNotification({
-          ...updatedReminder,
-          id: reminder.id
-        });
-    }
-
-    /*
-     * Mostramos la actividad en el lugar
-     * donde quedó después de completarla.
+     * Abrimos directamente Eliminados
+     * para mostrar donde quedo la actividad.
      */
     activityDateFilter = "all";
     activityPriorityFilter = "all";
-
-    activityStatusFilter =
-      isRecurring
-        ? "todos"
-        : "eliminados";
-
+    activityStatusFilter = "eliminados";
     currentActivitiesPage = 1;
 
     await loadReminders();
 
-    /*
-     * Esperamos el render y llevamos
-     * al usuario directamente a la
-     * card actualizada.
-     */
     window.setTimeout(() => {
       scrollToCreatedReminderCard(
         reminder.id
@@ -2043,9 +1968,8 @@ async function completeReminder(
     }, 250);
 
     /*
-     * Si la función fue llamada desde
-     * la notificación, no mostramos
-     * un segundo modal.
+     * Si vino desde una accion de
+     * notificacion no mostramos nada extra.
      */
     if (!showSuccessMessage) {
       return;
@@ -2060,13 +1984,15 @@ async function completeReminder(
     Swal.fire({
       title: "Error",
       text:
-        activityT("activities.completeErrorText", "Ocurrió un error al completar la actividad."),
+        activityT(
+          "activities.completeErrorText",
+          "Ocurrió un error al completar la actividad."
+        ),
       icon: "error",
       confirmButtonColor: "#960018"
     });
   }
 }
-
 function getLastDayOfReminderMonth(dateValue) {
   if (!dateValue) {
     return "";
