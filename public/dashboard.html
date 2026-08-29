@@ -58,10 +58,10 @@
           <div>
             <span class="welcome-badge">
               <i class="fa-solid fa-wand-magic-sparkles"></i>
-              Asistente
+              <span data-i18n="home.assistant">Asistente</span>
             </span>
 
-            <h2>¿Qué quieres encontrar?</h2>
+            <h2 data-i18n="home.searchTitle">¿Qué quieres encontrar?</h2>
           </div>
         </div>
 
@@ -71,12 +71,12 @@
           <input 
             type="text" 
             id="globalSearchInput" 
-            placeholder="Buscar por ejemplo: internet"
+            placeholder="Buscar por ejemplo: internet" data-i18n-placeholder="home.searchPlaceholder"
             autocomplete="off"
           >
 
           <button type="button" id="globalSearchButton">
-            Buscar
+            <span data-i18n="home.searchButton">Buscar</span>
           </button>
 
           <button type="button" id="clearGlobalSearchButton" class="clear-global-search-button" style="display: none;">
@@ -95,7 +95,7 @@
           </div>
 
           <div class="card-info">
-            <h3>Total de actividades</h3>
+            <h3 data-i18n="home.totalActivities">Total de actividades</h3>
             <p id="totalTasksCount">0</p>
           </div>
         </div>
@@ -106,7 +106,7 @@
           </div>
 
           <div class="card-info">
-            <h3>Actividades pendientes</h3>
+            <h3 data-i18n="home.pendingActivities">Actividades pendientes</h3>
             <p id="pendingTasksCount">0</p>
           </div>
         </div>
@@ -117,7 +117,7 @@
           </div>
 
           <div class="card-info">
-            <h3>Eventos hoy</h3>
+            <h3 data-i18n="home.eventsToday">Eventos hoy</h3>
             <p id="todayEventsCount">0</p>
           </div>
         </div>
@@ -128,7 +128,7 @@
           </div>
 
           <div class="card-info">
-            <h3>Avisos programados</h3>
+            <h3 data-i18n="home.scheduledReminders">Avisos programados</h3>
             <p id="activeRemindersCount">0</p>
           </div>
         </div>
@@ -139,7 +139,7 @@
           </div>
 
           <div class="card-info">
-            <h3>Gastos del mes</h3>
+            <h3 data-i18n="home.monthlyExpenses">Gastos del mes</h3>
             <p id="monthlyExpensesAmount">$0</p>
           </div>
         </div>
@@ -150,7 +150,7 @@
           </div>
 
           <div class="card-info">
-            <h3>Ingresos del mes</h3>
+            <h3 data-i18n="home.monthlyIncome">Ingresos del mes</h3>
             <p id="monthlyIncomeAmount">$0</p>
           </div>
         </div>
@@ -161,7 +161,7 @@
           </div>
 
           <div class="card-info">
-            <h3>Ahorro estimado</h3>
+            <h3 data-i18n="home.estimatedSavings">Ahorro estimado</h3>
             <p id="monthlySavingsAmount">$0</p>
           </div>
         </div>
@@ -179,8 +179,8 @@
 
             <div class="dashboard-section-heading">
               <div>
-                <span class="dashboard-section-eyebrow">Agenda</span>
-                <h2>Próximas actividades</h2>
+                <span class="dashboard-section-eyebrow" data-i18n="home.eyebrow">Agenda</span>
+                <h2 data-i18n="home.upcomingActivities">Próximas actividades</h2>
               </div>
 
             <!--  <button
@@ -202,8 +202,8 @@
                 </div>
 
                 <div>
-                  <h3>Tu agenda aparecerá aquí</h3>
-                  <p>Las actividades más próximas se mostrarán en esta sección.</p>
+                  <h3 data-i18n="home.emptyTitle">Tu agenda aparecerá aquí</h3>
+                  <p data-i18n="home.emptyText">Las actividades más próximas se mostrarán en esta sección.</p>
                 </div>
               </div>
             </div>
@@ -220,6 +220,7 @@
 
  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  <script src="./src/js/i18n.js"></script>
   <script src="./src/js/sidebar.js"></script>
   <script>
     renderSidebar("dashboard");

@@ -13,7 +13,7 @@
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <title>Mis documentos</title>
+  <title data-i18n="documents.pageTitle">Mis documentos</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -90,7 +90,7 @@
 
           <div class="documents-user-info">
 
-            <h1 id="section-title">
+            <h1 id="section-title" data-i18n="documents.sectionTitle">
               Documentos
             </h1>
 
@@ -105,7 +105,7 @@
             id="user-avatar"
             class="documents-avatar"
             src=""
-            alt="Avatar"
+            alt="Avatar" data-i18n-aria-label="documents.avatar"
             style="display: none;"
           >
 
@@ -117,17 +117,16 @@
 
             <span class="documents-hero-badge">
             <i class="fa-solid fa-shield-halved"></i>
-            Espacio personal
+            <span data-i18n="documents.personalSpace">Espacio personal</span>
             </span>
 
             <div class="documents-hero-copy">
             <h2>
-                Tus documentos importantes, siempre disponibles
+                <span data-i18n="documents.heroTitle">Tus documentos importantes, siempre disponibles</span>
             </h2>
 
             <p>
-                Guarda, consulta y comparte tus archivos personales
-                desde un solo lugar.
+                <span data-i18n="documents.heroText">Guarda, consulta y comparte tus archivos personales desde un solo lugar.</span>
             </p>
             </div>
 
@@ -152,7 +151,7 @@
             class="documents-primary-button"
         >
             <i class="fa-solid fa-plus"></i>
-            Agregar documento
+            <span data-i18n="documents.addDocument">Agregar documento</span>
         </button>
 
       </section>
@@ -168,7 +167,7 @@
           <input
             type="search"
             id="documentsSearchInput"
-            placeholder="Buscar documento"
+            placeholder="Buscar documento" data-i18n-placeholder="documents.searchPlaceholder"
             autocomplete="off"
           >
         </label>
@@ -180,7 +179,7 @@
                 id="documentsCount"
                 class="documents-count"
             >
-                0 documentos
+                0 <span data-i18n="documents.documentsSuffix">documentos</span>
             </span>
         </div>
 
@@ -193,7 +192,7 @@
       >
         <div class="documents-loading">
           <i class="fa-solid fa-spinner fa-spin"></i>
-          <p>Cargando documentos...</p>
+          <p data-i18n="documents.loading">Cargando documentos...</p>
         </div>
       </section>
 
@@ -222,10 +221,10 @@
       <header class="document-modal-header">
 
         <div>
-          <span>Documento personal</span>
+          <span data-i18n="documents.personalDocument">Documento personal</span>
 
           <h2 id="documentModalTitle">
-            Agregar documento
+            <span data-i18n="documents.addDocument">Agregar documento</span>
           </h2>
         </div>
 
@@ -233,7 +232,7 @@
           type="button"
           class="document-modal-close"
           data-close-document-modal
-          aria-label="Cerrar"
+          aria-label="Cerrar" data-i18n-aria-label="documents.close"
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -254,7 +253,7 @@
         <div class="document-field">
 
           <label for="documentName">
-            Nombre del documento
+            <span data-i18n="documents.documentName">Nombre del documento</span>
           </label>
 
           <input
@@ -262,7 +261,7 @@
             id="documentName"
             name="document_name"
             maxlength="180"
-            placeholder="Ejemplo: Cédula de ciudadanía"
+            placeholder="Ejemplo: Cédula de ciudadanía" data-i18n-placeholder="documents.documentNamePlaceholder"
             required
           >
 
@@ -271,7 +270,7 @@
         <div class="document-field">
 
           <label for="documentFile">
-            Archivo
+            <span data-i18n="documents.file">Archivo</span>
           </label>
 
           <label
@@ -281,9 +280,9 @@
             <i class="fa-solid fa-cloud-arrow-up"></i>
 
             <span>
-              <strong>Seleccionar archivo</strong>
+              <strong data-i18n="documents.selectFile">Seleccionar archivo</strong>
               <small>
-                PDF, JPG, PNG o WEBP · máximo 5 MB
+                <span data-i18n="documents.fileHelp">PDF, JPG, PNG o WEBP · máximo 5 MB</span>
               </small>
             </span>
           </label>
@@ -299,7 +298,7 @@
             id="documentFileName"
             class="document-selected-file"
           >
-            Ningún archivo seleccionado
+            <span data-i18n="documents.noFileSelected">Ningún archivo seleccionado</span>
           </p>
 
         </div>
@@ -317,7 +316,7 @@
             class="document-secondary-button"
             data-close-document-modal
           >
-            Cancelar
+            <span data-i18n="documents.cancel">Cancelar</span>
           </button>
 
           <button
@@ -326,7 +325,7 @@
             class="documents-primary-button"
           >
             <i class="fa-solid fa-floppy-disk"></i>
-            Guardar
+            <span data-i18n="documents.save">Guardar</span>
           </button>
 
         </div>
@@ -338,6 +337,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  <script src="./src/js/i18n.js"></script>
   <script src="./src/js/sidebar.js"></script>
 
   <script>

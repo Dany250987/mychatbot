@@ -1053,3 +1053,19 @@ html.danybot-mobile-app
 
   margin: 2px auto 8px !important;
 }
+
+/* ==================================================
+   DANYBOT - IDIOMA LOGIN
+================================================== */
+
+@media (max-width: 768px) {
+  .login-language-control {
+    margin-bottom: 6px;
+  }
+
+  .login-language-select {
+    min-width: 106px;
+    height: 32px;
+    font-size: 10px;
+  }
+}

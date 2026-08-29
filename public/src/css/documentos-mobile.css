@@ -77,16 +77,30 @@
     object-fit: cover;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
   }
-
   html.danybot-mobile-app .documents-hero-copy {
-    display: none !important;
+    display: block !important;
+    max-width: 100%;
+    margin-top: 10px;
+  }
+
+  html.danybot-mobile-app .documents-hero-copy h2 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+  }
+
+  html.danybot-mobile-app .documents-hero-copy p {
+    margin: 0;
+    font-size: 11.5px;
+    line-height: 1.35;
   }
 
   html.danybot-mobile-app .documents-hero {
     position: relative;
     display: block;
     width: 100%;
-    min-height: 150px;
+    min-height: 205px;
     margin: 0 0 14px;
     padding: 16px 132px 62px 16px;
     overflow: hidden;
@@ -738,7 +752,7 @@
   }
 
   html.danybot-mobile-app .documents-hero {
-    min-height: 146px;
+    min-height: 200px;
     padding-right: 118px;
     width: 100%;
     min-width: 0;

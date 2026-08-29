@@ -1,3 +1,45 @@
+function documentT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key);
+  }
+
+  return fallback;
+}
+
+function getDocumentsLocale() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage() === "en"
+      ? "en-US"
+      : "es-CO";
+  }
+
+  return "es-CO";
+}
+
+function getDocumentResponseText(data, key, fallback) {
+  const language =
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+      ? window.DANYBOT_I18N.getLanguage()
+      : "es";
+
+  if (language === "en") {
+    return documentT(key, fallback);
+  }
+
+  return (
+    data?.mensaje ||
+    data?.error ||
+    documentT(key, fallback)
+  );
+}
+
 // =====================================================
 // DANYBOT - DOCUMENTOS PERSONALES
 // Lógica base compartida
@@ -83,7 +125,7 @@ async function handleDocumentsUnauthorizedSession(
     'Tu sesión venció o no es válida. Inicia sesión nuevamente.';
 
   await Swal.fire({
-    title: 'Sesión vencida',
+    title: documentT("documents.sessionExpired", "Sesión vencida"),
     text: message,
     icon: 'warning',
     confirmButtonColor: '#3c0000'
@@ -159,7 +201,7 @@ function formatDocumentDate(dateValue) {
   }
 
   return new Intl.DateTimeFormat(
-    'es-CO',
+    getDocumentsLocale(),
     {
       day: '2-digit',
       month: 'short',
@@ -277,7 +319,7 @@ function updateDocumentsDateTime() {
 
   dateTimeElement.textContent =
     new Intl.DateTimeFormat(
-      'es-CO',
+      getDocumentsLocale(),
       {
         weekday: 'long',
         day: 'numeric',
@@ -303,12 +345,12 @@ function resetDocumentForm() {
 
   if (documentModalTitle) {
     documentModalTitle.textContent =
-      'Agregar documento';
+      documentT("documents.addDocument", "Agregar documento");
   }
 
   if (documentFileName) {
     documentFileName.textContent =
-      'Ningún archivo seleccionado';
+      documentT("documents.noFileSelected", "Ningún archivo seleccionado");
   }
 
   if (documentFormMessage) {
@@ -324,7 +366,7 @@ function resetDocumentForm() {
 
     saveDocumentButton.innerHTML = `
       <i class="fa-solid fa-floppy-disk"></i>
-      Guardar
+      ${documentT("documents.save", "Guardar")}
     `;
   }
 }
@@ -398,7 +440,7 @@ function openEditDocumentModal(documentId) {
 
   if (documentModalTitle) {
     documentModalTitle.textContent =
-      'Editar documento';
+      documentT("documents.editDocument", "Editar documento");
   }
 
   if (documentFileInput) {
@@ -407,9 +449,9 @@ function openEditDocumentModal(documentId) {
 
   if (documentFileName) {
     documentFileName.textContent =
-      `Archivo actual: ${
+      `${documentT("documents.currentFile", "Archivo actual")}: ${
         documentData.file_name ||
-        'Documento guardado'
+        documentT("documents.savedDocument", "Documento guardado")
       }`;
   }
 
@@ -520,7 +562,7 @@ async function loadDocuments() {
       <i class="fa-solid fa-spinner fa-spin"></i>
 
       <p>
-        Cargando documentos...
+        ${documentT("documents.loading", "Cargando documentos...")}
       </p>
     </div>
   `;
@@ -550,8 +592,7 @@ async function loadDocuments() {
 
     if (!response.ok) {
       throw new Error(
-        data.mensaje ||
-        'No se pudieron consultar los documentos.'
+        getDocumentResponseText(data, "documents.loadFailedText", "No se pudieron consultar los documentos.")
       );
     }
 
@@ -592,11 +633,11 @@ async function loadDocuments() {
         ></i>
 
         <h3>
-          No pudimos cargar tus documentos
+          ${documentT("documents.loadErrorTitle", "No pudimos cargar tus documentos")}
         </h3>
 
         <p>
-          Revisa tu conexión e inténtalo nuevamente.
+          ${documentT("documents.loadErrorText", "Revisa tu conexión e inténtalo nuevamente.")}
         </p>
 
         <button
@@ -659,8 +700,14 @@ function updateDocumentsCount() {
 
   documentsCount.textContent =
     total === 1
-      ? '1 documento'
-      : `${total} documentos`;
+      ? documentT(
+          "documents.oneDocument",
+          "1 documento"
+        )
+      : `${total} ${documentT(
+          "documents.documentsSuffix",
+          "documentos"
+        )}`;
 }
 
 function renderDocumentsList() {
@@ -687,16 +734,16 @@ function renderDocumentsList() {
         <h3>
           ${
             hasSearch
-              ? 'No encontramos coincidencias'
-              : 'Aún no tienes documentos'
+              ? documentT("documents.noMatchesTitle", "No encontramos coincidencias")
+              : documentT("documents.noDocumentsTitle", "Aún no tienes documentos")
           }
         </h3>
 
         <p>
           ${
             hasSearch
-              ? 'Prueba con otro nombre.'
-              : 'Agrega tu primer documento personal.'
+              ? documentT("documents.tryAnotherName", "Prueba con otro nombre.")
+              : documentT("documents.addFirstDocument", "Agrega tu primer documento personal.")
           }
         </p>
 
@@ -710,7 +757,7 @@ function renderDocumentsList() {
                 id="emptyAddDocumentButton"
               >
                 <i class="fa-solid fa-plus"></i>
-                Agregar documento
+                ${documentT("documents.addDocument", "Agregar documento")}
               </button>
             `
         }
@@ -751,7 +798,7 @@ function createDocumentCard(documentData) {
   const safeDocumentName =
     escapeDocumentHtml(
       documentData.document_name ||
-      'Documento sin nombre'
+      documentT("documents.unnamedDocument", "Documento sin nombre")
     );
 
   const safeFileName =
@@ -827,55 +874,55 @@ function createDocumentCard(documentData) {
         type="button"
         class="document-action-button"
         data-document-action="view"
-        aria-label="Ver documento"
-        title="Ver"
+        aria-label="${documentT("documents.viewDocument", "Ver documento")}"
+        title="${documentT("documents.view", "Ver")}"
       >
         <i class="fa-solid fa-eye"></i>
-        <span>Ver</span>
+        <span>${documentT("documents.view", "Ver")}</span>
       </button>
 
       <button
         type="button"
         class="document-action-button"
         data-document-action="download"
-        aria-label="Descargar documento"
-        title="Descargar"
+        aria-label="${documentT("documents.downloadDocument", "Descargar documento")}"
+        title="${documentT("documents.download", "Descargar")}"
       >
         <i class="fa-solid fa-download"></i>
-        <span>Descargar</span>
+        <span>${documentT("documents.download", "Descargar")}</span>
       </button>
 
       <button
         type="button"
         class="document-action-button"
         data-document-action="share"
-        aria-label="Compartir documento"
-        title="Compartir"
+        aria-label="${documentT("documents.shareDocument", "Compartir documento")}"
+        title="${documentT("documents.share", "Compartir")}"
       >
         <i class="fa-solid fa-share-nodes"></i>
-        <span>Compartir</span>
+        <span>${documentT("documents.share", "Compartir")}</span>
       </button>
 
       <button
         type="button"
         class="document-action-button"
         data-document-action="edit"
-        aria-label="Editar documento"
-        title="Editar"
+        aria-label="${documentT("documents.editDocumentAction", "Editar documento")}"
+        title="${documentT("documents.edit", "Editar")}"
       >
         <i class="fa-solid fa-pen"></i>
-        <span>Editar</span>
+        <span>${documentT("documents.edit", "Editar")}</span>
       </button>
 
       <button
         type="button"
         class="document-action-button is-danger"
         data-document-action="delete"
-        aria-label="Eliminar documento"
-        title="Eliminar"
+        aria-label="${documentT("documents.deleteDocumentAction", "Eliminar documento")}"
+        title="${documentT("documents.delete", "Eliminar")}"
       >
         <i class="fa-solid fa-trash-can"></i>
-        <span>Eliminar</span>
+        <span>${documentT("documents.delete", "Eliminar")}</span>
       </button>
 
     </div>
@@ -925,9 +972,9 @@ function validateDocumentFile(file) {
 
   if (!allowedMimeTypes.includes(file.type)) {
     Swal.fire({
-      title: 'Archivo no permitido',
+      title: documentT("documents.fileNotAllowedTitle", "Archivo no permitido"),
       text:
-        'Solo puedes cargar PDF, JPG, PNG o WEBP.',
+        documentT("documents.fileNotAllowedText", "Solo puedes cargar PDF, JPG, PNG o WEBP."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -940,9 +987,9 @@ function validateDocumentFile(file) {
 
   if (file.size > maximumSize) {
     Swal.fire({
-      title: 'Archivo demasiado grande',
+      title: documentT("documents.fileTooLargeTitle", "Archivo demasiado grande"),
       text:
-        'El documento no puede superar los 5 MB.',
+        documentT("documents.fileTooLargeText", "El documento no puede superar los 5 MB."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -965,7 +1012,7 @@ async function saveDocument(event) {
 
   if (!documentName) {
     documentFormMessage.textContent =
-      'Escribe el nombre del documento.';
+      documentT("documents.enterDocumentName", "Escribe el nombre del documento.");
 
     documentNameInput?.focus();
     return;
@@ -976,7 +1023,7 @@ async function saveDocument(event) {
     !selectedFile
   ) {
     documentFormMessage.textContent =
-      'Selecciona un archivo.';
+      documentT("documents.selectAFile", "Selecciona un archivo.");
 
     return;
   }
@@ -1014,7 +1061,7 @@ async function saveDocument(event) {
 
   saveDocumentButton.innerHTML = `
     <i class="fa-solid fa-spinner fa-spin"></i>
-    Guardando
+    ${documentT("documents.saving", "Guardando")}
   `;
 
   documentFormMessage.textContent = '';
@@ -1044,8 +1091,7 @@ async function saveDocument(event) {
 
     if (!response.ok) {
       throw new Error(
-        data.mensaje ||
-        'No se pudo guardar el documento.'
+        getDocumentResponseText(data, "documents.saveFailedText", "No se pudo guardar el documento.")
       );
     }
 
@@ -1063,9 +1109,19 @@ async function saveDocument(event) {
 
     await Swal.fire({
       title: editingDocumentId
-        ? 'Documento actualizado'
-        : 'Documento guardado',
-      text: data.mensaje,
+        ? documentT("documents.updatedTitle", "Documento actualizado")
+        : documentT("documents.savedTitle", "Documento guardado"),
+      text: editingDocumentId
+        ? getDocumentResponseText(
+            data,
+            "documents.updatedText",
+            "El documento fue actualizado correctamente."
+          )
+        : getDocumentResponseText(
+            data,
+            "documents.savedText",
+            "El documento fue guardado correctamente."
+          ),
       icon: 'success',
       timer: 1700,
       showConfirmButton: false
@@ -1078,15 +1134,14 @@ async function saveDocument(event) {
     );
 
     documentFormMessage.textContent =
-      error.message ||
-      'No se pudo guardar el documento.';
+      error.message || documentT("documents.saveFailedText", "No se pudo guardar el documento.");
 
   } finally {
     saveDocumentButton.disabled = false;
 
     saveDocumentButton.innerHTML = `
       <i class="fa-solid fa-floppy-disk"></i>
-      Guardar
+      ${documentT("documents.save", "Guardar")}
     `;
   }
 }
@@ -1126,8 +1181,7 @@ async function fetchDocumentFile(
       );
 
     throw new Error(
-      data.mensaje ||
-      'No se pudo recuperar el archivo.'
+      getDocumentResponseText(data, "documents.retrieveFileFailedText", "No se pudo recuperar el archivo.")
     );
   }
 
@@ -1185,7 +1239,7 @@ async function viewDocument(documentData) {
     );
 
     await Swal.fire({
-      title: 'No se pudo abrir',
+      title: documentT("documents.openFailedTitle", "No se pudo abrir"),
       text: error.message,
       icon: 'error',
       confirmButtonColor: '#3c0000'
@@ -1245,7 +1299,7 @@ async function downloadDocument(
     );
 
     await Swal.fire({
-      title: 'No se pudo descargar',
+      title: documentT("documents.downloadFailedTitle", "No se pudo descargar"),
       text: error.message,
       icon: 'error',
       confirmButtonColor: '#3c0000'
@@ -1301,7 +1355,7 @@ async function shareDocument(
         title:
           documentData.document_name,
         text:
-          'Documento compartido desde DANYBOT',
+          documentT("documents.sharedFromDanybot", "Documento compartido desde DANYBOT"),
         files: [file]
       });
 
@@ -1309,9 +1363,9 @@ async function shareDocument(
     }
 
     await Swal.fire({
-      title: 'Compartir desde la web',
+      title: documentT("documents.shareFromWebTitle", "Compartir desde la web"),
       text:
-        'Tu navegador no permite compartir archivos directamente. Puedes descargarlo y adjuntarlo manualmente.',
+        documentT("documents.shareFromWebText", "Tu navegador no permite compartir archivos directamente. Puedes descargarlo y adjuntarlo manualmente."),
       icon: 'info',
       confirmButtonColor: '#3c0000'
     });
@@ -1327,10 +1381,10 @@ async function shareDocument(
     );
 
     await Swal.fire({
-      title: 'No se pudo compartir',
+      title: documentT("documents.shareFailedTitle", "No se pudo compartir"),
       text:
         error.message ||
-        'No fue posible compartir el documento.',
+        documentT("documents.shareFailedText", "No fue posible compartir el documento."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
@@ -1346,10 +1400,10 @@ async function deleteDocument(
   documentData
 ) {
   const result = await Swal.fire({
-    title: 'Eliminar documento',
+    title: documentT("documents.deleteTitle", "Eliminar documento"),
     html: `
       <p>
-        Se eliminará
+        ${documentT("documents.deletePrefix", "Se eliminará")}
         <strong>
           ${escapeDocumentHtml(
             documentData.document_name
@@ -1360,8 +1414,8 @@ async function deleteDocument(
     `,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Eliminar',
-    cancelButtonText: 'Cancelar',
+    confirmButtonText: documentT("documents.delete", "Eliminar"),
+    cancelButtonText: documentT("documents.cancel", "Cancelar"),
     confirmButtonColor: '#960018',
     cancelButtonColor: '#6b7280',
     reverseButtons: true
@@ -1395,16 +1449,19 @@ async function deleteDocument(
 
     if (!response.ok) {
       throw new Error(
-        data.mensaje ||
-        'No se pudo eliminar el documento.'
+        getDocumentResponseText(data, "documents.deleteFailedText", "No se pudo eliminar el documento.")
       );
     }
 
     await loadDocuments();
 
     await Swal.fire({
-      title: 'Documento eliminado',
-      text: data.mensaje,
+      title: documentT("documents.deletedTitle", "Documento eliminado"),
+      text: getDocumentResponseText(
+        data,
+        "documents.deletedText",
+        "El documento fue eliminado correctamente."
+      ),
       icon: 'success',
       timer: 1500,
       showConfirmButton: false
@@ -1417,7 +1474,7 @@ async function deleteDocument(
     );
 
     await Swal.fire({
-      title: 'No se pudo eliminar',
+      title: documentT("documents.deleteFailedTitle", "No se pudo eliminar"),
       text: error.message,
       icon: 'error',
       confirmButtonColor: '#3c0000'
@@ -1497,8 +1554,8 @@ document.addEventListener(
           if (!selectedFile) {
             documentFileName.textContent =
               editingDocumentId
-                ? 'Conservar archivo actual'
-                : 'Ningún archivo seleccionado';
+                ? documentT("documents.keepCurrentFile", "Conservar archivo actual")
+                : documentT("documents.noFileSelected", "Ningún archivo seleccionado");
 
             return;
           }
@@ -1511,7 +1568,7 @@ document.addEventListener(
             documentFileInput.value = '';
 
             documentFileName.textContent =
-              'Ningún archivo seleccionado';
+              documentT("documents.noFileSelected", "Ningún archivo seleccionado");
 
             return;
           }

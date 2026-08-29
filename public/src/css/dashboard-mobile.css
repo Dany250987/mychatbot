@@ -3395,3 +3395,59 @@ html.danybot-mobile-app
     animation: none !important;
   }
 }
+/* ==========================================================
+   DANYBOT - SELECTOR DE IDIOMA MI CUENTA
+========================================================== */
+
+html.danybot-mobile-app.danybot-account-view
+.account-language-select {
+  width: 100% !important;
+  min-height: 42px !important;
+  height: 42px !important;
+
+  margin: 0 !important;
+  padding: 0 14px !important;
+
+  border: 1px solid rgba(150, 0, 24, 0.18) !important;
+  border-radius: 14px !important;
+
+  background: #fff7f7 !important;
+  color: #3c0000 !important;
+
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+
+  outline: none !important;
+  cursor: pointer !important;
+
+  appearance: auto !important;
+  -webkit-appearance: menulist !important;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-language-select:focus {
+  border-color: rgba(150, 0, 24, 0.45) !important;
+
+  box-shadow:
+    0 0 0 3px rgba(150, 0, 24, 0.08) !important;
+
+  background: #ffffff !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-language-select:active {
+  border-color: #cb4c46 !important;
+}
+
+html.danybot-mobile-app.danybot-account-view
+.account-language-select option {
+  background: #ffffff;
+  color: #3c0000;
+  font-weight: 700;
+}

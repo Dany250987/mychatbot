@@ -2,6 +2,52 @@
 // Buscador global del dashboard
 // ===============================
 
+function globalSearchT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key) || fallback;
+  }
+
+  return fallback;
+}
+
+function getGlobalSearchLanguage() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage();
+  }
+
+  return "es";
+}
+
+function getGlobalSearchResponseText(
+  data,
+  key,
+  fallback
+) {
+  if (getGlobalSearchLanguage() === "en") {
+    return globalSearchT(key, fallback);
+  }
+
+  return (
+    data?.mensaje ||
+    data?.error ||
+    data?.message ||
+    globalSearchT(key, fallback)
+  );
+}
+
+function normalizeGlobalSearchDisplayValue(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
 const GLOBAL_SEARCH_API_URL = "/api/search";
 
 function getGlobalSearchAuthHeaders() {
@@ -16,10 +62,21 @@ async function handleGlobalSearchUnauthorized(data) {
   localStorage.removeItem("userData");
   localStorage.removeItem("authToken");
 
-  const message = data?.error || data?.mensaje || "Tu sesión venció. Inicia sesión nuevamente.";
+  const message =
+    getGlobalSearchLanguage() === "en"
+      ? globalSearchT(
+          "globalSearch.sessionExpiredText",
+          "Your session has expired. Please sign in again."
+        )
+      : data?.error ||
+        data?.mensaje ||
+        globalSearchT(
+          "globalSearch.sessionExpiredText",
+          "Tu sesión venció. Inicia sesión nuevamente."
+        );
 
   await Swal.fire({
-    title: "Sesión vencida",
+    title: globalSearchT("globalSearch.sessionExpiredTitle", "Sesión vencida"),
     text: message,
     icon: "warning",
     confirmButtonColor: "#960018"
@@ -30,16 +87,159 @@ async function handleGlobalSearchUnauthorized(data) {
 
 function getGlobalSearchTypeLabel(type) {
   const labels = {
-    reminder: "Actividad",
-    expense: "Gasto",
-    monthly_income: "Ingreso mensual",
-    additional_income: "Ingreso adicional",
-    document: "Documento"
+    reminder: globalSearchT(
+      "globalSearch.activity",
+      "Actividad"
+    ),
+    expense: globalSearchT(
+      "globalSearch.expense",
+      "Gasto"
+    ),
+    monthly_income: globalSearchT(
+      "globalSearch.monthlyIncome",
+      "Ingreso mensual"
+    ),
+    additional_income: globalSearchT(
+      "globalSearch.additionalIncome",
+      "Ingreso adicional"
+    ),
+    document: globalSearchT(
+      "globalSearch.document",
+      "Documento"
+    )
   };
 
-  return labels[type] || "Resultado";
+  return (
+    labels[type] ||
+    globalSearchT(
+      "globalSearch.result",
+      "Resultado"
+    )
+  );
 }
 
+function getGlobalSearchValueLabel(value) {
+  const normalized =
+    normalizeGlobalSearchDisplayValue(value);
+
+  const labels = {
+    personal:
+      globalSearchT(
+        "globalSearch.personal",
+        "Personal"
+      ),
+    finanzas:
+      globalSearchT(
+        "globalSearch.finances",
+        "Finanzas"
+      ),
+    estudio:
+      globalSearchT(
+        "globalSearch.study",
+        "Estudio"
+      ),
+    trabajo:
+      globalSearchT(
+        "globalSearch.work",
+        "Trabajo"
+      ),
+    salud:
+      globalSearchT(
+        "globalSearch.health",
+        "Salud"
+      ),
+    pagos:
+      globalSearchT(
+        "globalSearch.payments",
+        "Pagos"
+      ),
+    otro:
+      globalSearchT(
+        "globalSearch.other",
+        "Otro"
+      ),
+    factura:
+      globalSearchT(
+        "globalSearch.bill",
+        "Factura"
+      ),
+    alimentacion:
+      globalSearchT(
+        "globalSearch.food",
+        "Alimentación"
+      ),
+    transporte:
+      globalSearchT(
+        "globalSearch.transportation",
+        "Transporte"
+      ),
+    entretenimiento:
+      globalSearchT(
+        "globalSearch.entertainment",
+        "Entretenimiento"
+      ),
+    prestamos:
+      globalSearchT(
+        "globalSearch.loans",
+        "Préstamos"
+      ),
+    "ingreso principal":
+      globalSearchT(
+        "globalSearch.mainIncome",
+        "Ingreso principal"
+      ),
+    "ingreso adicional":
+      globalSearchT(
+        "globalSearch.additionalIncome",
+        "Ingreso adicional"
+      ),
+    "documento personal":
+      globalSearchT(
+        "globalSearch.personalDocument",
+        "Documento personal"
+      ),
+    activo:
+      globalSearchT(
+        "globalSearch.active",
+        "Activo"
+      ),
+    completado:
+      globalSearchT(
+        "globalSearch.completed",
+        "Completado"
+      ),
+    papelera:
+      globalSearchT(
+        "globalSearch.trash",
+        "Papelera"
+      )
+  };
+
+  return labels[normalized] || value || "";
+}
+
+function getGlobalSearchResultTitle(result) {
+  const title = result?.title || "";
+
+  if (
+    result?.type === "monthly_income" &&
+    normalizeGlobalSearchDisplayValue(title) ===
+      "ingreso mensual"
+  ) {
+    return globalSearchT(
+      "globalSearch.monthlyIncome",
+      "Ingreso mensual"
+    );
+  }
+
+  return (
+    title ||
+    globalSearchT(
+      "globalSearch.noTitle",
+      "Sin título"
+    )
+  );
+}
 function getGlobalSearchTypeIcon(type) {
   const icons = {
     reminder: "fa-bell",
@@ -88,7 +288,22 @@ function formatGlobalSearchDate(value) {
 
   const [year, month, day] = cleanValue.split("-");
 
-  return `${day}/${month}/${year}`;
+  return new Intl.DateTimeFormat(
+    getGlobalSearchLanguage() === "en"
+      ? "en-US"
+      : "es-CO",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }
+  ).format(
+    new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day)
+    )
+  );
 }
 
 function formatGlobalSearchTime(value) {
@@ -108,7 +323,7 @@ function formatGlobalSearchMoney(value) {
     return formatDashboardMoney(value);
   }
 
-  return new Intl.NumberFormat("es-CO", {
+  return new Intl.NumberFormat(getGlobalSearchLanguage() === "en" ? "en-US" : "es-CO", {
     style: "currency",
     currency: "COP",
     minimumFractionDigits: 0
@@ -119,7 +334,7 @@ function getGlobalSearchResultMeta(result) {
   const meta = [];
 
   if (result.category) {
-    meta.push(result.category);
+    meta.push(getGlobalSearchValueLabel(result.category));
   }
 
   if (result.date_value) {
@@ -131,7 +346,7 @@ function getGlobalSearchResultMeta(result) {
   }
 
   if (result.status) {
-    meta.push(result.status);
+    meta.push(getGlobalSearchValueLabel(result.status));
   }
 
   if (result.amount !== null && result.amount !== undefined) {
@@ -271,8 +486,8 @@ function renderGlobalSearchResults(data) {
     resultsContainer.innerHTML = `
       <div class="global-search-empty">
         <i class="fa-solid fa-face-thinking"></i>
-        <h3>No encontré resultados</h3>
-        <p>Intenta buscar con otra palabra, categoría, fecha o valor.</p>
+        <h3>${globalSearchT("globalSearch.noResultsTitle", "No encontré resultados")}</h3>
+        <p>${globalSearchT("globalSearch.noResultsText", "Intenta buscar con otra palabra, categoría, fecha o valor.")}</p>
       </div>
     `;
     return;
@@ -280,8 +495,12 @@ function renderGlobalSearchResults(data) {
 
   resultsContainer.innerHTML = `
     <div class="global-search-results-header">
-      <h3>Resultados encontrados</h3>
-      <span>${data.total} resultado${data.total === 1 ? "" : "s"}</span>
+      <h3>${globalSearchT("globalSearch.resultsFound", "Resultados encontrados")}</h3>
+      <span>${data.total} ${
+        data.total === 1
+          ? globalSearchT("globalSearch.resultSingular", "resultado")
+          : globalSearchT("globalSearch.resultPlural", "resultados")
+      }</span>
     </div>
 
     <div class="global-search-results-list">
@@ -298,8 +517,8 @@ function renderGlobalSearchResults(data) {
 
           <div class="global-search-result-info">
             <span>${getGlobalSearchTypeLabel(result.type)}</span>
-            <strong>${result.title || "Sin título"}</strong>
-            <p>${result.description || "Sin descripción"}</p>
+            <strong>${getGlobalSearchResultTitle(result)}</strong>
+            <p>${result.description || globalSearchT("globalSearch.noDescription", "Sin descripción")}</p>
             <small>${getGlobalSearchResultMeta(result)}</small>
           </div>
         </button>
@@ -367,8 +586,8 @@ async function executeGlobalSearch() {
 
     if (!response.ok) {
       Swal.fire({
-        title: "No se pudo buscar",
-        text: data.mensaje || "Ocurrió un error al realizar la búsqueda.",
+        title: globalSearchT("globalSearch.searchFailedTitle", "No se pudo buscar"),
+        text: getGlobalSearchResponseText(data, "globalSearch.searchFailedText", "Ocurrió un error al realizar la búsqueda."),
         icon: "error",
         confirmButtonColor: "#960018"
       });
@@ -381,8 +600,8 @@ async function executeGlobalSearch() {
     console.error("Error en buscador global:", error);
 
     Swal.fire({
-      title: "Error",
-      text: "No fue posible realizar la búsqueda global.",
+      title: globalSearchT("globalSearch.errorTitle", "Error"),
+      text: globalSearchT("globalSearch.globalSearchFailedText", "No fue posible realizar la búsqueda global."),
       icon: "error",
       confirmButtonColor: "#960018"
     });

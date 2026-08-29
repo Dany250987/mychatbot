@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Día en Orden | Crear cuenta</title>
+  <title data-i18n="signup.pageTitle">Día en Orden | Crear cuenta</title>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -30,6 +30,7 @@
   <link rel="stylesheet" href="src/css/signup-mobile.css">
 
   <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
+  <script src="src/js/i18n.js" defer></script>
   <script src="src/js/signup.js" defer></script>
   <script src="src/js/signup-mobile.js" defer></script>
   <script src="src/js/api-config.js"></script>
@@ -86,37 +87,36 @@
           <img src="src/img/danybot.png" alt="Logo Día en Orden">
         </div>
 
-        <span class="signup-kicker">Crear cuenta</span>
+        <span class="signup-kicker" data-i18n="signup.kicker">Crear cuenta</span>
 
-        <h1>Únete a Día en Orden</h1>
+        <h1 data-i18n="signup.title">Únete a Día en Orden</h1>
 
-        <p>
-          Ingresa tus datos para comenzar a organizar tu día de forma simple y práctica.
-          Validaremos tu correo con un código antes de crear la cuenta.
+        <p data-i18n="signup.intro">
+          Ingresa tus datos para comenzar a organizar tu día de forma simple y práctica. Validaremos tu correo con un código antes de crear la cuenta.
         </p>
       </div>
 
       <form id="signup-form" class="signup-form">
         <div class="form-row">
           <div class="form-col">
-            <label for="name">Nombre</label>
+            <label for="name" data-i18n="signup.name">Nombre</label>
             <input 
               type="text" 
               id="name" 
               name="name" 
-              placeholder="Ingresa tu nombre" 
+              placeholder="Ingresa tu nombre" data-i18n-placeholder="signup.namePlaceholder" 
               autocomplete="name"
               required
             >
           </div>
 
           <div class="form-col">
-            <label for="email">Correo electrónico</label>
+            <label for="email" data-i18n="signup.email">Correo electrónico</label>
             <input 
               type="email" 
               id="email" 
               name="email" 
-              placeholder="Ingresa tu correo electrónico" 
+              placeholder="Ingresa tu correo electrónico" data-i18n-placeholder="signup.emailPlaceholder" 
               autocomplete="email"
               required
             >
@@ -125,7 +125,7 @@
 
         <div class="form-row">
           <div class="form-col">
-            <label for="date-of-birth">Fecha de nacimiento</label>
+            <label for="date-of-birth" data-i18n="signup.birthDate">Fecha de nacimiento</label>
             <input 
               type="date" 
               id="date-of-birth" 
@@ -135,7 +135,7 @@
           </div>
 
           <div class="form-col">
-            <label for="phone">Número de teléfono</label>
+            <label for="phone" data-i18n="signup.phone">Número de teléfono</label>
             <input 
               type="tel" 
               id="phone" 
@@ -149,7 +149,7 @@
 
         <div class="form-row">
           <div class="form-col password-wrapper">
-            <label for="password">Contraseña</label>
+            <label for="password" data-i18n="signup.password">Contraseña</label>
 
             <div class="input-group">
               <input 
@@ -165,7 +165,7 @@
                 type="button" 
                 class="toggle-password" 
                 onclick="togglePassword('password', this)"
-                aria-label="Mostrar u ocultar contraseña"
+                aria-label="Mostrar u ocultar contraseña" data-i18n-aria-label="signup.togglePassword"
               >
                 <i class="fa-solid fa-eye"></i>
               </button>
@@ -173,14 +173,14 @@
           </div>
 
           <div class="form-col password-wrapper">
-            <label for="confirm-password">Confirmar contraseña</label>
+            <label for="confirm-password" data-i18n="signup.confirmPassword">Confirmar contraseña</label>
 
             <div class="input-group">
               <input 
                 type="password" 
                 id="confirm-password" 
                 name="confirm-password" 
-                placeholder="Ingresa tu contraseña"
+                placeholder="Ingresa tu contraseña" data-i18n-placeholder="signup.confirmPasswordPlaceholder"
                 autocomplete="new-password"
                 required
               >
@@ -189,7 +189,7 @@
                 type="button" 
                 class="toggle-password" 
                 onclick="togglePassword('confirm-password', this)"
-                aria-label="Mostrar u ocultar confirmación de contraseña"
+                aria-label="Mostrar u ocultar confirmación de contraseña" data-i18n-aria-label="signup.toggleConfirmPassword"
               >
                 <i class="fa-solid fa-eye"></i>
               </button>
@@ -199,18 +199,18 @@
 
         <div class="form-actions">
           <button type="button" class="btn-cancel" id="btn-cancel" onclick="window.location.href='login_google.html'">
-            Cancelar
+            <span data-i18n="signup.cancel">Cancelar</span>
           </button>
 
           <button type="submit" id="btn-submit" class="btn-submit">
-            Crear cuenta
+            <span data-i18n="signup.createAccount">Crear cuenta</span>
           </button>
         </div>
       </form>
 
       <p class="signin-text">
-        ¿Ya tienes una cuenta?
-        <a href="login_google.html">Inicia sesión</a>
+        <span data-i18n="signup.alreadyAccount">¿Ya tienes una cuenta?</span>
+        <a href="login_google.html" data-i18n="signup.signIn">Inicia sesión</a>
       </p>
     </section>
 

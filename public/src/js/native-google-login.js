@@ -1,3 +1,35 @@
+function nativeGoogleT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key) || fallback;
+  }
+
+  return fallback;
+}
+
+function getNativeGoogleLanguage() {
+  return (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+      ? window.DANYBOT_I18N.getLanguage()
+      : "es"
+  );
+}
+
+function getNativeGoogleResponseText(data, key, fallback) {
+  if (getNativeGoogleLanguage() === "en") {
+    return nativeGoogleT(key, fallback);
+  }
+
+  return (
+    data?.message ||
+    data?.error ||
+    data?.mensaje ||
+    nativeGoogleT(key, fallback)
+  );
+}
 const DANYBOT_GOOGLE_WEB_CLIENT_ID = "625571352027-jgsi8eovhcd2b4or9uohaog1f8663d8i.apps.googleusercontent.com";
 
 let danyBotGoogleNativeInitialized = false;
@@ -49,7 +81,7 @@ async function initializeDanyBotGoogleNativeLogin() {
   const SocialLogin = getDanyBotSocialLoginPlugin();
 
   if (!SocialLogin) {
-    throw new Error("Plugin SocialLogin no disponible.");
+    throw new Error(nativeGoogleT("login.googlePluginUnavailable", "Plugin SocialLogin no disponible."));
   }
 
   await SocialLogin.initialize({
@@ -69,8 +101,8 @@ async function loginWithDanyBotNativeGoogle() {
 
     if (!SocialLogin) {
       await showAuthMessage({
-        title: "Google no disponible",
-        text: "El login nativo de Google no está disponible en este dispositivo.",
+        title: nativeGoogleT("login.googleUnavailableTitle", "Google no disponible"),
+        text: nativeGoogleT("login.googleUnavailableText", "El login nativo de Google no está disponible en este dispositivo."),
         icon: "warning"
       });
       return;
@@ -78,7 +110,7 @@ async function loginWithDanyBotNativeGoogle() {
 
     if (nativeGoogleButton) {
       nativeGoogleButton.disabled = true;
-      nativeGoogleButton.textContent = "Conectando con Google...";
+      nativeGoogleButton.textContent = nativeGoogleT("login.connectingGoogle", "Conectando con Google...");
     }
 
     await initializeDanyBotGoogleNativeLogin();
@@ -91,7 +123,7 @@ async function loginWithDanyBotNativeGoogle() {
     const credential = login && login.result ? login.result.idToken : null;
 
     if (!credential) {
-      throw new Error("Google no devolvio un idToken válido.");
+      throw new Error(nativeGoogleT("login.googleInvalidToken", "Google no devolvió un idToken válido."));
     }
 
     const apiResponse = await fetch("/api/auth/google-login", {
@@ -108,8 +140,8 @@ async function loginWithDanyBotNativeGoogle() {
 
     if (!apiResponse.ok || !data.user || !data.token) {
       await showAuthMessage({
-        title: "No se pudo iniciar sesión",
-        text: data.message || data.error || "Ocurrió un error al validar tu cuenta de Google.",
+        title: nativeGoogleT("login.loginFailedTitle", "No se pudo iniciar sesión"),
+        text: getNativeGoogleResponseText(data, "login.googleValidationError", "Ocurrió un error al validar tu cuenta de Google."),
         icon: "error"
       });
       return;
@@ -118,8 +150,8 @@ async function loginWithDanyBotNativeGoogle() {
     saveUserSession(data.user, data.token);
 
     await showAuthMessage({
-      title: "Bienvenida",
-      text: data.message || `Hola ${data.user.name}, ingresaste correctamente.`,
+      title: nativeGoogleT("login.welcomeTitle", "Bienvenida"),
+      text: getNativeGoogleLanguage() === "en" ? `${nativeGoogleT("login.hello", "Hola")} ${data.user.name}, ${nativeGoogleT("login.loginSuccessSuffix", "ingresaste correctamente.")}` : (data.message || `Hola ${data.user.name}, ingresaste correctamente.`),
       icon: "success"
     });
 
@@ -139,8 +171,8 @@ async function loginWithDanyBotNativeGoogle() {
       console.error("Error en Google nativo:", error);
 
       await showAuthMessage({
-        title: "Error con Google",
-        text: error.message || "No fue posible iniciar sesión con Google.",
+        title: nativeGoogleT("login.googleErrorTitle", "Error con Google"),
+        text: error.message || nativeGoogleT("login.googleErrorText", "No fue posible iniciar sesión con Google."),
         icon: "error"
       });
 
@@ -149,7 +181,7 @@ async function loginWithDanyBotNativeGoogle() {
         nativeGoogleButton.disabled = false;
         nativeGoogleButton.innerHTML = `
           <span class="native-google-icon">G</span>
-          Continuar con Google
+          ${nativeGoogleT("login.continueGoogle", "Continuar con Google")}
         `;
       }
     }
@@ -176,7 +208,7 @@ function renderDanyBotNativeGoogleButton() {
         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06L5.84 9.9C6.71 7.3 9.14 5.38 12 5.38z"/>
       </svg>
     </span>
-    <span>Continuar con Google</span>
+    <span>${nativeGoogleT("login.continueGoogle", "Continuar con Google")}</span>
   </button>
 `;
 

@@ -1,3 +1,14 @@
+function dashboardUiT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key);
+  }
+
+  return fallback;
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
   const userData = localStorage.getItem("userData");
   const authToken = localStorage.getItem("authToken");
@@ -64,7 +75,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const quickReminderButton = document.getElementById("quickReminderButton");
 
   if (title) {
-    title.textContent = `Hola, ${user.name || user.email || "Usuario"}`;
+    title.textContent = `${dashboardUiT("home.hello", "Hola")}, ${user.name || user.email || dashboardUiT("home.user", "Usuario")}`;
   }
 
   if (avatar) {
@@ -203,7 +214,10 @@ function showDanyBotInitialLoader() {
         >
       </div>
 
-      <p>Preparando tu día...</p>
+      <p>${
+        window.DANYBOT_I18N?.t?.("common.preparingDay") ||
+        "Preparando tu día..."
+      }</p>
 
       <div
         class="danybot-initial-loader-dots"
@@ -297,8 +311,8 @@ function openSectionFromHash() {
       }
 
       title.textContent = user
-        ? `Hola, ${user.name || user.email || "Usuario"}`
-        : "Hola 👋";
+        ? `${dashboardUiT("home.hello", "Hola")}, ${user.name || user.email || dashboardUiT("home.user", "Usuario")}`
+        : `${dashboardUiT("home.hello", "Hola")} 👋`;
     }
 
     return;
@@ -331,7 +345,7 @@ function showSection(section, selectedLink = null) {
 
   const sectionTitles = {
     motivacion: "Motivación",
-    recordatorios: "Tus actividades",
+    recordatorios: dashboardUiT("activities.sectionTitle", "Tus actividades"),
     calendario: "Tu calendario",
     cuenta: "Mi cuenta",
     crecimiento: "Crecimiento personal",
@@ -517,6 +531,23 @@ function getAccountAuthHeaders(includeJsonContent = false) {
 function renderAccountSection() {
   const contentEl = document.getElementById("section-content");
 
+  const accountT = (key, fallback) => {
+    if (
+      window.DANYBOT_I18N &&
+      typeof window.DANYBOT_I18N.t === "function"
+    ) {
+      return window.DANYBOT_I18N.t(key);
+    }
+
+    return fallback;
+  };
+
+  const currentLanguage =
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+      ? window.DANYBOT_I18N.getLanguage()
+      : "es";
+
   if (!contentEl) {
     return;
   }
@@ -553,36 +584,67 @@ function renderAccountSection() {
           }
 
           <div>
-            <span class="welcome-badge">Información de cuenta</span>
+            <span class="welcome-badge">${accountT("account.accountInfo", "Información de cuenta")}</span>
             <h2>${user.name || "Usuario"}</h2>
-            <p>${user.email || "Sin correo registrado"}</p>
+            <p>${user.email || accountT("account.noEmail", "Sin correo registrado")}</p>
           </div>
         </div>
 
         <div class="account-info-grid">
           <div>
-            <span>Nombre</span>
-            <strong>${user.name || "No registrado"}</strong>
+            <span>${accountT("account.name", "Nombre")}</span>
+            <strong>${user.name || accountT("account.notRegistered", "No registrado")}</strong>
           </div>
 
           <div>
-            <span>Correo</span>
+            <span>${accountT("account.email", "Correo")}</span>
             <strong>${user.email || "No registrado"}</strong>
           </div>
 
           <div>
-            <span>ID de usuario</span>
+            <span>${accountT("account.userId", "ID de usuario")}</span>
             <strong>${user.id || "No disponible"}</strong>
           </div>
         </div>
       </div>
 
+      <div class="account-logout-card account-language-card">
+        <div>
+          <span class="welcome-badge">
+            ${accountT("account.language", "Idioma")}
+          </span>
+
+          <h2>
+            ${accountT("account.language", "Idioma")}
+          </h2>
+        </div>
+
+        <select
+          id="accountLanguageSelect"
+          class="account-language-select"
+        >
+          <option
+            value="es"
+            ${currentLanguage === "es" ? "selected" : ""}
+          >
+            ${accountT("account.spanish", "Español")}
+          </option>
+
+          <option
+            value="en"
+            ${currentLanguage === "en" ? "selected" : ""}
+          >
+            ${accountT("account.english", "English")}
+          </option>
+        </select>
+      </div>
+
       <div class="account-logout-card">
         <div>
-          <span class="welcome-badge">Sesión</span>
-          <h2>Cerrar sesión</h2>
+          <span class="welcome-badge">${accountT("account.session", "Sesión")}</span>
+          <h2>${accountT("account.logout", "Cerrar sesión")}</h2>
           <p>
-            Sal de tu cuenta actual para ingresar con otro usuario.
+            ${accountT("account.logoutDescription", "Sal de tu cuenta actual para ingresar con otro usuario.")}
           </p>
         </div>
 
@@ -592,17 +654,44 @@ function renderAccountSection() {
           onclick="logoutFromSidebar()"
         >
           <i class="fa-solid fa-right-from-bracket"></i>
-          Cerrar sesión
+          ${accountT("account.logout", "Cerrar sesión")}
         </button>
       </div>
 
         <button type="button" class="delete-account-button" onclick="confirmDeleteAccount()">
           <i class="fa-solid fa-trash-can"></i>
-          Eliminar cuenta
+          ${accountT("account.deleteAccount", "Eliminar cuenta")}
         </button>
       </div>
     </div>
   `;
+
+  const accountLanguageSelect =
+    contentEl.querySelector(
+      "#accountLanguageSelect"
+    );
+
+  if (accountLanguageSelect) {
+    accountLanguageSelect.addEventListener(
+      "change",
+      (event) => {
+        if (
+          window.DANYBOT_I18N &&
+          typeof window.DANYBOT_I18N.setLanguage === "function"
+        ) {
+          window.DANYBOT_I18N.setLanguage(
+            event.target.value
+          );
+
+          if (typeof renderSidebar === "function") {
+            renderSidebar("cuenta");
+          }
+
+          renderAccountSection();
+        }
+      }
+    );
+  }
 
   const accountAvatar = contentEl.querySelector(".account-avatar");
 
@@ -624,61 +713,138 @@ function renderAccountSection() {
 async function confirmDeleteAccount() {
   const user = getCurrentSessionUser();
 
+  const accountT = (key, fallback) => {
+    if (
+      window.DANYBOT_I18N &&
+      typeof window.DANYBOT_I18N.t === "function"
+    ) {
+      return window.DANYBOT_I18N.t(key);
+    }
+
+    return fallback;
+  };
+
+  const currentLanguage =
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+      ? window.DANYBOT_I18N.getLanguage()
+      : "es";
+
   if (!user) {
     await Swal.fire({
-      title: "Sesión no encontrada",
-      text: "No se pudo identificar el usuario actual.",
+      title: accountT(
+        "account.sessionNotFoundTitle",
+        "Sesión no encontrada"
+      ),
+      text: accountT(
+        "account.sessionNotFoundText",
+        "No se pudo identificar el usuario actual."
+      ),
       icon: "warning",
       confirmButtonColor: "#960018"
     });
+
     return;
   }
 
   const result = await Swal.fire({
-    title: "Eliminar cuenta",
+    title: accountT(
+      "account.deleteAccountTitle",
+      "Eliminar cuenta"
+    ),
+
     html: `
       <div class="delete-account-modal">
         <p>
-          Esta acción eliminará permanentemente tu cuenta y todos tus datos.
+          ${accountT(
+            "account.deletePermanentWarning",
+            "Esta acción eliminará permanentemente tu cuenta y todos tus datos."
+          )}
         </p>
 
         <p>
-          Para confirmar, escribe:
+          ${accountT(
+            "account.deleteConfirmInstruction",
+            "Para confirmar, escribe:"
+          )}
+
           <strong>ELIMINAR</strong>
         </p>
 
-        <input 
-          id="deleteAccountConfirmation" 
-          class="swal2-input" 
-          placeholder="Escribe ELIMINAR"
+        <input
+          id="deleteAccountConfirmation"
+          class="swal2-input"
+          placeholder="${accountT(
+            "account.deleteConfirmPlaceholder",
+            "Escribe ELIMINAR"
+          )}"
         >
 
         <p style="margin-top: 12px;">
-          Si tu cuenta fue creada con contraseña, ingrésala también.
-          Si fue creada con Google, puedes dejar este campo vacío.
+          ${accountT(
+            "account.deletePasswordHelp",
+            "Si tu cuenta fue creada con contraseña, ingrésala también. Si fue creada con Google, puedes dejar este campo vacío."
+          )}
         </p>
 
-        <input 
-          id="deleteAccountPassword" 
-          type="password" 
-          class="swal2-input" 
-          placeholder="Contraseña"
+        <input
+          id="deleteAccountPassword"
+          type="password"
+          class="swal2-input"
+          placeholder="${accountT(
+            "account.password",
+            "Contraseña"
+          )}"
         >
       </div>
     `,
+
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Eliminar definitivamente",
-    cancelButtonText: "Cancelar",
+
+    confirmButtonText: accountT(
+      "account.deletePermanently",
+      "Eliminar definitivamente"
+    ),
+
+    cancelButtonText: accountT(
+      "account.cancel",
+      "Cancelar"
+    ),
+
     confirmButtonColor: "#960018",
     cancelButtonColor: "#6b7280",
     focusConfirm: false,
-    preConfirm: () => {
-      const confirmation = document.getElementById("deleteAccountConfirmation").value.trim();
-      const password = document.getElementById("deleteAccountPassword").value;
 
+    preConfirm: () => {
+      const confirmation =
+        document
+          .getElementById(
+            "deleteAccountConfirmation"
+          )
+          .value
+          .trim();
+
+      const password =
+        document
+          .getElementById(
+            "deleteAccountPassword"
+          )
+          .value;
+
+      /*
+       * IMPORTANTE:
+       * El backend exige literalmente ELIMINAR.
+       * No traducir esta palabra a DELETE.
+       */
       if (confirmation !== "ELIMINAR") {
-        Swal.showValidationMessage("Debes escribir ELIMINAR para continuar.");
+        Swal.showValidationMessage(
+          accountT(
+            "account.deleteValidation",
+            "Debes escribir ELIMINAR para continuar."
+          )
+        );
+
         return false;
       }
 
@@ -694,33 +860,66 @@ async function confirmDeleteAccount() {
   }
 
   try {
-    const response = await fetch("/api/auth/account", {
-      method: "DELETE",
-      headers: getAccountAuthHeaders(true),
-      body: JSON.stringify({
-        confirmation: result.value.confirmation,
-        password: result.value.password
-      })
-    });
+    const response = await fetch(
+      "/api/auth/account",
+      {
+        method: "DELETE",
+        headers:
+          getAccountAuthHeaders(true),
 
-    const data = await response.json();
+        body: JSON.stringify({
+          confirmation:
+            result.value.confirmation,
+
+          password:
+            result.value.password
+        })
+      }
+    );
+
+    const data =
+      await response.json();
 
     if (!response.ok) {
       await Swal.fire({
-        title: "No se pudo eliminar",
-        text: data.mensaje || data.error || "Ocurrió un error al eliminar la cuenta.",
+        title: accountT(
+          "account.deleteFailedTitle",
+          "No se pudo eliminar"
+        ),
+
+        text:
+          currentLanguage === "es"
+            ? (
+                data.mensaje ||
+                data.error ||
+                accountT(
+                  "account.deleteFailedText",
+                  "Ocurrió un error al eliminar la cuenta."
+                )
+              )
+            : accountT(
+                "account.deleteFailedText",
+                "Ocurrió un error al eliminar la cuenta."
+              ),
+
         icon: "error",
         confirmButtonColor: "#960018"
       });
+
       return;
     }
 
     try {
       if (user && user.id) {
-        localStorage.removeItem(`alertedReminderKeys_${user.id}`);
+        localStorage.removeItem(
+          `alertedReminderKeys_${user.id}`
+        );
       }
     } catch (error) {
-      console.error("Error al limpiar alertas:", error);
+      console.error(
+        "Error al limpiar alertas:",
+        error
+      );
     }
 
     localStorage.removeItem("userData");
@@ -728,20 +927,46 @@ async function confirmDeleteAccount() {
     localStorage.removeItem("userEmail");
 
     await Swal.fire({
-      title: "Cuenta eliminada",
-      text: data.mensaje || "Tu cuenta fue eliminada correctamente.",
+      title: accountT(
+        "account.deletedTitle",
+        "Cuenta eliminada"
+      ),
+
+      text:
+        currentLanguage === "es"
+          ? (
+              data.mensaje ||
+              accountT(
+                "account.deletedText",
+                "Tu cuenta fue eliminada correctamente."
+              )
+            )
+          : accountT(
+              "account.deletedText",
+              "Tu cuenta fue eliminada correctamente."
+            ),
+
       icon: "success",
       confirmButtonColor: "#960018"
     });
 
-    window.location.href = "login_google.html";
+    window.location.href =
+      "login_google.html";
 
   } catch (error) {
-    console.error("Error al eliminar cuenta:", error);
+    console.error(
+      "Error al eliminar cuenta:",
+      error
+    );
 
     await Swal.fire({
       title: "Error",
-      text: "No fue posible eliminar la cuenta.",
+
+      text: accountT(
+        "account.deleteErrorText",
+        "No fue posible eliminar la cuenta."
+      ),
+
       icon: "error",
       confirmButtonColor: "#960018"
     });

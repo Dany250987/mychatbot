@@ -1,3 +1,37 @@
+function signupT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key) || fallback;
+  }
+
+  return fallback;
+}
+
+function getSignupLanguage() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage();
+  }
+
+  return "es";
+}
+
+function getSignupResponseText(data, key, fallback) {
+  if (getSignupLanguage() === "en") {
+    return signupT(key, fallback);
+  }
+
+  return (
+    data?.error ||
+    data?.mensaje ||
+    data?.message ||
+    signupT(key, fallback)
+  );
+}
 const input = document.querySelector("#phone");
 const LOGIN_PAGE = "login_google.html";
 
@@ -54,8 +88,8 @@ function setSubmitButtonLoading(isLoading) {
   submitButton.disabled = isLoading;
 
   submitButton.textContent = isLoading
-    ? "Enviando código..."
-    : "Crear cuenta";
+    ? signupT("signup.sendingCode", "Enviando código...")
+    : signupT("signup.createAccount", "Crear cuenta");
 }
 
 async function sendVerificationCode(signupData) {
@@ -76,7 +110,7 @@ async function sendVerificationCode(signupData) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || data.mensaje || "No se pudo enviar el código de verificación.");
+    throw new Error(getSignupResponseText(data, "signup.verificationSendFailed", "No se pudo enviar el código de verificación."));
   }
 
   return data;
@@ -97,7 +131,7 @@ async function verifyEmailCode(email, code) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || data.mensaje || "No se pudo verificar el código.");
+    throw new Error(getSignupResponseText(data, "signup.verificationFailed", "No se pudo verificar el código."));
   }
 
   return data;
@@ -105,27 +139,27 @@ async function verifyEmailCode(email, code) {
 
 async function openVerificationCodeModal(email) {
   const result = await Swal.fire({
-    title: "Verifica tu correo",
+    title: signupT("signup.verifyEmailTitle", "Verifica tu correo"),
     html: `
       <p>
-        Te enviamos un código de verificación a:
+        ${signupT("signup.verificationSentText", "Te enviamos un código de verificación a:")}
       </p>
       <strong>${email}</strong>
       <p style="margin-top: 12px;">
-        Revisa tu bandeja de entrada o spam.
+        ${signupT("signup.checkInboxText", "Revisa tu bandeja de entrada o spam.")}
       </p>
     `,
     input: "text",
-    inputLabel: "Código de verificación",
-    inputPlaceholder: "Ej: 123456",
+    inputLabel: signupT("signup.verificationCode", "Código de verificación"),
+    inputPlaceholder: signupT("signup.verificationPlaceholder", "Ej: 123456"),
     inputAttributes: {
       maxlength: 6,
       autocapitalize: "off",
       autocorrect: "off"
     },
     showCancelButton: true,
-    confirmButtonText: "Verificar y crear cuenta",
-    cancelButtonText: "Cancelar",
+    confirmButtonText: signupT("signup.verifyCreateAccount", "Verificar y crear cuenta"),
+    cancelButtonText: signupT("signup.cancel", "Cancelar"),
     confirmButtonColor: "#960018",
     cancelButtonColor: "#6b7280",
     showLoaderOnConfirm: true,
@@ -134,7 +168,7 @@ async function openVerificationCodeModal(email) {
       const cleanCode = String(code || "").trim();
 
       if (!cleanCode) {
-        Swal.showValidationMessage("Ingresa el código que llegó a tu correo.");
+        Swal.showValidationMessage(signupT("signup.enterVerificationCode", "Ingresa el código que llegó a tu correo."));
         return false;
       }
 
@@ -165,8 +199,8 @@ document.getElementById("signup-form").addEventListener("submit", async (event) 
 
   if (signupData.password !== signupData.confirm_password) {
     await showSignupMessage({
-      title: "Contraseñas diferentes",
-      text: "Las contraseñas no coinciden.",
+      title: signupT("signup.passwordsDifferentTitle", "Contraseñas diferentes"),
+      text: signupT("signup.passwordsMismatch", "Las contraseñas no coinciden."),
       icon: "warning"
     });
     return;
@@ -189,8 +223,8 @@ document.getElementById("signup-form").addEventListener("submit", async (event) 
     localStorage.setItem("userEmail", signupData.email);
 
     await showSignupMessage({
-      title: "Cuenta creada",
-      text: verificationResult.value?.mensaje || "Tu cuenta fue creada y el correo fue verificado correctamente.",
+      title: signupT("signup.accountCreatedTitle", "Cuenta creada"),
+      text: getSignupResponseText(verificationResult.value, "signup.accountCreatedText", "Tu cuenta fue creada y el correo fue verificado correctamente."),
       icon: "success"
     });
 
@@ -202,8 +236,8 @@ document.getElementById("signup-form").addEventListener("submit", async (event) 
     setSubmitButtonLoading(false);
 
     await showSignupMessage({
-      title: "No se pudo crear la cuenta",
-      text: error.message || "Ocurrió un error al registrarte.",
+      title: signupT("signup.accountCreateFailedTitle", "No se pudo crear la cuenta"),
+      text: error.message || signupT("signup.accountCreateFailedText", "Ocurrió un error al registrarte."),
       icon: "error"
     });
   }
