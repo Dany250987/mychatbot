@@ -768,7 +768,15 @@
           "No fue posible eliminar la cuenta.",
         language: "Idioma",
         spanish: "Español",
-        english: "English"
+        english: "English",
+        supportBadge: "Apoyo voluntario",
+        supportTitle: "Apoyar Día en Orden",
+        supportDescription:
+          "Tu apoyo ayuda a mantener y mejorar la aplicación. Es completamente voluntario y no desbloquea funciones ni contenido adicional.",
+        supportButton: "Apoyar",
+        supportErrorTitle: "No se pudo abrir el enlace",
+        supportErrorText:
+          "Intenta nuevamente en unos segundos."
       }
     },
 
@@ -1539,7 +1547,15 @@
         deletePermanentWarningEnMarker: true,
         language: "Language",
         spanish: "Español",
-        english: "English"
+        english: "English",
+        supportBadge: "Voluntary support",
+        supportTitle: "Support Día en Orden",
+        supportDescription:
+          "Your support helps maintain and improve the app. It is completely voluntary and does not unlock features or additional content.",
+        supportButton: "Support",
+        supportErrorTitle: "Could not open the link",
+        supportErrorText:
+          "Please try again in a few seconds."
       }
     }
   };

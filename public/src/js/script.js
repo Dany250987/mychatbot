@@ -71,7 +71,10 @@ document.addEventListener(
 function showAuthMessage({ title, text, icon }) {
   if (typeof Swal !== "undefined") {
     const isWelcomeMessage =
-      title === "Bienvenida";
+      title === loginT(
+        "login.welcomeTitle",
+        "Bienvenida"
+      );
 
     return Swal.fire({
       title,

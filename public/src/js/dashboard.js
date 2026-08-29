@@ -528,6 +528,61 @@ function getAccountAuthHeaders(includeJsonContent = false) {
   return headers;
 }
 
+const DANYBOT_SUPPORT_PAYMENT_URL =
+  "https://checkout.nequi.wompi.co/l/oyVB4H";
+
+async function openDanyBotSupportPayment() {
+  const Browser =
+    window.Capacitor?.Plugins?.Browser;
+
+  try {
+    if (
+      Browser &&
+      typeof Browser.open === "function"
+    ) {
+      await Browser.open({
+        url: DANYBOT_SUPPORT_PAYMENT_URL
+      });
+
+      return;
+    }
+
+    const supportWindow = window.open(
+      DANYBOT_SUPPORT_PAYMENT_URL,
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+    if (!supportWindow) {
+      window.location.href =
+        DANYBOT_SUPPORT_PAYMENT_URL;
+    }
+  } catch (error) {
+    console.error(
+      "Error al abrir el enlace de apoyo:",
+      error
+    );
+
+    if (typeof Swal !== "undefined") {
+      await Swal.fire({
+        title:
+          window.DANYBOT_I18N?.t?.(
+            "account.supportErrorTitle"
+          ) || "No se pudo abrir el enlace",
+
+        text:
+          window.DANYBOT_I18N?.t?.(
+            "account.supportErrorText"
+          ) ||
+          "Intenta nuevamente en unos segundos.",
+
+        icon: "error",
+        confirmButtonColor: "#960018"
+      });
+    }
+  }
+}
+
 function renderAccountSection() {
   const contentEl = document.getElementById("section-content");
 
@@ -639,6 +694,33 @@ function renderAccountSection() {
         </select>
       </div>
 
+      <div class="account-logout-card account-support-card">
+        <div>
+          <span class="welcome-badge">
+            ${accountT("account.supportBadge", "Apoyo voluntario")}
+          </span>
+
+          <h2>
+            ${accountT("account.supportTitle", "Apoyar Día en Orden")}
+          </h2>
+
+          <p>
+            ${accountT(
+              "account.supportDescription",
+              "Tu apoyo ayuda a mantener y mejorar la aplicación. Es completamente voluntario y no desbloquea funciones ni contenido adicional."
+            )}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="account-logout-button account-support-button"
+          onclick="openDanyBotSupportPayment()"
+        >
+          <i class="fa-solid fa-heart"></i>
+          ${accountT("account.supportButton", "Apoyar")}
+        </button>
+      </div>
       <div class="account-logout-card">
         <div>
           <span class="welcome-badge">${accountT("account.session", "Sesión")}</span>

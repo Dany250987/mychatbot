@@ -326,15 +326,77 @@ function getDashboardHomeIcon(reminder) {
 }
 
 function getDashboardHomeTypeLabel(reminder) {
-  const category = String(reminder.category || "").trim();
+  const category = String(
+    reminder.category || ""
+  )
+    .trim()
+    .toLowerCase();
+
+  const categoryLabels = {
+    personal:
+      dashboardHomeT(
+        "activities.personal",
+        "Personal"
+      ),
+
+    finanzas:
+      dashboardHomeT(
+        "activities.finance",
+        "Finanzas"
+      ),
+
+    estudio:
+      dashboardHomeT(
+        "activities.study",
+        "Estudio"
+      ),
+
+    trabajo:
+      dashboardHomeT(
+        "activities.work",
+        "Trabajo"
+      ),
+
+    salud:
+      dashboardHomeT(
+        "activities.health",
+        "Salud"
+      ),
+
+    pagos:
+      dashboardHomeT(
+        "activities.payments",
+        "Pagos"
+      ),
+
+    otro:
+      dashboardHomeT(
+        "activities.other",
+        "Otro"
+      )
+  };
+
+  if (category && categoryLabels[category]) {
+    return escapeDashboardHomeHtml(
+      categoryLabels[category]
+    );
+  }
 
   if (category) {
-    return escapeDashboardHomeHtml(category);
+    return escapeDashboardHomeHtml(
+      reminder.category
+    );
   }
 
   return reminder.reminder_time
-    ? dashboardHomeT("home.reminder", "Aviso")
-    : dashboardHomeT("home.activity", "Actividad");
+    ? dashboardHomeT(
+        "home.reminder",
+        "Aviso"
+      )
+    : dashboardHomeT(
+        "home.activity",
+        "Actividad"
+      );
 }
 
 function getDashboardHomeTypeClass(reminder) {
