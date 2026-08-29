@@ -1,3 +1,24 @@
+function taskT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key) || fallback;
+  }
+
+  return fallback;
+}
+
+function getTaskLanguage() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage();
+  }
+
+  return "es";
+}
 // ===============================
 // Seguridad con token para tareas
 // ===============================
@@ -97,7 +118,7 @@ function renderTasksSection() {
         <div class="task-header-actions">
           <button type="button" class="task-voice-button">
             <i class="fa-solid fa-microphone"></i>
-            Crear por voz
+            ${taskT("activities.taskCreateByVoice", "Crear por voz")}
           </button>
 
           <button type="button" class="task-main-button">
@@ -263,20 +284,20 @@ async function startVoiceTask() {
       taskVoiceButton.classList.add("listening");
       taskVoiceButton.innerHTML = `
         <i class="fa-solid fa-microphone-lines"></i>
-        Escuchando...
+        ${taskT("activities.taskListening", "Escuchando...")}
       `;
     }
 
     const result = await window.startDanyBotNativeSpeech({
-      language: "es-CO",
-      prompt: "Di la tarea que quieres crear"
+      language: getTaskLanguage() === "en" ? "en-US" : "es-CO",
+      prompt: taskT("activities.taskVoicePrompt", "Di la tarea que quieres crear")
     });
 
     if (taskVoiceButton) {
       taskVoiceButton.classList.remove("listening");
       taskVoiceButton.innerHTML = `
         <i class="fa-solid fa-microphone"></i>
-        Crear por voz
+        ${taskT("activities.taskCreateByVoice", "Crear por voz")}
       `;
     }
 
@@ -353,7 +374,7 @@ async function startVoiceTask() {
       taskVoiceButton.classList.remove("listening");
       taskVoiceButton.innerHTML = `
         <i class="fa-solid fa-microphone"></i>
-        Crear por voz
+        ${taskT("activities.taskCreateByVoice", "Crear por voz")}
       `;
     }
 
@@ -673,7 +694,7 @@ function formatTaskCompletedUntil(task) {
     return "";
   }
 
-  return visibleUntilDate.toLocaleDateString("es-CO", {
+  return visibleUntilDate.toLocaleDateString(getTaskLanguage() === "en" ? "en-US" : "es-CO", {
     day: "numeric",
     month: "long",
     year: "numeric"

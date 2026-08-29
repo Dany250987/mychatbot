@@ -25,6 +25,218 @@ function runQuery(sql, params = []) {
   });
 }
 
+function normalizeGlobalSearchTerm(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+const GLOBAL_SEARCH_VALUE_ALIASES = {
+  low: ['baja'],
+  medium: ['media'],
+  high: ['alta'],
+
+  once: ['una_vez'],
+  daily: ['diario'],
+  weekly: ['semanal'],
+  monthly: ['mensual'],
+  annual: ['anual'],
+  yearly: ['anual'],
+
+  active: ['activo'],
+  completed: ['completado'],
+  complete: ['completado'],
+  trash: ['papelera'],
+  deleted: ['papelera'],
+
+  finance: ['finanzas'],
+  finances: ['finanzas'],
+  study: ['estudio'],
+  studies: ['estudio'],
+  work: ['trabajo'],
+  health: ['salud'],
+  payment: ['pagos'],
+  payments: ['pagos'],
+  other: ['otro'],
+
+  bill: ['Factura'],
+  bills: ['Factura'],
+  food: ['Alimentación'],
+  transportation: ['Transporte'],
+  transport: ['Transporte'],
+  entertainment: ['Entretenimiento'],
+  loan: ['Prestamos'],
+  loans: ['Prestamos'],
+
+  alimentacion: ['Alimentación'],
+  prestamo: ['Prestamos'],
+  prestamos: ['Prestamos'],
+
+  'una vez': ['una_vez']
+};
+
+function getGlobalSearchTerms(searchText) {
+  const terms = [searchText];
+
+  const normalized =
+    normalizeGlobalSearchTerm(searchText);
+
+  const aliases =
+    GLOBAL_SEARCH_VALUE_ALIASES[normalized] || [];
+
+  aliases.forEach((alias) => {
+    const alreadyExists = terms.some(
+      (term) =>
+        normalizeGlobalSearchTerm(term) ===
+        normalizeGlobalSearchTerm(alias)
+    );
+
+    if (!alreadyExists) {
+      terms.push(alias);
+    }
+  });
+
+  return terms;
+}
+
+function getGlobalSearchModuleTargets(normalizedSearchText) {
+  const targets = {
+    reminders: false,
+    expenses: false,
+    monthlyIncomes: false,
+    additionalIncomes: false,
+    documents: false
+  };
+
+  const activityTerms = new Set([
+    'actividad',
+    'actividades',
+    'activity',
+    'activities',
+    'recordatorio',
+    'recordatorios',
+    'reminder',
+    'reminders',
+    'tarea',
+    'tareas',
+    'task',
+    'tasks'
+  ]);
+
+  const expenseTerms = new Set([
+    'gasto',
+    'gastos',
+    'expense',
+    'expenses'
+  ]);
+
+  const incomeTerms = new Set([
+    'ingreso',
+    'ingresos',
+    'income',
+    'incomes'
+  ]);
+
+  const monthlyIncomeTerms = new Set([
+    'ingreso mensual',
+    'ingresos mensuales',
+    'monthly income',
+    'monthly incomes'
+  ]);
+
+  const additionalIncomeTerms = new Set([
+    'ingreso adicional',
+    'ingresos adicionales',
+    'additional income',
+    'additional incomes'
+  ]);
+
+  const documentTerms = new Set([
+    'documento',
+    'documentos',
+    'document',
+    'documents'
+  ]);
+
+  const movementTerms = new Set([
+    'movimiento',
+    'movimientos',
+    'movement',
+    'movements'
+  ]);
+
+  if (activityTerms.has(normalizedSearchText)) {
+    targets.reminders = true;
+  }
+
+  if (expenseTerms.has(normalizedSearchText)) {
+    targets.expenses = true;
+  }
+
+  if (incomeTerms.has(normalizedSearchText)) {
+    targets.monthlyIncomes = true;
+    targets.additionalIncomes = true;
+  }
+
+  if (monthlyIncomeTerms.has(normalizedSearchText)) {
+    targets.monthlyIncomes = true;
+  }
+
+  if (additionalIncomeTerms.has(normalizedSearchText)) {
+    targets.additionalIncomes = true;
+  }
+
+  if (documentTerms.has(normalizedSearchText)) {
+    targets.documents = true;
+  }
+
+  if (movementTerms.has(normalizedSearchText)) {
+    targets.expenses = true;
+    targets.monthlyIncomes = true;
+    targets.additionalIncomes = true;
+  }
+
+  return targets;
+}
+
+function getModuleSearchTerms(searchTerms, includeAll) {
+  const terms =
+    includeAll
+      ? ['', ...searchTerms]
+      : [...searchTerms];
+
+  return terms.filter(
+    (term, index, array) =>
+      array.findIndex(
+        (candidate) =>
+          normalizeGlobalSearchTerm(candidate) ===
+          normalizeGlobalSearchTerm(term)
+      ) === index
+  );
+}
+
+function buildSearchParams(userId, term, fieldCount) {
+  const searchLike = `%${term}%`;
+
+  return [
+    userId,
+    ...Array(fieldCount).fill(searchLike)
+  ];
+}
+
+function mergeUniqueSearchResults(groups, limit = 10) {
+  const unique = new Map();
+
+  groups.flat().forEach((result) => {
+    if (!unique.has(result.id)) {
+      unique.set(result.id, result);
+    }
+  });
+
+  return Array.from(unique.values()).slice(0, limit);
+}
 // GET /api/search?q=texto
 router.get('/', async (req, res) => {
   const userId = req.user.id;
@@ -253,78 +465,134 @@ router.get('/', async (req, res) => {
     // EJECUTAR BÚSQUEDAS
     // =====================================
 
+    const reminderTerms =
+      getModuleSearchTerms(
+        searchTerms,
+        moduleTargets.reminders
+      );
+
+    const expenseTerms =
+      getModuleSearchTerms(
+        searchTerms,
+        moduleTargets.expenses
+      );
+
+    const monthlyIncomeTerms =
+      getModuleSearchTerms(
+        searchTerms,
+        moduleTargets.monthlyIncomes
+      );
+
+    const additionalIncomeTerms =
+      getModuleSearchTerms(
+        searchTerms,
+        moduleTargets.additionalIncomes
+      );
+
+    const documentTerms =
+      getModuleSearchTerms(
+        searchTerms,
+        moduleTargets.documents
+      );
+
     const [
-      reminders,
-      expenses,
-      monthlyIncomes,
-      additionalIncomes,
-      documents
+      reminderGroups,
+      expenseGroups,
+      monthlyIncomeGroups,
+      additionalIncomeGroups,
+      documentGroups
     ] = await Promise.all([
 
-      runQuery(
-        remindersSql,
-        [
-          userId,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike
-        ]
+      Promise.all(
+        reminderTerms.map((term) =>
+          runQuery(
+            remindersSql,
+            buildSearchParams(
+              userId,
+              term,
+              11
+            )
+          )
+        )
       ),
 
-      runQuery(
-        expensesSql,
-        [
-          userId,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike
-        ]
+      Promise.all(
+        expenseTerms.map((term) =>
+          runQuery(
+            expensesSql,
+            buildSearchParams(
+              userId,
+              term,
+              6
+            )
+          )
+        )
       ),
 
-      runQuery(
-        monthlyIncomesSql,
-        [
-          userId,
-          searchLike,
-          searchLike,
-          searchLike
-        ]
+      Promise.all(
+        monthlyIncomeTerms.map((term) =>
+          runQuery(
+            monthlyIncomesSql,
+            buildSearchParams(
+              userId,
+              term,
+              3
+            )
+          )
+        )
       ),
 
-      runQuery(
-        additionalIncomesSql,
-        [
-          userId,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike,
-          searchLike
-        ]
+      Promise.all(
+        additionalIncomeTerms.map((term) =>
+          runQuery(
+            additionalIncomesSql,
+            buildSearchParams(
+              userId,
+              term,
+              6
+            )
+          )
+        )
       ),
 
-      runQuery(
-        documentsSql,
-        [
-          userId,
-          searchLike,
-          searchLike
-        ]
+      Promise.all(
+        documentTerms.map((term) =>
+          runQuery(
+            documentsSql,
+            buildSearchParams(
+              userId,
+              term,
+              2
+            )
+          )
+        )
       )
     ]);
 
+    const reminders =
+      mergeUniqueSearchResults(
+        reminderGroups
+      );
+
+    const expenses =
+      mergeUniqueSearchResults(
+        expenseGroups
+      );
+
+    const monthlyIncomes =
+      mergeUniqueSearchResults(
+        monthlyIncomeGroups
+      );
+
+    const additionalIncomes =
+      mergeUniqueSearchResults(
+        additionalIncomeGroups
+      );
+
+    const documents =
+      mergeUniqueSearchResults(
+        documentGroups
+      );
 
     // =====================================
     // UNIFICAR RESULTADOS
