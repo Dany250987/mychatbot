@@ -1,3 +1,16 @@
+function getDashboardLocale() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage() === "en"
+      ? "en-US"
+      : "es-CO";
+  }
+
+  return "es-CO";
+}
+
 function updateDateTime() {
   const datetime = document.getElementById("datetime");
 
@@ -7,14 +20,14 @@ function updateDateTime() {
 
   const now = new Date();
 
-  const formattedDate = now.toLocaleDateString("es-CO", {
+  const formattedDate = now.toLocaleDateString(getDashboardLocale(), {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric"
   });
 
-  const formattedTime = now.toLocaleTimeString("es-CO", {
+  const formattedTime = now.toLocaleTimeString(getDashboardLocale(), {
     hour: "2-digit",
     minute: "2-digit"
   });
@@ -86,22 +99,36 @@ function formatReminderTime(timeValue) {
   date.setHours(Number(hour));
   date.setMinutes(Number(minute));
 
-  return date.toLocaleTimeString("es-CO", {
+  return date.toLocaleTimeString(getDashboardLocale(), {
     hour: "numeric",
     minute: "2-digit"
   });
 }
 
 function formatRepeatType(repeatType) {
-  const types = {
-    una_vez: "Una vez",
-    diario: "Diario",
-    semanal: "Semanal",
-    mensual: "Mensual",
-    anual: "Anual"
+  const translate = (key, fallback) => {
+    if (
+      window.DANYBOT_I18N &&
+      typeof window.DANYBOT_I18N.t === "function"
+    ) {
+      return window.DANYBOT_I18N.t(key);
+    }
+
+    return fallback;
   };
 
-  return types[repeatType] || "Una vez";
+  const types = {
+    una_vez: translate("activities.once", "Una vez"),
+    diario: translate("activities.daily", "Diario"),
+    semanal: translate("activities.weekly", "Semanal"),
+    mensual: translate("activities.monthly", "Mensual"),
+    anual: translate("activities.yearly", "Anual")
+  };
+
+  return (
+    types[repeatType] ||
+    translate("activities.once", "Una vez")
+  );
 }
 
 function getRepeatTypeClass(repeatType) {
@@ -147,3 +174,10 @@ function getRepeatTypeIcon(repeatType) {
 
   return "fa-circle-dot";
 }
+
+document.addEventListener(
+  "danybot:language-changed",
+  () => {
+    updateDateTime();
+  }
+);

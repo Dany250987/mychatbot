@@ -1,3 +1,33 @@
+function reminderVoiceT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key);
+  }
+
+  return fallback;
+}
+
+function getReminderVoiceLanguage() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage();
+  }
+
+  return "es";
+}
+
+function getReminderVoiceErrorText(reason, key, fallback) {
+  if (getReminderVoiceLanguage() === "en") {
+    return reminderVoiceT(key, fallback);
+  }
+
+  return reason || reminderVoiceT(key, fallback);
+}
+
 // ===============================
 // Seguridad con token para recordatorios por voz
 // ===============================
@@ -48,6 +78,300 @@ async function handleVoiceReminderUnauthorizedSession(data) {
   window.location.href = "login_google.html";
 }
 
+
+function getReminderVoiceParserText(text) {
+  if (getReminderVoiceLanguage() !== "en") {
+    return text;
+  }
+
+  return translateEnglishVoiceToParserText(text);
+}
+
+function translateEnglishVoiceToParserText(text) {
+  let value =
+    String(text || "")
+      .toLowerCase()
+      .replace(/[’']/g, "'")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  if (!value) {
+    return value;
+  }
+
+  const monthMap = {
+    january: "enero",
+    february: "febrero",
+    march: "marzo",
+    april: "abril",
+    may: "mayo",
+    june: "junio",
+    july: "julio",
+    august: "agosto",
+    september: "septiembre",
+    october: "octubre",
+    november: "noviembre",
+    december: "diciembre"
+  };
+
+  const weekDayMap = {
+    sunday: "domingo",
+    monday: "lunes",
+    tuesday: "martes",
+    wednesday: "miercoles",
+    thursday: "jueves",
+    friday: "viernes",
+    saturday: "sabado"
+  };
+
+  const spokenHourMap = {
+    one: "una",
+    two: "dos",
+    three: "tres",
+    four: "cuatro",
+    five: "cinco",
+    six: "seis",
+    seven: "siete",
+    eight: "ocho",
+    nine: "nueve",
+    ten: "diez",
+    eleven: "once",
+    twelve: "doce"
+  };
+
+  /*
+   * August 30 / August 30th
+   */
+  value = value.replace(
+    /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})(?:st|nd|rd|th)?\b/g,
+    (match, monthName, day) =>
+      `${day} ${monthMap[monthName]}`
+  );
+
+  /*
+   * 30 August / 30th August
+   */
+  value = value.replace(
+    /\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december)\b/g,
+    (match, day, monthName) =>
+      `${day} ${monthMap[monthName]}`
+  );
+
+  /*
+   * Fechas relativas.
+   */
+  value = value
+    .replace(/\bday after tomorrow\b/g, "pasado manana")
+    .replace(/\btomorrow\b/g, "manana")
+    .replace(/\btoday\b/g, "hoy");
+
+  /*
+   * Recurrencias generales.
+   */
+  value = value
+    .replace(/\bevery day\b|\bdaily\b/g, "cada dia")
+    .replace(/\bevery week\b|\bweekly\b/g, "cada semana")
+    .replace(/\bevery month\b|\bmonthly\b/g, "cada mes")
+    .replace(/\bevery year\b|\byearly\b|\bannually\b/g, "cada ano");
+
+  /*
+   * Every Monday, every Tuesday...
+   */
+  value = value.replace(
+    /\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/g,
+    (match, dayName) =>
+      `cada ${weekDayMap[dayName]}`
+  );
+
+  /*
+   * Días individuales.
+   */
+  Object.entries(weekDayMap).forEach(
+    ([english, spanish]) => {
+      value = value.replace(
+        new RegExp(`\\b${english}\\b`, "g"),
+        spanish
+      );
+    }
+  );
+
+  /*
+   * Meses individuales.
+   */
+  Object.entries(monthMap).forEach(
+    ([english, spanish]) => {
+      value = value.replace(
+        new RegExp(`\\b${english}\\b`, "g"),
+        spanish
+      );
+    }
+  );
+
+  /*
+   * at seven / at seven pm
+   */
+  value = value.replace(
+    /\bat\s+(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s*(am|pm)?\b/g,
+    (match, hourWord, meridiem) =>
+      `a las ${spokenHourMap[hourWord]}${
+        meridiem ? ` ${meridiem}` : ""
+      }`
+  );
+
+  /*
+   * at 7 / at 7 PM / at 7:30 PM
+   */
+  value = value.replace(
+    /\bat\s+(\d{1,2})(?::(\d{1,2}))?\s*(am|pm)?\b/g,
+    (match, hour, minutes, meridiem) => {
+      const minuteText =
+        minutes ? `:${minutes}` : "";
+
+      const meridiemText =
+        meridiem ? ` ${meridiem}` : "";
+
+      return `a las ${hour}${minuteText}${meridiemText}`;
+    }
+  );
+
+  value = value
+    .replace(/\bin the morning\b/g, "de la manana")
+    .replace(/\bin the afternoon\b/g, "de la tarde")
+    .replace(/\bin the evening\b/g, "de la noche")
+    .replace(/\bat night\b/g, "de la noche");
+
+  /*
+   * Inicio habitual de una orden.
+   */
+  value = value.replace(
+    /^(?:please\s+)?remind me(?:\s+to)?\s+/,
+    "recordatorio para "
+  );
+
+  value = value.replace(
+    /^(?:please\s+)?(?:create|add|set)\s+(?:a\s+)?reminder(?:\s+to|\s+for)?\s+/,
+    "recordatorio para "
+  );
+
+  /*
+   * Palabras auxiliares para la detección
+   * de categoría. Solo afectan al parser,
+   * nunca al título mostrado al usuario.
+   */
+  if (
+    /\b(pay|payment|bill|rent|credit card|expense|expenses|savings)\b/.test(value)
+  ) {
+    value += " pagar factura";
+  }
+
+  if (
+    /\b(study|course|class|exam|homework)\b/.test(value)
+  ) {
+    value += " estudiar curso";
+  }
+
+  if (
+    /\b(doctor|appointment|medicine|health|exercise|workout)\b/.test(value)
+  ) {
+    value += " medico cita salud";
+  }
+
+  if (
+    /\b(meeting|report|email|work|client|ticket)\b/.test(value)
+  ) {
+    value += " reunion informe trabajo";
+  }
+
+  return value
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+function detectEnglishReminderTitle(text) {
+  let title =
+    String(text || "")
+      .trim();
+
+  if (!title) {
+    return "Reminder";
+  }
+
+  title = title
+    .replace(/[¿?¡!.,;]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  title = title
+    .replace(
+      /^(?:please\s+)?remind me(?:\s+to)?\s+/i,
+      ""
+    )
+    .replace(
+      /^(?:please\s+)?(?:create|add|set)\s+(?:a\s+)?reminder(?:\s+to|\s+for)?\s+/i,
+      ""
+    );
+
+  /*
+   * Horas.
+   */
+  title = title
+    .replace(
+      /\bat\s+\d{1,2}(?::\d{1,2})?\s*(?:am|pm)?\b/gi,
+      " "
+    )
+    .replace(
+      /\bat\s+(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s*(?:am|pm)?\b/gi,
+      " "
+    )
+    .replace(
+      /\b(?:in the morning|in the afternoon|in the evening|at night)\b/gi,
+      " "
+    );
+
+  /*
+   * Fechas relativas y recurrencia.
+   */
+  title = title
+    .replace(
+      /\b(?:day after tomorrow|tomorrow|today)\b/gi,
+      " "
+    )
+    .replace(
+      /\b(?:every day|daily|every week|weekly|every month|monthly|every year|yearly|annually)\b/gi,
+      " "
+    )
+    .replace(
+      /\b(?:every\s+|on\s+)?(?:sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi,
+      " "
+    );
+
+  /*
+   * Fechas con nombre del mes.
+   */
+  title = title
+    .replace(
+      /\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?\b/gi,
+      " "
+    )
+    .replace(
+      /\b\d{1,2}(?:st|nd|rd|th)?\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)\b/gi,
+      " "
+    );
+
+  title = title
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!title) {
+    return "Reminder";
+  }
+
+  return (
+    title.charAt(0).toUpperCase() +
+    title.slice(1)
+  );
+}
 
 function getDateForTimeOnly(reminderTime) {
   const today = new Date();
@@ -730,8 +1054,20 @@ async function saveVoiceReminder(reminderData) {
 
     if (!response.ok) {
       Swal.fire({
-        title: "No se pudo guardar",
-        text: data.mensaje || "No se pudo guardar el recordatorio.",
+        title: reminderVoiceT("activities.saveFailedTitle", "No se pudo guardar"),
+        text:
+          getReminderVoiceLanguage() === "en"
+            ? reminderVoiceT(
+                "activities.saveFailedText",
+                "No se pudo guardar la actividad."
+              )
+            : (
+                data.mensaje ||
+                reminderVoiceT(
+                  "activities.saveFailedText",
+                  "No se pudo guardar la actividad."
+                )
+              ),
         icon: "error",
         confirmButtonColor: "#960018"
       });
@@ -766,13 +1102,13 @@ async function saveVoiceReminder(reminderData) {
       notificationResult.exactAlarmRequired
     ) {
       const exactAlarmResult = await Swal.fire({
-        title: "Permitir avisos exactos",
+        title: reminderVoiceT("activities.exactAlertsTitle", "Permitir avisos exactos"),
         text:
-          "Para avisarte exactamente a la hora programada, Día en Orden necesita permiso para usar alarmas y recordatorios.",
+          reminderVoiceT("activities.exactAlertsText", "Para avisarte exactamente a la hora programada, Día en Orden necesita permiso para usar alarmas y recordatorios."),
         icon: "info",
         showCancelButton: true,
-        confirmButtonText: "Ir a configuración",
-        cancelButtonText: "Ahora no",
+        confirmButtonText: reminderVoiceT("activities.goToSettings", "Ir a configuración"),
+        cancelButtonText: reminderVoiceT("activities.notNow", "Ahora no"),
         confirmButtonColor: "#960018",
         cancelButtonColor: "#6b7280"
       });
@@ -910,7 +1246,7 @@ async function startVoiceReminder() {
 
     try {
       if (statusText) {
-        statusText.textContent = "Escuchando... di tu recordatorio completo.";
+        statusText.textContent = reminderVoiceT("activities.listening", "Escuchando... di tu recordatorio completo.");
       }
 
       if (voiceButton) {
@@ -919,8 +1255,8 @@ async function startVoiceReminder() {
       }
 
       const result = await window.startDanyBotNativeSpeech({
-        language: "es-CO",
-        prompt: "Di el recordatorio que quieres crear"
+        language: getReminderVoiceLanguage() === "en" ? "en-US" : "es-CO",
+        prompt: reminderVoiceT("activities.voiceNativePrompt", "Di el recordatorio que quieres crear")
       });
 
       if (voiceButton) {
@@ -934,8 +1270,8 @@ async function startVoiceReminder() {
         }
 
         Swal.fire({
-          title: "No se pudo escuchar",
-          text: result.reason || "No se detectó ningún texto.",
+          title: reminderVoiceT("activities.couldNotListen", "No se pudo escuchar"),
+          text: getReminderVoiceErrorText(result.reason, "activities.noTextDetected", "No se detectó ningún texto."),
           icon: "warning",
           confirmButtonColor: "#960018"
         });
@@ -961,12 +1297,12 @@ async function startVoiceReminder() {
       }
 
       if (statusText) {
-        statusText.textContent = "No se pudo usar el micrófono.";
+        statusText.textContent = reminderVoiceT("activities.microphoneUnavailable", "No se pudo usar el micrófono.");
       }
 
       Swal.fire({
-        title: "Error de voz",
-        text: "No fue posible usar el micrófono del celular.",
+        title: reminderVoiceT("activities.voiceError", "Error de voz"),
+        text: reminderVoiceT("activities.microphoneError", "No fue posible usar el micrófono del celular."),
         icon: "error",
         confirmButtonColor: "#960018"
       });
@@ -979,8 +1315,8 @@ async function startVoiceReminder() {
 
   if (!SpeechRecognition) {
     Swal.fire({
-      title: "Micrófono no compatible",
-      text: "Tu navegador no soporta reconocimiento de voz. Prueba en Google Chrome.",
+      title: reminderVoiceT("activities.microphoneUnsupported", "Micrófono no compatible"),
+      text: reminderVoiceT("activities.microphoneUnsupportedText", "Tu navegador no soporta reconocimiento de voz. Prueba en Google Chrome."),
       icon: "warning",
       confirmButtonColor: "#960018"
     });
@@ -989,7 +1325,7 @@ async function startVoiceReminder() {
 
   const recognition = new SpeechRecognition();
 
-  recognition.lang = "es-CO";
+  recognition.lang = getReminderVoiceLanguage() === "en" ? "en-US" : "es-CO";
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
@@ -1051,7 +1387,7 @@ async function startVoiceReminder() {
   }
 
   if (statusText) {
-    statusText.textContent = "Escuchando... habla tu recordatorio completo.";
+    statusText.textContent = reminderVoiceT("activities.listening", "Escuchando... di tu recordatorio completo.");
   }
 
   if (voiceButton) {
@@ -1065,8 +1401,8 @@ async function startVoiceReminder() {
     resetVoiceButton();
 
     Swal.fire({
-      title: "No se pudo iniciar el micrófono",
-      text: "Intenta nuevamente.",
+      title: reminderVoiceT("activities.microphoneStartFailed", "No se pudo iniciar el micrófono"),
+      text: reminderVoiceT("activities.tryAgain", "Intenta nuevamente."),
       icon: "error",
       confirmButtonColor: "#960018"
     });
@@ -1096,7 +1432,7 @@ async function startVoiceReminder() {
     if (statusText) {
       statusText.textContent = visibleText
         ? `"${visibleText}"`
-        : "Escuchando... habla tu recordatorio completo.";
+        : reminderVoiceT("activities.listening", "Escuchando... di tu recordatorio completo.");
     }
 
     clearTimeout(silenceTimer);
@@ -1116,8 +1452,8 @@ async function startVoiceReminder() {
     }
 
     Swal.fire({
-      title: "No se pudo escuchar",
-      text: "Revisa el permiso del micrófono o intenta nuevamente.",
+      title: reminderVoiceT("activities.couldNotListen", "No se pudo escuchar"),
+      text: reminderVoiceT("activities.microphonePermissionError", "Revisa el permiso del micrófono o intenta nuevamente."),
       icon: "error",
       confirmButtonColor: "#960018"
     });
@@ -1280,8 +1616,11 @@ function getVoiceReminderLastDayOfMonth(dateValue) {
 function parseReminderFromVoice(text) {
   const originalText = text;
 
+  const parserText =
+    getReminderVoiceParserText(text);
+
   const normalizedText =
-    normalizeText(text);
+    normalizeText(parserText);
 
 
   let reminderDate =
@@ -1335,9 +1674,13 @@ function parseReminderFromVoice(text) {
    * exactamente el texto original.
    */
   const title =
-    detectReminderTitle(
-      originalText
-    );
+    getReminderVoiceLanguage() === "en"
+      ? detectEnglishReminderTitle(
+          originalText
+        )
+      : detectReminderTitle(
+          originalText
+        );
 
 
   return {

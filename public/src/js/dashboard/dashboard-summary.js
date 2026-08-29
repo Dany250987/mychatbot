@@ -2,6 +2,28 @@
 // Seguridad con token para el resumen del dashboard
 // ===============================
 
+function dashboardHomeT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key);
+  }
+
+  return fallback;
+}
+
+function getDashboardHomeLanguage() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage();
+  }
+
+  return "es";
+}
+
 function getDashboardSummaryAuthToken() {
   return localStorage.getItem("authToken");
 }
@@ -186,8 +208,8 @@ function renderDashboardUpcomingActivities(activityList = []) {
         </div>
 
         <div>
-          <h3>Tu agenda aparecerá aquí</h3>
-          <p>Las actividades más próximas se mostrarán en esta sección.</p>
+          <h3>${dashboardHomeT("home.emptyTitle", "Tu agenda aparecerá aquí")}</h3>
+          <p>${dashboardHomeT("home.emptyText", "Las actividades más próximas se mostrarán en esta sección.")}</p>
         </div>
       </div>
     `;
@@ -200,7 +222,7 @@ function renderDashboardUpcomingActivities(activityList = []) {
       const title = escapeDashboardHomeHtml(
         reminder.title
         || reminder.original_text
-        || "Actividad"
+        || dashboardHomeT("home.activity", "Actividad")
       );
 
       const dateLabel = formatDashboardHomeActivityDate(reminder);
@@ -212,7 +234,7 @@ function renderDashboardUpcomingActivities(activityList = []) {
         <a
           class="dashboard-upcoming-item"
           href="./dashboard.html?type=reminder&id=${encodeURIComponent(reminder.id)}&status=${encodeURIComponent(reminder.status || "activo")}#recordatorios"
-          aria-label="Abrir actividad: ${title}"
+          aria-label="${dashboardHomeT("home.openActivity", "Abrir actividad")}: ${title}"
         >
           <span class="dashboard-upcoming-dot ${typeClass}"></span>
 
@@ -254,13 +276,13 @@ function formatDashboardHomeActivityDate(reminder) {
   let dateText = "";
 
   if (reminderDate === today) {
-    dateText = "Hoy";
+    dateText = dashboardHomeT("home.today", "Hoy");
   } else if (reminderDate === tomorrow) {
-    dateText = "Mañana";
+    dateText = dashboardHomeT("home.tomorrow", "Mañana");
   } else {
     const date = new Date(`${reminderDate}T00:00:00`);
 
-    dateText = date.toLocaleDateString("es-CO", {
+    dateText = date.toLocaleDateString(getDashboardHomeLanguage() === "en" ? "en-US" : "es-CO", {
       day: "numeric",
       month: "short"
     }).replace(".", "");
@@ -272,7 +294,10 @@ function formatDashboardHomeActivityDate(reminder) {
 
   const [hourValue, minuteValue] = reminderTime.split(":");
   const hour = Number(hourValue);
-  const suffix = hour >= 12 ? "p. m." : "a. m.";
+  const suffix =
+    getDashboardHomeLanguage() === "en"
+      ? (hour >= 12 ? "PM" : "AM")
+      : (hour >= 12 ? "p. m." : "a. m.");
   const formattedHour = hour % 12 || 12;
 
   return `${dateText}, ${formattedHour}:${minuteValue} ${suffix}`;
@@ -307,7 +332,9 @@ function getDashboardHomeTypeLabel(reminder) {
     return escapeDashboardHomeHtml(category);
   }
 
-  return reminder.reminder_time ? "Aviso" : "Actividad";
+  return reminder.reminder_time
+    ? dashboardHomeT("home.reminder", "Aviso")
+    : dashboardHomeT("home.activity", "Actividad");
 }
 
 function getDashboardHomeTypeClass(reminder) {

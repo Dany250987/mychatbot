@@ -1,3 +1,14 @@
+function documentMobileT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key);
+  }
+
+  return fallback;
+}
+
 // =====================================================
 // DANYBOT - DOCUMENTOS MÓVIL
 // Funciones nativas para Android
@@ -25,7 +36,7 @@ function convertDocumentBlobToBase64(blob) {
       ) {
         reject(
           new Error(
-            'No se pudo convertir el documento.'
+            documentMobileT("documents.nativeConversionFailed", "No se pudo convertir el documento.")
           )
         );
 
@@ -38,7 +49,7 @@ function convertDocumentBlobToBase64(blob) {
     reader.onerror = () => {
       reject(
         new Error(
-          'No se pudo leer el documento.'
+          documentMobileT("documents.nativeReadFailed", "No se pudo leer el documento.")
         )
       );
     };
@@ -68,7 +79,7 @@ async function writeDocumentBlobToNativeFile({
 }) {
   if (!(blob instanceof Blob) || blob.size === 0) {
     throw new Error(
-      'El documento recibido está vacío o no es válido.'
+      documentMobileT("documents.nativeInvalidDocument", "El documento recibido está vacío o no es válido.")
     );
   }
 
@@ -77,7 +88,7 @@ async function writeDocumentBlobToNativeFile({
 
   if (!Filesystem) {
     throw new Error(
-      'No se encontró el sistema nativo de archivos.'
+      documentMobileT("documents.nativeFileSystemMissing", "No se encontró el sistema nativo de archivos.")
     );
   }
 
@@ -111,7 +122,7 @@ async function writeDocumentBlobToNativeFile({
 
   if (!fileInfo?.uri) {
     throw new Error(
-      'No se pudo obtener la ubicación del documento.'
+      documentMobileT("documents.nativeLocationFailed", "No se pudo obtener la ubicación del documento.")
     );
   }
 
@@ -129,13 +140,13 @@ window.openDocumentInMobileApp =
   ) {
     if (!isNativeDocumentsApp()) {
       throw new Error(
-        'El visor nativo solo está disponible en la aplicación móvil.'
+        documentMobileT("documents.nativeViewerOnlyMobile", "El visor nativo solo está disponible en la aplicación móvil.")
       );
     }
 
     if (!(blob instanceof Blob) || blob.size === 0) {
       throw new Error(
-        'El documento recibido está vacío o no es válido.'
+        documentMobileT("documents.nativeInvalidDocument", "El documento recibido está vacío o no es válido.")
       );
     }
 
@@ -150,7 +161,7 @@ window.openDocumentInMobileApp =
 
     if (!Filesystem || !FileViewer) {
       throw new Error(
-        'No se encontraron los plugins necesarios para abrir el documento.'
+        documentMobileT("documents.nativePluginsMissing", "No se encontraron los plugins necesarios para abrir el documento.")
       );
     }
 
@@ -186,7 +197,7 @@ window.openDocumentInMobileApp =
 
     if (!fileInfo?.uri) {
       throw new Error(
-        'No se pudo obtener la ubicación temporal del documento.'
+        documentMobileT("documents.nativeTemporaryLocationFailed", "No se pudo obtener la ubicación temporal del documento.")
       );
     }
 
@@ -202,7 +213,7 @@ window.openDocumentInMobileApp =
   ) {
     if (!isNativeDocumentsApp()) {
       throw new Error(
-        'La descarga nativa solo está disponible en la aplicación móvil.'
+        documentMobileT("documents.nativeDownloadOnlyMobile", "La descarga nativa solo está disponible en la aplicación móvil.")
       );
     }
 
@@ -211,7 +222,7 @@ window.openDocumentInMobileApp =
 
     if (!Filesystem) {
       throw new Error(
-        'No se encontró el sistema nativo de archivos.'
+        documentMobileT("documents.nativeFileSystemMissing", "No se encontró el sistema nativo de archivos.")
       );
     }
 
@@ -231,9 +242,9 @@ window.openDocumentInMobileApp =
       });
 
     await Swal.fire({
-      title: 'Documento guardado',
+      title: documentMobileT("documents.savedTitle", "Documento guardado"),
       text:
-        `${savedFile.fileName} fue guardado en la carpeta Documentos/DANYBOT.`,
+        `${savedFile.fileName} ${documentMobileT("documents.nativeSavedTextSuffix", "fue guardado en la carpeta Documentos/DANYBOT.")}`,
       icon: 'success',
       confirmButtonColor: '#3c0000'
     });
@@ -246,7 +257,7 @@ window.shareDocumentInMobileApp =
   ) {
     if (!isNativeDocumentsApp()) {
       throw new Error(
-        'La función de compartir solo está disponible en la aplicación móvil.'
+        documentMobileT("documents.nativeShareOnlyMobile", "La función de compartir solo está disponible en la aplicación móvil.")
       );
     }
 
@@ -255,7 +266,7 @@ window.shareDocumentInMobileApp =
 
     if (!Share) {
       throw new Error(
-        'No se encontró el menú nativo para compartir.'
+        documentMobileT("documents.nativeShareMenuMissing", "No se encontró el menú nativo para compartir.")
       );
     }
 
@@ -274,23 +285,23 @@ window.shareDocumentInMobileApp =
 
     if (!canShareResult.value) {
       throw new Error(
-        'Este dispositivo no permite compartir archivos.'
+        documentMobileT("documents.nativeShareUnsupported", "Este dispositivo no permite compartir archivos.")
       );
     }
 
     await Share.share({
       title:
         documentData?.document_name ||
-        'Documento DANYBOT',
+        documentMobileT("documents.nativeShareTitle", "Documento DANYBOT"),
 
       text:
-        'Documento compartido desde DANYBOT.',
+        documentMobileT("documents.nativeShareText", "Documento compartido desde DANYBOT."),
 
       url:
         temporaryFile.uri,
 
       dialogTitle:
-        'Compartir documento'
+        documentMobileT("documents.shareDocument", "Compartir documento")
     });
   };
   

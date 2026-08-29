@@ -1,3 +1,13 @@
+function biometricT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key) || fallback;
+  }
+
+  return fallback;
+}
 // ==============================================
 // DANYBOT - LOGIN BIOMÉTRICO ANDROID
 // ==============================================
@@ -203,7 +213,7 @@ async function authenticateDanyBotBiometric() {
 
   if (!BiometricAuth) {
     throw new Error(
-      'BiometricAuth no está disponible.'
+      biometricT("login.biometricPluginUnavailable", "BiometricAuth no está disponible.")
     );
   }
 
@@ -213,7 +223,7 @@ async function authenticateDanyBotBiometric() {
   if (!biometry?.isAvailable) {
     throw new Error(
       biometry?.reason ||
-      'La biometría no está disponible.'
+      biometricT("login.biometricUnavailable", "La biometría no está disponible.")
     );
   }
 
@@ -223,13 +233,13 @@ async function authenticateDanyBotBiometric() {
    */
   await BiometricAuth.internalAuthenticate({
     reason:
-      'Confirma tu identidad para acceder a DANYBOT',
+      biometricT("login.biometricReason", "Confirma tu identidad para acceder a DANYBOT"),
 
     androidTitle:
-      'Acceso a DANYBOT',
+      biometricT("login.biometricAndroidTitle", "Acceso a DANYBOT"),
 
     androidSubtitle:
-      'Usa tu huella para continuar',
+      biometricT("login.biometricAndroidSubtitle", "Usa tu huella para continuar"),
 
     allowDeviceCredential:
       false
@@ -297,10 +307,10 @@ async function offerDanyBotBiometricAccess(
     const result =
         await Swal.fire({
             title:
-            '¿Activar acceso con huella?',
+            biometricT("login.biometricActivateTitle", "¿Activar acceso con huella?"),
 
             text:
-            'La próxima vez podrás entrar a DANYBOT usando la huella de este dispositivo.',
+            biometricT("login.biometricActivateText", "La próxima vez podrás entrar a DANYBOT usando la huella de este dispositivo."),
 
             icon:
             'question',
@@ -309,10 +319,10 @@ async function offerDanyBotBiometricAccess(
             true,
 
             confirmButtonText:
-            'Activar huella',
+            biometricT("login.biometricActivateButton", "Activar huella"),
 
             cancelButtonText:
-            'Ahora no',
+            biometricT("login.notNow", "Ahora no"),
 
             confirmButtonColor:
             '#3c0000',
@@ -366,10 +376,10 @@ async function offerDanyBotBiometricAccess(
 
     await Swal.fire({
       title:
-        'Huella activada',
+        biometricT("login.biometricActivatedTitle", "Huella activada"),
 
       text:
-        'Ya puedes ingresar a DANYBOT con tu huella.',
+        biometricT("login.biometricActivatedText", "Ya puedes ingresar a DANYBOT con tu huella."),
 
       icon:
         'success',
@@ -428,10 +438,10 @@ async function loginWithDanyBotBiometric() {
 
       await showAuthMessage({
         title:
-          'Acceso biométrico no disponible',
+          biometricT("login.biometricAccessUnavailableTitle", "Acceso biométrico no disponible"),
 
         text:
-          'Inicia sesión nuevamente con tu correo o Google.',
+          biometricT("login.biometricAccessUnavailableText", "Inicia sesión nuevamente con tu correo o Google."),
 
         icon:
           'info'
@@ -452,10 +462,10 @@ async function loginWithDanyBotBiometric() {
 
       await showAuthMessage({
         title:
-          'Sesión vencida',
+          biometricT("login.sessionExpiredTitle", "Sesión vencida"),
 
         text:
-          'Por seguridad, inicia sesión nuevamente. Después podrás volver a usar tu huella.',
+          biometricT("login.sessionExpiredText", "Por seguridad, inicia sesión nuevamente. Después podrás volver a usar tu huella."),
 
         icon:
           'info'

@@ -1,3 +1,78 @@
+function getActivityPriorityDisplayLabel(priority) {
+  const value =
+    String(priority || "media").toLowerCase();
+
+  if (value === "alta") {
+    return activityT("activities.high", "Alta");
+  }
+
+  if (value === "baja") {
+    return activityT("activities.low", "Baja");
+  }
+
+  return activityT("activities.medium", "Media");
+}
+
+function getActivityCategoryDisplayLabel(category) {
+  const value =
+    String(category || "personal")
+      .trim()
+      .toLowerCase();
+
+  const labels = {
+    personal: activityT("activities.personal", "Personal"),
+    salud: activityT("activities.health", "Salud"),
+    trabajo: activityT("activities.work", "Trabajo"),
+    finanzas: activityT("activities.finance", "Finanzas"),
+    estudio: activityT("activities.study", "Estudio"),
+    pagos: activityT("activities.payments", "Pagos"),
+    otro: activityT("activities.other", "Otro")
+  };
+
+  return labels[value] || category || labels.personal;
+}
+
+function getActivityRepeatDisplayLabel(repeatType) {
+  const labels = {
+    una_vez: activityT("activities.once", "Una vez"),
+    diario: activityT("activities.daily", "Diario"),
+    semanal: activityT("activities.weekly", "Semanal"),
+    mensual: activityT("activities.monthly", "Mensual"),
+    anual: activityT("activities.yearly", "Anual")
+  };
+
+  return labels[repeatType] || repeatType || "";
+}
+
+function activityT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key);
+  }
+
+  return fallback;
+}
+
+function getActivityResponseText(data, key, fallback) {
+  const language =
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+      ? window.DANYBOT_I18N.getLanguage()
+      : "es";
+
+  if (language === "en") {
+    return activityT(key, fallback);
+  }
+
+  return (
+    data?.mensaje ||
+    data?.error ||
+    activityT(key, fallback)
+  );
+}
+
 // ===============================
 // Seguridad con token para recordatorios
 // ===============================
@@ -128,7 +203,7 @@ function showMobileActivitiesLoader() {
         aria-hidden="true"
       >
 
-      <p>Cargando actividades</p>
+      <p>${activityT("activities.loading", "Cargando actividades")}</p>
 
       <div
         class="mobile-activities-loader-dots"
@@ -299,7 +374,7 @@ function renderDetectedReminder(reminder) {
   box.style.display = "block";
 
   box.innerHTML = `
-    <h3>Recordatorio detectado</h3>
+    <h3>${activityT("activities.detectedReminder", "Recordatorio detectado")}</h3>
 
     <div class="detected-reminder-grid">
       <div>
@@ -308,18 +383,18 @@ function renderDetectedReminder(reminder) {
       </div>
 
       <div>
-        <span>Fecha</span>
-        <strong>${reminder.reminder_date || "No detectada"}</strong>
+        <span>${activityT("activities.date", "Fecha")}</span>
+        <strong>${reminder.reminder_date || activityT("activities.notDetected", "No detectada")}</strong>
       </div>
 
       <div>
-        <span>Hora</span>
-        <strong>${reminder.reminder_time || "Sin hora"}</strong>
+        <span>${activityT("activities.time", "Hora")}</span>
+        <strong>${reminder.reminder_time || activityT("activities.noTime", "Sin hora")}</strong>
       </div>
 
       <div>
-        <span>Categoría</span>
-        <strong>${reminder.category}</strong>
+        <span>${activityT("activities.category", "Categoría")}</span>
+        <strong>${getActivityCategoryDisplayLabel(reminder.category)}</strong>
       </div>
     </div>
   `;
@@ -335,7 +410,7 @@ function renderReminderActions(reminder) {
           class="reopen-reminder-button"
         >
           <i class="fa-solid fa-rotate-left"></i>
-          Restaurar
+          ${activityT("activities.restore", "Restaurar")}
         </button>
 
         <button 
@@ -344,7 +419,7 @@ function renderReminderActions(reminder) {
           class="delete-reminder-button"
         >
           <i class="fa-solid fa-trash-can"></i>
-          Eliminar
+          ${activityT("activities.delete", "Eliminar")}
         </button>
       </div>
     `;
@@ -358,30 +433,35 @@ function renderReminderActions(reminder) {
         class="complete-reminder-button"
       >
         <i class="fa-solid fa-check"></i>
-        Completar
+        ${activityT("activities.complete", "Completar")}
       </button>
 
       <button type="button" onclick="editReminder(${reminder.id})">
         <i class="fa-solid fa-pen"></i>
-        Editar
+        ${activityT("activities.edit", "Editar")}
       </button>
 
       <button type="button" onclick="deleteReminder(${reminder.id})" class="delete-reminder-button">
         <i class="fa-solid fa-trash"></i>
-        Eliminar
+        ${activityT("activities.delete", "Eliminar")}
       </button>
     </div>
   `;
 }
 
 function getActivityPriorityLabel(priority) {
+  const value =
+    String(priority || "media")
+      .trim()
+      .toLowerCase();
+
   const labels = {
-    alta: "Alta prioridad",
-    media: "Prioridad media",
-    baja: "Baja prioridad"
+    alta: activityT("activities.high", "Alta"),
+    media: activityT("activities.medium", "Media"),
+    baja: activityT("activities.low", "Baja")
   };
 
-  return labels[priority] || "Prioridad media";
+  return labels[value] || labels.media;
 }
 
 function getActivityPriorityClass(priority) {
@@ -395,7 +475,7 @@ function getActivityPriorityClass(priority) {
 }
 
 function getActivityDescription(reminder) {
-  return reminder.description || reminder.original_text || "Sin descripción adicional.";
+  return reminder.description || reminder.original_text || activityT("activities.noDescription", "Sin descripción adicional.");
 }
 
 function getActivityDueDateLabel(reminder) {
@@ -408,7 +488,7 @@ function getActivityReminderLabel(reminder) {
   const reminderDate = formatReminderDateLabel(reminder.reminder_date);
   const reminderTime = reminder.reminder_time
     ? formatReminderTime(reminder.reminder_time)
-    : "Sin hora";
+    : activityT("activities.noTime", "Sin hora");
 
   return `${reminderDate} · ${reminderTime}`;
 }
@@ -698,7 +778,7 @@ const paginatedActivities = getPaginatedActivities(sortedReminders);
       <div class="activity-card-header">
         <span class="activity-priority-pill ${getActivityPriorityClass(reminder.priority)}">
           <i class="fa-solid fa-flag"></i>
-          ${getActivityPriorityLabel(reminder.priority)}
+          ${getActivityPriorityDisplayLabel(reminder.priority)}
         </span>
 
         <span class="activity-status-pill ${getReminderStatusClass(reminder)}">
@@ -715,7 +795,7 @@ const paginatedActivities = getPaginatedActivities(sortedReminders);
           <div>
             <h3>${reminder.title}</h3>
             <span class="activity-category-label">
-              ${reminder.category || "Personal"} · ${formatRepeatType(reminder.repeat_type)}
+              ${getActivityCategoryDisplayLabel(reminder.category)} · ${getActivityRepeatDisplayLabel(reminder.repeat_type)}
             </span>
           </div>
         </div>
@@ -726,7 +806,7 @@ const paginatedActivities = getPaginatedActivities(sortedReminders);
 
         <div class="activity-info-grid">
           <div class="activity-info-item">
-            <span>Fecha límite</span>
+            <span>${activityT("activities.dueDate", "Fecha límite")}</span>
             <strong>
               <i class="fa-solid fa-calendar-check"></i>
               ${getActivityDueDateLabel(reminder)}
@@ -734,7 +814,7 @@ const paginatedActivities = getPaginatedActivities(sortedReminders);
           </div>
 
           <div class="activity-info-item">
-            <span>Aviso</span>
+            <span>${activityT("activities.reminder", "Aviso")}</span>
             <strong>
               <i class="fa-solid fa-bell"></i>
               ${getActivityReminderLabel(reminder)}
@@ -742,10 +822,10 @@ const paginatedActivities = getPaginatedActivities(sortedReminders);
           </div>
 
           <div class="activity-info-item">
-            <span>Repetición</span>
+            <span>${activityT("activities.repeat", "Repetición")}</span>
             <strong>
               <i class="fa-solid ${getRepeatTypeIcon(reminder.repeat_type)}"></i>
-              ${formatRepeatType(reminder.repeat_type)}
+              ${getActivityRepeatDisplayLabel(reminder.repeat_type)}
             </strong>
           </div>
         </div>
@@ -863,10 +943,23 @@ function isPendingCreatedReminder(reminder) {
     && Number(reminder.id) === Number(pendingCreatedReminderId);
 }
 
+function getActivitiesLocale() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage() === "en"
+      ? "en-US"
+      : "es-CO";
+  }
+
+  return "es-CO";
+}
+
 function formatReminderDateLabel(dateValue) {
   const date = new Date(`${getReminderDateValue(dateValue)}T00:00:00`);
 
-  return date.toLocaleDateString("es-CO", {
+  return date.toLocaleDateString(getActivitiesLocale(), {
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -883,7 +976,7 @@ function formatReminderDayNumber(dateValue) {
 function formatReminderMonthShort(dateValue) {
   const date = new Date(`${getReminderDateValue(dateValue)}T00:00:00`);
 
-  return date.toLocaleDateString("es-CO", {
+  return date.toLocaleDateString(getActivitiesLocale(), {
     month: "short"
   }).replace(".", "");
 }
@@ -969,18 +1062,18 @@ function isReminderOverdue(reminder) {
 
 function getReminderStatusLabel(reminder) {
   if (isReminderInTrash(reminder)) {
-    return "Papelera";
+    return activityT("activities.trash", "Papelera");
   }
 
   if (isReminderOverdue(reminder)) {
-    return "Vencido";
+    return activityT("activities.overdue", "Vencido");
   }
 
   if (isReminderToday(reminder)) {
-    return "Hoy";
+    return activityT("activities.today", "Hoy");
   }
 
-  return "Activo";
+  return activityT("activities.active", "Activo");
 }
 
 function getReminderStatusClass(reminder) {
@@ -1010,8 +1103,8 @@ async function editReminder(reminderId) {
 
   if (!reminder) {
     Swal.fire({
-      title: "Recordatorio no encontrado",
-      text: "No se encontró el recordatorio para editar.",
+      title: activityT("activities.reminderNotFound", "Recordatorio no encontrado"),
+      text: activityT("activities.reminderNotFoundEdit", "No se encontró el recordatorio para editar."),
       icon: "warning",
       confirmButtonColor: "#960018"
     });
@@ -1019,31 +1112,31 @@ async function editReminder(reminderId) {
   }
 
     const result = await Swal.fire({
-      title: "Editar actividad",
+      title: activityT("activities.editActivity", "Editar actividad"),
       html: `
         <div class="reminder-edit-modal">
-          <label for="editReminderTitle">Título</label>
+          <label for="editReminderTitle">${activityT("activities.title", "Título")}</label>
           <input 
             id="editReminderTitle" 
             class="swal2-input" 
             value="${reminder.title || ""}"
           >
 
-          <label for="editReminderDescription">Descripción</label>
+          <label for="editReminderDescription">${activityT("activities.description", "Descripción")}</label>
           <textarea
             id="editReminderDescription"
             class="swal2-textarea"
-            placeholder="Agrega una descripción opcional"
+            placeholder="${activityT("activities.descriptionOptional", "Agrega una descripción opcional")}"
           >${reminder.description || ""}</textarea>
 
-          <label for="editReminderPriority">Prioridad</label>
+          <label for="editReminderPriority">${activityT("activities.priority", "Prioridad")}</label>
           <select id="editReminderPriority" class="swal2-input">
-            <option value="baja" ${reminder.priority === "baja" ? "selected" : ""}>Baja</option>
-            <option value="media" ${!reminder.priority || reminder.priority === "media" ? "selected" : ""}>Media</option>
-            <option value="alta" ${reminder.priority === "alta" ? "selected" : ""}>Alta</option>
+            <option value="baja" ${reminder.priority === "baja" ? "selected" : ""}>${activityT("activities.low", "Baja")}</option>
+            <option value="media" ${!reminder.priority || reminder.priority === "media" ? "selected" : ""}>${activityT("activities.medium", "Media")}</option>
+            <option value="alta" ${reminder.priority === "alta" ? "selected" : ""}>${activityT("activities.high", "Alta")}</option>
           </select>
 
-          <label for="editReminderDueDate">Fecha límite</label>
+          <label for="editReminderDueDate">${activityT("activities.dueDate", "Fecha límite")}</label>
           <input 
             id="editReminderDueDate" 
             type="date" 
@@ -1051,7 +1144,7 @@ async function editReminder(reminderId) {
             value="${getReminderDateValue(reminder.due_date || reminder.reminder_date)}"
           >
 
-          <label for="editReminderDate">Fecha de aviso</label>
+          <label for="editReminderDate">${activityT("activities.reminderDate", "Fecha de aviso")}</label>
           <input 
             id="editReminderDate" 
             type="date" 
@@ -1059,7 +1152,7 @@ async function editReminder(reminderId) {
             value="${getReminderDateValue(reminder.reminder_date)}"
           >
 
-          <label for="editReminderTime">Hora de aviso</label>
+          <label for="editReminderTime">${activityT("activities.reminderTime", "Hora de aviso")}</label>
           <input 
             id="editReminderTime" 
             type="time" 
@@ -1067,37 +1160,37 @@ async function editReminder(reminderId) {
             value="${reminder.reminder_time ? reminder.reminder_time.substring(0, 5) : ""}"
           >
 
-          <label for="editReminderCategory">Categoría</label>
+          <label for="editReminderCategory">${activityT("activities.category", "Categoría")}</label>
           <select id="editReminderCategory" class="swal2-input">
-            <option value="personal" ${reminder.category === "personal" || reminder.category === "Personal" ? "selected" : ""}>Personal</option>
-            <option value="finanzas" ${reminder.category === "finanzas" || reminder.category === "Finanzas" ? "selected" : ""}>Finanzas</option>
-            <option value="estudio" ${reminder.category === "estudio" || reminder.category === "Estudio" ? "selected" : ""}>Estudio</option>
-            <option value="trabajo" ${reminder.category === "trabajo" || reminder.category === "Trabajo" ? "selected" : ""}>Trabajo</option>
-            <option value="salud" ${reminder.category === "salud" || reminder.category === "Salud" ? "selected" : ""}>Salud</option>
-            <option value="pagos" ${reminder.category === "pagos" ? "selected" : ""}>Pagos</option>
-            <option value="otro" ${reminder.category === "otro" ? "selected" : ""}>Otro</option>
+            <option value="personal" ${reminder.category === "personal" || reminder.category === "Personal" ? "selected" : ""}>${activityT("activities.personal", "Personal")}</option>
+            <option value="finanzas" ${reminder.category === "finanzas" || reminder.category === "Finanzas" ? "selected" : ""}>${activityT("activities.finance", "Finanzas")}</option>
+            <option value="estudio" ${reminder.category === "estudio" || reminder.category === "Estudio" ? "selected" : ""}>${activityT("activities.study", "Estudio")}</option>
+            <option value="trabajo" ${reminder.category === "trabajo" || reminder.category === "Trabajo" ? "selected" : ""}>${activityT("activities.work", "Trabajo")}</option>
+            <option value="salud" ${reminder.category === "salud" || reminder.category === "Salud" ? "selected" : ""}>${activityT("activities.health", "Salud")}</option>
+            <option value="pagos" ${reminder.category === "pagos" ? "selected" : ""}>${activityT("activities.payments", "Pagos")}</option>
+            <option value="otro" ${reminder.category === "otro" ? "selected" : ""}>${activityT("activities.other", "Otro")}</option>
           </select>
 
-          <label for="editReminderRepeat">Repetición</label>
+          <label for="editReminderRepeat">${activityT("activities.repeat", "Repetición")}</label>
           <select id="editReminderRepeat" class="swal2-input">
-            <option value="una_vez" ${reminder.repeat_type === "una_vez" ? "selected" : ""}>Una vez</option>
-            <option value="diario" ${reminder.repeat_type === "diario" ? "selected" : ""}>Diario</option>
-            <option value="semanal" ${reminder.repeat_type === "semanal" ? "selected" : ""}>Semanal</option>
-            <option value="mensual" ${reminder.repeat_type === "mensual" ? "selected" : ""}>Mensual</option>
-            <option value="anual" ${reminder.repeat_type === "anual" ? "selected" : ""}>Anual</option>
+            <option value="una_vez" ${reminder.repeat_type === "una_vez" ? "selected" : ""}>${activityT("activities.once", "Una vez")}</option>
+            <option value="diario" ${reminder.repeat_type === "diario" ? "selected" : ""}>${activityT("activities.daily", "Diario")}</option>
+            <option value="semanal" ${reminder.repeat_type === "semanal" ? "selected" : ""}>${activityT("activities.weekly", "Semanal")}</option>
+            <option value="mensual" ${reminder.repeat_type === "mensual" ? "selected" : ""}>${activityT("activities.monthly", "Mensual")}</option>
+            <option value="anual" ${reminder.repeat_type === "anual" ? "selected" : ""}>${activityT("activities.yearly", "Anual")}</option>
           </select>
 
-          <label for="editReminderStatus">Estado</label>
+          <label for="editReminderStatus">${activityT("activities.status", "Estado")}</label>
           <select id="editReminderStatus" class="swal2-input">
-            <option value="activo" ${reminder.status === "activo" ? "selected" : ""}>Activo</option>
-            <option value="completado" ${reminder.status === "completado" ? "selected" : ""}>Completado</option>
-            <option value="papelera" ${reminder.status === "papelera" ? "selected" : ""}>Papelera</option>
+            <option value="activo" ${reminder.status === "activo" ? "selected" : ""}>${activityT("activities.active", "Activo")}</option>
+            <option value="completado" ${reminder.status === "completado" ? "selected" : ""}>${activityT("activities.completed", "Completado")}</option>
+            <option value="papelera" ${reminder.status === "papelera" ? "selected" : ""}>${activityT("activities.trash", "Papelera")}</option>
           </select>
         </div>
       `,
       showCancelButton: true,
-      confirmButtonText: "Guardar cambios",
-      cancelButtonText: "Cancelar",
+      confirmButtonText: activityT("activities.saveChanges", "Guardar cambios"),
+      cancelButtonText: activityT("activities.cancel", "Cancelar"),
       confirmButtonColor: "#960018",
       cancelButtonColor: "#6b7280",
       focusConfirm: false,
@@ -1151,8 +1244,8 @@ async function editReminder(reminderId) {
 
     if (!response.ok) {
       Swal.fire({
-        title: "No se pudo actualizar",
-        text: data.mensaje || "No se pudo actualizar el recordatorio.",
+        title: activityT("activities.updateFailedTitle", "No se pudo actualizar"),
+        text: getActivityResponseText(data, "activities.updateFailedText", "No se pudo actualizar la actividad."),
         icon: "error",
         confirmButtonColor: "#960018"
       });
@@ -1193,8 +1286,8 @@ async function editReminder(reminderId) {
     await loadReminders();
 
     await Swal.fire({
-      title: "Recordatorio actualizado",
-      text: "Los cambios fueron guardados correctamente.",
+      title: activityT("activities.updatedTitle", "Actividad actualizada"),
+      text: activityT("activities.updatedText", "Los cambios fueron guardados correctamente."),
       icon: "success",
       confirmButtonColor: "#960018"
     });
@@ -1215,7 +1308,7 @@ async function editReminder(reminderId) {
 
     Swal.fire({
       title: "Error",
-      text: "Ocurrió un error al editar el recordatorio.",
+      text: activityT("activities.editErrorText", "Ocurrió un error al editar la actividad."),
       icon: "error",
       confirmButtonColor: "#960018"
     });
@@ -1226,13 +1319,13 @@ async function deleteReminder(reminderId) {
   const reminder = getReminderById(reminderId);
 
   const result = await Swal.fire({
-    title: "¿Eliminar actividad?",
+    title: activityT("activities.deleteActivityTitle", "¿Eliminar actividad?"),
     text:
-      "La actividad se moverá a Eliminados y podrás restaurarla mientras permanezca allí.",
+      activityT("activities.deleteActivityText", "La actividad se moverá a Eliminados y podrás restaurarla mientras permanezca allí."),
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Eliminar",
-    cancelButtonText: "Cancelar",
+    confirmButtonText: activityT("activities.delete", "Eliminar"),
+    cancelButtonText: activityT("activities.cancel", "Cancelar"),
     buttonsStyling: false,
     customClass: {
       popup: "reminder-swal-popup",
@@ -1264,12 +1357,11 @@ async function deleteReminder(reminderId) {
 
     if (!response.ok) {
       await Swal.fire({
-        title: "No se pudo eliminar",
+        title: activityT("activities.deleteFailedTitle", "No se pudo eliminar"),
         text:
-          data.mensaje ||
-          "No se pudo eliminar la actividad.",
+          getActivityResponseText(data, "activities.deleteFailedText", "No se pudo eliminar la actividad."),
         icon: "error",
-        confirmButtonText: "Aceptar",
+        confirmButtonText: activityT("activities.ok", "Aceptar"),
         buttonsStyling: false,
         customClass: {
           popup: "reminder-swal-popup",
@@ -1301,13 +1393,13 @@ async function deleteReminder(reminderId) {
      * usando los mismos estilos de Día en Orden.
      */
     await Swal.fire({
-      title: "Actividad eliminada",
+      title: activityT("activities.deletedTitle", "Actividad eliminada"),
       text:
         reminder?.title
-          ? `"${reminder.title}" se movió a Eliminados.`
-          : "La actividad se movió a Eliminados.",
+          ? `"${reminder.title}" ${activityT("activities.movedToDeletedSuffix", "se movió a Eliminados.")}`
+          : activityT("activities.movedToDeletedText", "La actividad se movió a Eliminados."),
       icon: "success",
-      confirmButtonText: "Aceptar",
+      confirmButtonText: activityT("activities.ok", "Aceptar"),
       buttonsStyling: false,
       customClass: {
         popup: "reminder-swal-popup",
@@ -1325,9 +1417,9 @@ async function deleteReminder(reminderId) {
     await Swal.fire({
       title: "Error",
       text:
-        "Ocurrió un error al eliminar la actividad.",
+        activityT("activities.deleteErrorText", "Ocurrió un error al eliminar la actividad."),
       icon: "error",
-      confirmButtonText: "Aceptar",
+      confirmButtonText: activityT("activities.ok", "Aceptar"),
       buttonsStyling: false,
       customClass: {
         popup: "reminder-swal-popup",
@@ -1343,8 +1435,8 @@ async function restoreReminder(reminderId) {
 
   if (!reminder) {
     Swal.fire({
-      title: "Recordatorio no encontrado",
-      text: "No se encontró el recordatorio para restaurar.",
+      title: activityT("activities.reminderNotFound", "Recordatorio no encontrado"),
+      text: activityT("activities.restoreNotFoundText", "No se encontró la actividad para restaurar."),
       icon: "warning",
       confirmButtonColor: "#960018"
     });
@@ -1378,8 +1470,8 @@ async function restoreReminder(reminderId) {
 
     if (!response.ok) {
       Swal.fire({
-        title: "No se pudo restaurar",
-        text: data.mensaje || "No se pudo restaurar el recordatorio.",
+        title: activityT("activities.restoreFailedTitle", "No se pudo restaurar"),
+        text: getActivityResponseText(data, "activities.restoreFailedText", "No se pudo restaurar la actividad."),
         icon: "error",
         confirmButtonColor: "#960018"
       });
@@ -1393,7 +1485,7 @@ async function restoreReminder(reminderId) {
 
     Swal.fire({
       title: "Error",
-      text: "Ocurrió un error al restaurar el recordatorio.",
+      text: activityT("activities.restoreErrorText", "Ocurrió un error al restaurar la actividad."),
       icon: "error",
       confirmButtonColor: "#960018"
     });
@@ -1404,13 +1496,13 @@ async function deleteReminderPermanently(reminderId) {
   const reminder = getReminderById(reminderId);
 
   const result = await Swal.fire({
-    title: "¿Eliminar definitivamente?",
+    title: activityT("activities.deletePermanentlyTitle", "¿Eliminar definitivamente?"),
     text:
-      "Esta actividad se borrará de forma permanente y ya no podrá recuperarse.",
+      activityT("activities.deletePermanentlyText", "Esta actividad se borrará de forma permanente y ya no podrá recuperarse."),
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Eliminar",
-    cancelButtonText: "Cancelar",
+    confirmButtonText: activityT("activities.delete", "Eliminar"),
+    cancelButtonText: activityT("activities.cancel", "Cancelar"),
     buttonsStyling: false,
     customClass: {
       popup: "reminder-swal-popup",
@@ -1442,12 +1534,12 @@ async function deleteReminderPermanently(reminderId) {
 
     if (!response.ok) {
       await Swal.fire({
-        title: "No se pudo eliminar",
+        title: activityT("activities.deleteFailedTitle", "No se pudo eliminar"),
         text:
           data.mensaje ||
-          "No se pudo eliminar definitivamente la actividad.",
+          activityT("activities.deletePermanentlyFailedText", "No se pudo eliminar definitivamente la actividad."),
         icon: "error",
-        confirmButtonText: "Aceptar",
+        confirmButtonText: activityT("activities.ok", "Aceptar"),
         buttonsStyling: false,
         customClass: {
           popup: "reminder-swal-popup",
@@ -1475,13 +1567,13 @@ async function deleteReminderPermanently(reminderId) {
     await loadReminders();
 
     await Swal.fire({
-      title: "Actividad eliminada",
+      title: activityT("activities.deletedTitle", "Actividad eliminada"),
       text:
         reminder?.title
-          ? `"${reminder.title}" se eliminó definitivamente.`
-          : "La actividad se eliminó definitivamente.",
+          ? `"${reminder.title}" ${activityT("activities.deletedPermanentlySuffix", "se eliminó definitivamente.")}`
+          : activityT("activities.deletedPermanentlyText", "La actividad se eliminó definitivamente."),
       icon: "success",
-      confirmButtonText: "Aceptar",
+      confirmButtonText: activityT("activities.ok", "Aceptar"),
       buttonsStyling: false,
       customClass: {
         popup: "reminder-swal-popup",
@@ -1499,9 +1591,9 @@ async function deleteReminderPermanently(reminderId) {
     await Swal.fire({
       title: "Error",
       text:
-        "Ocurrió un error al eliminar definitivamente la actividad.",
+        activityT("activities.deletePermanentlyErrorText", "Ocurrió un error al eliminar definitivamente la actividad."),
       icon: "error",
-      confirmButtonText: "Aceptar",
+      confirmButtonText: activityT("activities.ok", "Aceptar"),
       buttonsStyling: false,
       customClass: {
         popup: "reminder-swal-popup",
@@ -1522,17 +1614,19 @@ async function emptyReminderTrash() {
   }
 
   const result = await Swal.fire({
-    title: "¿Vaciar eliminados?",
-    text:
-      `Se eliminarán definitivamente ${trashReminders.length} ${
-        trashReminders.length === 1
-          ? "actividad"
-          : "actividades"
-      }.`,
+    title: activityT("activities.emptyDeletedTitle", "¿Vaciar eliminados?"),
+    text: `${activityT(
+      "activities.deletePermanentlyPrefix",
+      "Se eliminarán definitivamente"
+    )} ${trashReminders.length} ${
+      trashReminders.length === 1
+        ? activityT("activities.activitySingular", "actividad")
+        : activityT("activities.activityPlural", "actividades")
+    }.`,
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "Vaciar",
-    cancelButtonText: "Cancelar",
+    confirmButtonText: activityT("activities.empty", "Vaciar"),
+    cancelButtonText: activityT("activities.cancel", "Cancelar"),
     buttonsStyling: false,
     customClass: {
       popup: "reminder-swal-popup",
@@ -1566,12 +1660,12 @@ async function emptyReminderTrash() {
 
     if (!response.ok) {
       await Swal.fire({
-        title: "No se pudo vaciar",
+        title: activityT("activities.emptyFailedTitle", "No se pudo vaciar"),
         text:
           data.mensaje ||
-          "No se pudieron eliminar las actividades.",
+          activityT("activities.emptyFailedText", "No se pudieron eliminar las actividades."),
         icon: "error",
-        confirmButtonText: "Aceptar",
+        confirmButtonText: activityT("activities.ok", "Aceptar"),
         buttonsStyling: false,
         customClass: {
           popup: "reminder-swal-popup",
@@ -1607,10 +1701,16 @@ async function emptyReminderTrash() {
       title: "Eliminados vaciados",
       text:
         data.eliminados === 1
-          ? "Se eliminó 1 actividad definitivamente."
-          : `Se eliminaron ${data.eliminados} actividades definitivamente.`,
+          ? activityT("activities.oneDeletedPermanently", "Se eliminó 1 actividad definitivamente.")
+          : `${activityT(
+              "activities.manyDeletedPermanentlyPrefix",
+              "Se eliminaron"
+            )} ${data.eliminados} ${activityT(
+              "activities.manyDeletedPermanentlySuffix",
+              "actividades definitivamente."
+            )}`,
       icon: "success",
-      confirmButtonText: "Aceptar",
+      confirmButtonText: activityT("activities.ok", "Aceptar"),
       buttonsStyling: false,
       customClass: {
         popup: "reminder-swal-popup",
@@ -1628,9 +1728,9 @@ async function emptyReminderTrash() {
     await Swal.fire({
       title: "Error",
       text:
-        "Ocurrió un error al vaciar las actividades eliminadas.",
+        activityT("activities.emptyDeletedErrorText", "Ocurrió un error al vaciar las actividades eliminadas."),
       icon: "error",
-      confirmButtonText: "Aceptar",
+      confirmButtonText: activityT("activities.ok", "Aceptar"),
       buttonsStyling: false,
       customClass: {
         popup: "reminder-swal-popup",
@@ -1731,8 +1831,8 @@ async function toggleReminderStatus(reminderId) {
 
   if (!reminder) {
     Swal.fire({
-      title: "Recordatorio no encontrado",
-      text: "No se encontró el recordatorio para completar.",
+      title: activityT("activities.reminderNotFound", "Recordatorio no encontrado"),
+      text: activityT("activities.completeNotFoundText", "No se encontró la actividad para completar."),
       icon: "warning",
       confirmButtonColor: "#960018"
     });
@@ -1871,10 +1971,9 @@ async function completeReminder(
 
     if (!response.ok) {
       Swal.fire({
-        title: "No se pudo completar",
+        title: activityT("activities.completeFailedTitle", "No se pudo completar"),
         text:
-          data.mensaje ||
-          "No se pudo completar el recordatorio.",
+          getActivityResponseText(data, "activities.completeFailedText", "No se pudo completar la actividad."),
         icon: "error",
         confirmButtonColor: "#960018"
       });
@@ -1961,7 +2060,7 @@ async function completeReminder(
     Swal.fire({
       title: "Error",
       text:
-        "Ocurrió un error al completar el recordatorio.",
+        activityT("activities.completeErrorText", "Ocurrió un error al completar la actividad."),
       icon: "error",
       confirmButtonColor: "#960018"
     });
@@ -1999,64 +2098,64 @@ function renderRemindersSection() {
 
       <div class="voice-reminders-header">
         <div>
-          <span class="welcome-badge">Actividades</span>
-          <h2>Organiza tus actividades</h2>
+          <span class="welcome-badge">${activityT("activities.badge", "Actividades")}</span>
+          <h2>${activityT("activities.organizeTitle", "Organiza tus actividades")}</h2>
           <p>
-            Crea pendientes, avisos y recordatorios con prioridad, fecha límite y alertas opcionales.
+            ${activityT("activities.organizeText", "Crea pendientes, avisos y recordatorios con prioridad, fecha límite y alertas opcionales.")}
           </p>
         </div>
       </div>
 
       <div class="manual-reminder-panel">
         <div class="manual-reminder-header">
-          <span class="welcome-badge">Nueva actividad</span>
-          <h3>Agregar actividad manual</h3>
+          <span class="welcome-badge">${activityT("activities.newActivity", "Nueva actividad")}</span>
+          <h3>${activityT("activities.addManual", "Agregar actividad manual")}</h3>
         </div>
 
         <form id="manualReminderForm" class="manual-reminder-form">
           <div class="manual-reminder-grid">
             <div class="manual-reminder-field">
-              <label for="manualReminderTitle">Título</label>
+              <label for="manualReminderTitle">${activityT("activities.title", "Título")}</label>
               <input 
                 type="text" 
                 id="manualReminderTitle" 
-                placeholder="Ej: Pagar internet"
+                placeholder="${activityT("activities.titlePlaceholder", "Ej: Pagar internet")}"
                 required
               >
             </div>
             <div class="manual-reminder-field manual-reminder-field-full">
-              <label for="manualReminderDescription">Descripción</label>
+              <label for="manualReminderDescription">${activityT("activities.description", "Descripción")}</label>
               <textarea
                 id="manualReminderDescription"
-                placeholder="Ej: Pago mensual del servicio de internet"
+                placeholder="${activityT("activities.descriptionPlaceholder", "Ej: Pago mensual del servicio de internet")}"
                 rows="3"
               ></textarea>
             </div>
 
             <div class="manual-reminder-field">
-              <label for="manualReminderPriority">Prioridad</label>
+              <label for="manualReminderPriority">${activityT("activities.priority", "Prioridad")}</label>
               <select id="manualReminderPriority" required>
-                <option value="media">Media</option>
-                <option value="alta">Alta</option>
-                <option value="baja">Baja</option>
+                <option value="media">${activityT("activities.medium", "Media")}</option>
+                <option value="alta">${activityT("activities.high", "Alta")}</option>
+                <option value="baja">${activityT("activities.low", "Baja")}</option>
               </select>
             </div>
 
 
             <div class="manual-reminder-field">
-              <label for="manualReminderCategory">Categoría</label>
+              <label for="manualReminderCategory">${activityT("activities.category", "Categoría")}</label>
               <select id="manualReminderCategory" required>
-                <option value="personal">Personal</option>
-                <option value="salud">Salud</option>
-                <option value="trabajo">Trabajo</option>
-                <option value="pagos">Pagos</option>
-                <option value="estudio">Estudio</option>
-                <option value="otro">Otro</option>
+                <option value="personal">${activityT("activities.personal", "Personal")}</option>
+                <option value="salud">${activityT("activities.health", "Salud")}</option>
+                <option value="trabajo">${activityT("activities.work", "Trabajo")}</option>
+                <option value="pagos">${activityT("activities.payments", "Pagos")}</option>
+                <option value="estudio">${activityT("activities.study", "Estudio")}</option>
+                <option value="otro">${activityT("activities.other", "Otro")}</option>
               </select>
             </div>
 
             <div class="manual-reminder-field">
-              <label for="manualReminderDate">Fecha</label>
+              <label for="manualReminderDate">${activityT("activities.date", "Fecha")}</label>
               <input 
                 type="date" 
                 id="manualReminderDate" 
@@ -2065,7 +2164,7 @@ function renderRemindersSection() {
             </div>
 
             <div class="manual-reminder-field">
-              <label for="manualReminderDueDate">Fecha límite</label>
+              <label for="manualReminderDueDate">${activityT("activities.dueDate", "Fecha límite")}</label>
               <input 
                 type="date" 
                 id="manualReminderDueDate"
@@ -2073,7 +2172,7 @@ function renderRemindersSection() {
             </div>
 
             <div class="manual-reminder-field">
-              <label for="manualReminderTime">Hora de aviso</label>
+              <label for="manualReminderTime">${activityT("activities.reminderTime", "Hora de aviso")}</label>
               <input 
                 type="time" 
                 id="manualReminderTime" 
@@ -2081,20 +2180,20 @@ function renderRemindersSection() {
             </div>
 
             <div class="manual-reminder-field">
-              <label for="manualReminderRepeat">Repetición</label>
+              <label for="manualReminderRepeat">${activityT("activities.repeat", "Repetición")}</label>
               <select id="manualReminderRepeat" required>
-                <option value="una_vez">Una vez</option>
-                <option value="diario">Diario</option>
-                <option value="semanal">Semanal</option>
-                <option value="mensual">Mensual</option>
-                <option value="anual">Anual</option>
+                <option value="una_vez">${activityT("activities.once", "Una vez")}</option>
+                <option value="diario">${activityT("activities.daily", "Diario")}</option>
+                <option value="semanal">${activityT("activities.weekly", "Semanal")}</option>
+                <option value="mensual">${activityT("activities.monthly", "Mensual")}</option>
+                <option value="anual">${activityT("activities.yearly", "Anual")}</option>
               </select>
             </div>
           </div>
 
           <button type="submit" class="manual-reminder-submit">
             <i class="fa-solid fa-floppy-disk"></i>
-            Guardar actividad
+            ${activityT("activities.saveActivity", "Guardar actividad")}
           </button>
         </form>
       </div>
@@ -2105,9 +2204,9 @@ function renderRemindersSection() {
         </button>
 
         <div class="voice-reminder-info">
-          <h3>¿Qué quieres que te recuerde?</h3>
+          <h3>${activityT("activities.voiceQuestion", "¿Qué quieres que te recuerde?")}</h3>
           <p id="voiceReminderStatus">
-            Toca el micrófono para empezar a hablar.
+            ${activityT("activities.voicePrompt", "Toca el micrófono para empezar a hablar.")}
           </p>
         </div>
       </div>
@@ -2117,7 +2216,7 @@ function renderRemindersSection() {
      <div class="reminders-list-panel">
 
       <div class="reminders-list-header">
-        <h3>Mis actividades</h3>
+        <h3>${activityT("activities.myActivities", "Mis actividades")}</h3>
       </div>
 
 
@@ -2129,7 +2228,7 @@ function renderRemindersSection() {
           <input
             type="search"
             id="activitySearchInput"
-            placeholder="Buscar por título, descripción, categoría o prioridad..."
+            placeholder="${activityT("activities.searchPlaceholder", "Buscar por título, descripción, categoría o prioridad...")}"
             autocomplete="off"
           >
         </div>
@@ -2150,7 +2249,7 @@ function renderRemindersSection() {
               data-filter-trigger="date"
             >
               <span data-filter-label="date">
-                Fecha
+                ${activityT("activities.date", "Fecha")}
               </span>
 
               <i class="fa-solid fa-chevron-down"></i>
@@ -2166,28 +2265,28 @@ function renderRemindersSection() {
                 type="button"
                 data-filter-value="all"
               >
-                Todas las fechas
+                ${activityT("activities.allDates", "Todas las fechas")}
               </button>
 
               <button
                 type="button"
                 data-filter-value="today"
               >
-                Hoy
+                ${activityT("activities.today", "Hoy")}
               </button>
 
               <button
                 type="button"
                 data-filter-value="week"
               >
-                Esta semana
+                ${activityT("activities.thisWeek", "Esta semana")}
               </button>
 
               <button
                 type="button"
                 data-filter-value="month"
               >
-                Este mes
+                ${activityT("activities.thisMonth", "Este mes")}
               </button>
             </div>
           </div>
@@ -2206,7 +2305,7 @@ function renderRemindersSection() {
               data-filter-trigger="priority"
             >
               <span data-filter-label="priority">
-                Prioridad
+                ${activityT("activities.priority", "Prioridad")}
               </span>
 
               <i class="fa-solid fa-chevron-down"></i>
@@ -2222,28 +2321,28 @@ function renderRemindersSection() {
                 type="button"
                 data-filter-value="all"
               >
-                Todas
+                ${activityT("activities.allPriorities", "Todas")}
               </button>
 
               <button
                 type="button"
                 data-filter-value="alta"
               >
-                Alta
+                ${activityT("activities.high", "Alta")}
               </button>
 
               <button
                 type="button"
                 data-filter-value="media"
               >
-                Media
+                ${activityT("activities.medium", "Media")}
               </button>
 
               <button
                 type="button"
                 data-filter-value="baja"
               >
-                Baja
+                ${activityT("activities.low", "Baja")}
               </button>
             </div>
           </div>
@@ -2262,7 +2361,7 @@ function renderRemindersSection() {
               data-filter-trigger="status"
             >
               <span data-filter-label="status">
-                Estado
+                ${activityT("activities.status", "Estado")}
               </span>
 
               <i class="fa-solid fa-chevron-down"></i>
@@ -2278,21 +2377,21 @@ function renderRemindersSection() {
                 type="button"
                 data-filter-value="todos"
               >
-                Todos
+                ${activityT("activities.allStatuses", "Todos")}
               </button>
 
               <button
                 type="button"
                 data-filter-value="vencidos"
               >
-                Vencidos
+                ${activityT("activities.overduePlural", "Vencidos")}
               </button>
 
               <button
                 type="button"
                 data-filter-value="eliminados"
               >
-                Eliminados
+                ${activityT("activities.deleted", "Eliminados")}
               </button>
             </div>
           </div>
@@ -2329,7 +2428,7 @@ function renderRemindersSection() {
           onclick="emptyReminderTrash()"
         >
           <i class="fa-solid fa-trash-can"></i>
-          Vaciar eliminados
+          ${activityT("activities.emptyDeletedButton", "Vaciar eliminados")}
         </button>
       </div>
 
@@ -2495,8 +2594,8 @@ async function handleManualReminderSubmit(event) {
 
     if (!response.ok) {
       Swal.fire({
-        title: "No se pudo guardar",
-        text: data.mensaje || data.error || "No se pudo guardar el recordatorio.",
+        title: activityT("activities.saveFailedTitle", "No se pudo guardar"),
+        text: getActivityResponseText(data, "activities.saveFailedText", "No se pudo guardar la actividad."),
         icon: "error",
         confirmButtonColor: "#960018"
       });
@@ -2537,13 +2636,13 @@ async function handleManualReminderSubmit(event) {
         notificationResult.exactAlarmRequired
       ) {
         const exactAlarmResult = await Swal.fire({
-          title: "Permitir avisos exactos",
+          title: activityT("activities.exactAlertsTitle", "Permitir avisos exactos"),
           text:
-            "Para avisarte exactamente a la hora programada, Día en Orden necesita permiso para usar alarmas y recordatorios.",
+            activityT("activities.exactAlertsText", "Para avisarte exactamente a la hora programada, Día en Orden necesita permiso para usar alarmas y recordatorios."),
           icon: "info",
           showCancelButton: true,
-          confirmButtonText: "Ir a configuración",
-          cancelButtonText: "Ahora no",
+          confirmButtonText: activityT("activities.goToSettings", "Ir a configuración"),
+          cancelButtonText: activityT("activities.notNow", "Ahora no"),
           confirmButtonColor: "#960018",
           cancelButtonColor: "#6b7280"
         });
@@ -2648,10 +2747,10 @@ function setupReminderFilters() {
         value: activityDateFilter,
         defaultValue: "all",
         labels: {
-          all: "Fecha",
-          today: "Hoy",
-          week: "Esta semana",
-          month: "Este mes"
+          all: activityT("activities.date", "Fecha"),
+          today: activityT("activities.today", "Hoy"),
+          week: activityT("activities.thisWeek", "Esta semana"),
+          month: activityT("activities.thisMonth", "Este mes")
         }
       },
 
@@ -2659,10 +2758,10 @@ function setupReminderFilters() {
         value: activityPriorityFilter,
         defaultValue: "all",
         labels: {
-          all: "Prioridad",
-          alta: "Alta",
-          media: "Media",
-          baja: "Baja"
+          all: activityT("activities.priority", "Prioridad"),
+          alta: activityT("activities.high", "Alta"),
+          media: activityT("activities.medium", "Media"),
+          baja: activityT("activities.low", "Baja")
         }
       },
 
@@ -2670,9 +2769,9 @@ function setupReminderFilters() {
         value: activityStatusFilter,
         defaultValue: "todos",
         labels: {
-          todos: "Estado",
-          vencidos: "Vencidos",
-          eliminados: "Eliminados"
+          todos: activityT("activities.status", "Estado"),
+          vencidos: activityT("activities.overduePlural", "Vencidos"),
+          eliminados: activityT("activities.deleted", "Eliminados")
         }
       }
     };
@@ -3250,9 +3349,9 @@ function getEmptyRemindersMessage() {
     return {
       icon: "fa-trash-can",
       title:
-        "No hay actividades eliminadas",
+        activityT("activities.noDeletedTitle", "No hay actividades eliminadas"),
       text:
-        "No se encontraron actividades eliminadas con los filtros seleccionados."
+        activityT("activities.noDeletedText", "No se encontraron actividades eliminadas con los filtros seleccionados.")
     };
   }
 
@@ -3265,9 +3364,9 @@ function getEmptyRemindersMessage() {
       icon:
         "fa-triangle-exclamation",
       title:
-        "No hay actividades vencidas",
+        activityT("activities.noOverdueTitle", "No hay actividades vencidas"),
       text:
-        "No se encontraron actividades vencidas con los filtros seleccionados."
+        activityT("activities.noOverdueText", "No se encontraron actividades vencidas con los filtros seleccionados.")
     };
   }
 
@@ -3280,9 +3379,9 @@ function getEmptyRemindersMessage() {
       icon:
         "fa-calendar-day",
       title:
-        "No hay actividades para hoy",
+        activityT("activities.noTodayTitle", "No hay actividades para hoy"),
       text:
-        "No se encontraron actividades para hoy con los filtros seleccionados."
+        activityT("activities.noTodayText", "No se encontraron actividades para hoy con los filtros seleccionados.")
     };
   }
 
@@ -3295,9 +3394,9 @@ function getEmptyRemindersMessage() {
       icon:
         "fa-calendar-week",
       title:
-        "No hay actividades esta semana",
+        activityT("activities.noWeekTitle", "No hay actividades esta semana"),
       text:
-        "No se encontraron actividades para esta semana con los filtros seleccionados."
+        activityT("activities.noWeekText", "No se encontraron actividades para esta semana con los filtros seleccionados.")
     };
   }
 
@@ -3310,9 +3409,9 @@ function getEmptyRemindersMessage() {
       icon:
         "fa-calendar",
       title:
-        "No hay actividades este mes",
+        activityT("activities.noMonthTitle", "No hay actividades este mes"),
       text:
-        "No se encontraron actividades para este mes con los filtros seleccionados."
+        activityT("activities.noMonthText", "No se encontraron actividades para este mes con los filtros seleccionados.")
     };
   }
 
@@ -3325,9 +3424,9 @@ function getEmptyRemindersMessage() {
       icon:
         "fa-flag",
       title:
-        "No hay actividades de prioridad alta",
+        activityT("activities.noHighTitle", "No hay actividades de prioridad alta"),
       text:
-        "No se encontraron actividades de prioridad alta con los filtros seleccionados."
+        activityT("activities.noHighText", "No se encontraron actividades de prioridad alta con los filtros seleccionados.")
     };
   }
 
@@ -3340,9 +3439,9 @@ function getEmptyRemindersMessage() {
       icon:
         "fa-flag",
       title:
-        "No hay actividades de prioridad media",
+        activityT("activities.noMediumTitle", "No hay actividades de prioridad media"),
       text:
-        "No se encontraron actividades de prioridad media con los filtros seleccionados."
+        activityT("activities.noMediumText", "No se encontraron actividades de prioridad media con los filtros seleccionados.")
     };
   }
 
@@ -3355,9 +3454,9 @@ function getEmptyRemindersMessage() {
       icon:
         "fa-flag",
       title:
-        "No hay actividades de prioridad baja",
+        activityT("activities.noLowTitle", "No hay actividades de prioridad baja"),
       text:
-        "No se encontraron actividades de prioridad baja con los filtros seleccionados."
+        activityT("activities.noLowText", "No se encontraron actividades de prioridad baja con los filtros seleccionados.")
     };
   }
 
@@ -3366,8 +3465,8 @@ function getEmptyRemindersMessage() {
     icon:
       "fa-bell-slash",
     title:
-      "No hay actividades para mostrar",
+      activityT("activities.noActivitiesTitle", "No hay actividades para mostrar"),
     text:
-      "Cuando registres una actividad, aparecerá aquí."
+      activityT("activities.noActivitiesText", "Cuando registres una actividad, aparecerá aquí.")
   };
 }

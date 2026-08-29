@@ -1,3 +1,59 @@
+function movementT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key);
+  }
+
+  return fallback;
+}
+
+function getMovementResponseText(data, key, fallback) {
+  const language =
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+      ? window.DANYBOT_I18N.getLanguage()
+      : "es";
+
+  if (language === "en") {
+    return movementT(key, fallback);
+  }
+
+  return (
+    data?.mensaje ||
+    data?.error ||
+    movementT(key, fallback)
+  );
+}
+
+function getMovementVoiceErrorText(reason, key, fallback) {
+  const language =
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+      ? window.DANYBOT_I18N.getLanguage()
+      : "es";
+
+  if (language === "en") {
+    return movementT(key, fallback);
+  }
+
+  return reason || movementT(key, fallback);
+}
+
+function getMovementsLocale() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage() === "en"
+      ? "en-US"
+      : "es-CO";
+  }
+
+  return "es-CO";
+}
+
 // ===============================
 // Sesión de usuario
 // ===============================
@@ -32,6 +88,28 @@ const USER_ID = user.id;
 const API_URL = '/api/expenses';
 
 const INCOME_API_URL = '/api/incomes';
+
+function getMovementCategoryDisplayLabel(category) {
+  const value =
+    String(category || "")
+      .trim()
+      .toLowerCase();
+
+  const labels = {
+    factura: movementT("movements.bill", "Factura"),
+    alimentación: movementT("movements.food", "Alimentación"),
+    alimentacion: movementT("movements.food", "Alimentación"),
+    transporte: movementT("movements.transportation", "Transporte"),
+    salud: movementT("movements.health", "Salud"),
+    entretenimiento: movementT("movements.entertainment", "Entretenimiento"),
+    prestamos: movementT("movements.loans", "Préstamos"),
+    préstamos: movementT("movements.loans", "Préstamos"),
+    otro: movementT("movements.other", "Otro"),
+    ingreso: movementT("movements.incomeLabel", "Ingreso")
+  };
+
+  return labels[value] || category || "";
+}
 
 function getAuthHeaders(includeJsonContent = false) {
   const currentToken = localStorage.getItem("authToken");
@@ -294,12 +372,12 @@ async function saveExpense(event) {
   */
   await Swal.fire({
     title: editedExpenseId
-      ? "Gasto actualizado"
-      : "Gasto registrado",
+      ? movementT("movements.expenseUpdatedTitle", "Gasto actualizado")
+      : movementT("movements.expenseRegisteredTitle", "Gasto registrado"),
 
     text: editedExpenseId
-      ? "La información del gasto fue actualizada correctamente."
-      : "El gasto fue guardado correctamente.",
+      ? movementT("movements.expenseUpdatedText", "La información del gasto fue actualizada correctamente.")
+      : movementT("movements.expenseRegisteredText", "El gasto fue guardado correctamente."),
 
     icon: "success",
     confirmButtonColor: "#3c0000"
@@ -313,7 +391,7 @@ async function saveExpense(event) {
 
     } catch (error) {
       console.error('Error al guardar gasto:', error);
-      expenseMessage.textContent = 'Ocurrió un error al guardar el gasto.';
+      expenseMessage.textContent = movementT("movements.genericErrorText", "Ocurrió un error.");
     }
   }
 
@@ -334,8 +412,8 @@ function validateExpenseEvidenceFile(file) {
 
   if (!allowedTypes.includes(file.type)) {
     Swal.fire({
-      title: 'Archivo no permitido',
-      text: 'La evidencia debe ser PDF, JPG, PNG o WEBP.',
+      title: movementT("movements.fileNotAllowedTitle", "Archivo no permitido"),
+      text: movementT("movements.fileNotAllowedText", "La evidencia debe ser PDF, JPG, PNG o WEBP."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -345,8 +423,8 @@ function validateExpenseEvidenceFile(file) {
 
   if (file.size > maxSizeBytes) {
     Swal.fire({
-      title: 'Archivo muy pesado',
-      text: 'La evidencia no puede superar los 5 MB.',
+      title: movementT("movements.fileTooLargeTitle", "Archivo muy pesado"),
+      text: movementT("movements.fileTooLargeText", "La evidencia no puede superar los 5 MB."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -361,7 +439,7 @@ function renderEvidenceCell(expense) {
   if (!expense.evidence_file_name) {
     return `
       <span class="no-evidence-label">
-        Sin evidencia
+        ${movementT("movements.noEvidence", "Sin evidencia")}
       </span>
     `;
   }
@@ -373,7 +451,7 @@ function renderEvidenceCell(expense) {
       onclick="openExpenseEvidence(${expense.id})"
     >
       <i class="bi bi-paperclip"></i>
-      Ver
+      ${movementT("movements.view", "Ver")}
     </button>
   `;
 }
@@ -401,8 +479,8 @@ async function openExpensePdfWithNativeViewer(blob, expenseId) {
 
     if (!Filesystem || !FileViewer) {
       Swal.fire({
-        title: 'Visor no disponible',
-        text: 'No se encontró el visor nativo de archivos en la app.',
+        title: movementT("movements.viewerUnavailableTitle", "Visor no disponible"),
+        text: movementT("movements.viewerUnavailableText", "No se encontró el visor nativo de archivos en la app."),
         icon: 'warning',
         confirmButtonColor: '#3c0000'
       });
@@ -431,8 +509,8 @@ async function openExpensePdfWithNativeViewer(blob, expenseId) {
     console.error('Error al abrir PDF con visor nativo:', error);
 
     Swal.fire({
-      title: 'No se pudo abrir el PDF',
-      text: 'El archivo se recibió, pero no se pudo abrir con el visor del celular.',
+      title: movementT("movements.pdfOpenFailedTitle", "No se pudo abrir el PDF"),
+      text: movementT("movements.pdfOpenFailedText", "El archivo se recibió, pero no se pudo abrir con el visor del celular."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
@@ -468,17 +546,17 @@ async function openExpenseEvidence(expenseId) {
     }
 
     if (!response.ok) {
-      let message = 'No se pudo abrir la evidencia.';
+      let message = movementT("movements.evidenceOpenErrorText", "Ocurrió un error al abrir la evidencia.");
 
       try {
         const data = await response.json();
-        message = data.mensaje || message;
+        message = getMovementResponseText(data, "movements.evidenceOpenErrorText", message);
       } catch (error) {
         console.error('No se pudo leer el error de evidencia:', error);
       }
 
       Swal.fire({
-        title: 'Evidencia no disponible',
+        title: movementT("movements.evidenceUnavailableTitle", "Evidencia no disponible"),
         text: message,
         icon: 'warning',
         confirmButtonColor: '#3c0000'
@@ -495,7 +573,7 @@ async function openExpenseEvidence(expenseId) {
 
     if (contentType.startsWith('image/')) {
       evidencePreviewHtml = `
-        <img src="${fileUrl}" alt="Evidencia del gasto" class="expense-evidence-image">
+        <img src="${fileUrl}" alt="${movementT("movements.expenseEvidenceTitle", "Evidencia del gasto")}" class="expense-evidence-image">
       `;
     } else if (contentType.includes('pdf')) {
       const isNativeApp =
@@ -520,22 +598,22 @@ async function openExpenseEvidence(expenseId) {
       evidencePreviewHtml = `
         <div class="expense-evidence-file-message">
           <i class="bi bi-file-earmark-text"></i>
-          <p>Este tipo de archivo no se puede previsualizar directamente en la app.</p>
+          <p>${movementT("movements.evidencePreviewUnavailable", "Este tipo de archivo no se puede previsualizar directamente en la app.")}</p>
           <a href="${fileUrl}" target="_blank" download="evidencia-gasto" class="expense-evidence-download">
-            Abrir archivo
+            ${movementT("movements.openFile", "Abrir archivo")}
           </a>
         </div>
       `;
     }
 
     Swal.fire({
-      title: 'Evidencia del gasto',
+      title: movementT("movements.expenseEvidenceTitle", "Evidencia del gasto"),
       html: `
         <div class="expense-evidence-modal">
           ${evidencePreviewHtml}
         </div>
       `,
-      confirmButtonText: 'Volver',
+      confirmButtonText: movementT("movements.back", "Volver"),
       confirmButtonColor: '#960018',
       showCloseButton: true,
       width: 'min(92vw, 760px)',
@@ -557,7 +635,7 @@ async function openExpenseEvidence(expenseId) {
 
     Swal.fire({
       title: 'Error',
-      text: 'Ocurrió un error al abrir la evidencia.',
+      text: movementT("movements.evidenceOpenErrorText", "Ocurrió un error al abrir la evidencia."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
@@ -723,7 +801,7 @@ function createMobileExpenseRow(expense) {
 
             <span class="mobile-expense-meta">
               <span class="mobile-expense-category">
-                ${expense.category}
+                ${getMovementCategoryDisplayLabel(expense.category)}
               </span>
 
               <span class="mobile-expense-date">
@@ -750,26 +828,26 @@ function createMobileExpenseRow(expense) {
           <div class="mobile-expense-detail-grid">
 
             <div class="mobile-expense-detail">
-              <span>Fecha</span>
+              <span>${movementT("movements.date", "Fecha")}</span>
               <strong>
                 ${formatDate(expense.expense_date)}
               </strong>
             </div>
 
             <div class="mobile-expense-detail">
-              <span>Categoría</span>
-              <strong>${expense.category}</strong>
+              <span>${movementT("movements.category", "Categoría")}</span>
+              <strong>${getMovementCategoryDisplayLabel(expense.category)}</strong>
             </div>
 
             <div class="mobile-expense-detail">
-              <span>Origen</span>
+              <span>${movementT("movements.source", "Origen")}</span>
               <strong>
                 ${getSourceLabel(expense.source)}
               </strong>
             </div>
 
             <div class="mobile-expense-detail">
-              <span>Evidencia</span>
+              <span>${movementT("movements.evidence", "Evidencia")}</span>
 
               <div class="mobile-expense-evidence">
                 ${renderEvidenceCell(expense)}
@@ -785,7 +863,7 @@ function createMobileExpenseRow(expense) {
               data-edit-expense="${expense.id}"
             >
               <i class="bi bi-pencil-square"></i>
-              <span>Editar</span>
+              <span>${movementT("movements.edit", "Editar")}</span>
             </button>
 
             <button
@@ -794,7 +872,7 @@ function createMobileExpenseRow(expense) {
               data-delete-expense="${expense.id}"
             >
               <i class="bi bi-trash3"></i>
-              <span>Eliminar</span>
+              <span>${movementT("movements.delete", "Eliminar")}</span>
             </button>
           </div>
         </div>
@@ -1055,11 +1133,14 @@ function getCategoryClass(category) {
 // Esta función muestra el nombre del origen de forma más amigable.
 function getSourceLabel(source) {
   const labels = {
-    manual: 'Manual',
-    voice: 'Por voz'
+    manual: movementT("movements.manual", "Manual"),
+    voice: movementT("movements.voice", "Por voz")
   };
 
-  return labels[source] || 'Manual';
+  return (
+    labels[source] ||
+    movementT("movements.manual", "Manual")
+  );
 }
 
 
@@ -1089,16 +1170,30 @@ function formatDate(dateValue) {
   const cleanDate = formatDateForInput(dateValue);
 
   if (!cleanDate) {
-    return '';
+    return "";
   }
 
-  const [year, month, day] = cleanDate.split('-');
+  const [year, month, day] =
+    cleanDate.split("-");
 
   if (!year || !month || !day) {
     return cleanDate;
   }
 
-  return `${day}/${month}/${year}`;
+  const date = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day)
+  );
+
+  return new Intl.DateTimeFormat(
+    getMovementsLocale(),
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }
+  ).format(date);
 }
 
 // Esta función convierte la fecha al formato que necesita el input type="date".
@@ -1215,7 +1310,7 @@ function startEditExpense(id) {
   const expense = currentExpenses.find((item) => item.id === id);
 
   if (!expense) {
-    expenseMessage.textContent = 'No se encontró el gasto para editar.';
+    expenseMessage.textContent = movementT("movements.expenseNotFoundEdit", "No se encontró el gasto para editar.");
     return;
   }
 
@@ -1230,7 +1325,7 @@ function startEditExpense(id) {
     expenseEvidence.value = '';
   }
 
-  submitExpenseButton.innerHTML = '<i class="bi bi-check2-circle"></i> Actualizar gasto';
+  submitExpenseButton.innerHTML = `<i class="bi bi-check2-circle"></i> ${movementT("movements.updateExpense", "Actualizar gasto")}`;
   cancelEditButton.style.display = 'block';
 
   expenseMessage.textContent = '';
@@ -1286,8 +1381,8 @@ async function deleteExpense(expenseId) {
 
     if (!response.ok) {
       Swal.fire({
-        title: 'No se pudo eliminar',
-        text: data.mensaje || 'Ocurrió un error.',
+        title: movementT("movements.deleteFailedTitle", "No se pudo eliminar"),
+        text: getMovementResponseText(data, "movements.genericErrorText", "Ocurrió un error."),
         icon: 'error',
       confirmButtonColor: '#3c0000'
       });
@@ -1295,8 +1390,8 @@ async function deleteExpense(expenseId) {
     }
 
     await Swal.fire({
-      title: 'Gasto eliminado',
-      text: 'El gasto fue eliminado correctamente.',
+      title: movementT("movements.expenseDeletedTitle", "Gasto eliminado"),
+      text: movementT("movements.expenseDeletedText", "El gasto fue eliminado correctamente."),
       icon: 'success',
       confirmButtonColor: '#3c0000'
     });
@@ -1308,7 +1403,7 @@ async function deleteExpense(expenseId) {
 
     Swal.fire({
       title: 'Error',
-      text: 'Ocurrió un error al eliminar el gasto.',
+      text: movementT("movements.expenseDeleteErrorText", "Ocurrió un error al eliminar el gasto."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
@@ -1326,7 +1421,7 @@ function resetFormMode() {
     expenseEvidence.value = '';
   }
 
-  submitExpenseButton.innerHTML = '<i class="bi bi-save2"></i> Guardar gasto';
+  submitExpenseButton.innerHTML = `<i class="bi bi-save2"></i> ${movementT("movements.saveExpense", "Guardar gasto")}`;
   cancelEditButton.style.display = 'none';
 
   setTodayDate();
@@ -1341,8 +1436,8 @@ async function startVoiceExpense() {
   if (isMobileApp) {
     if (typeof window.startDanyBotNativeSpeech !== "function") {
       Swal.fire({
-        title: "Voz no disponible",
-        text: "No se encontró la configuración de voz nativa.",
+        title: movementT("movements.voiceUnavailableTitle", "Voz no disponible"),
+        text: movementT("movements.nativeVoiceUnavailableText", "No se encontró la configuración de voz nativa."),
         icon: "warning",
         confirmButtonColor: "#3c0000"
       });
@@ -1351,19 +1446,19 @@ async function startVoiceExpense() {
 
     try {
       voiceButton.classList.add("listening");
-      voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Escuchando...';
+      voiceButton.innerHTML = `<i class="bi bi-mic-fill"></i> ${movementT("movements.listening", "Escuchando...")}`;
 
       const result = await window.startDanyBotNativeSpeech({
-        language: "es-CO",
-        prompt: "Di el gasto que quieres registrar"
+        language: getMovementsLocale(),
+        prompt: movementT("movements.expenseVoicePrompt", "Di el gasto que quieres registrar")
       });
 
       voiceButton.classList.remove("listening");
-      voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+      voiceButton.innerHTML = `<i class="bi bi-mic-fill"></i> ${movementT("movements.dictateExpenseVoice", "Dictar gasto por voz")}`;
 
       if (!result.success) {
         Swal.fire({
-          title: "No se pudo escuchar",
+          title: movementT("movements.couldNotListenTitle", "No se pudo escuchar"),
           text: result.reason || "No se detectó ningún texto.",
           icon: "warning",
           confirmButtonColor: "#3c0000"
@@ -1383,11 +1478,11 @@ async function startVoiceExpense() {
       console.error("Error en voz nativa de gastos:", error);
 
       voiceButton.classList.remove("listening");
-      voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+      voiceButton.innerHTML = `<i class="bi bi-mic-fill"></i> ${movementT("movements.dictateExpenseVoice", "Dictar gasto por voz")}`;
 
       Swal.fire({
-        title: "Error de voz",
-        text: "No fue posible usar el micrófono del celular.",
+        title: movementT("movements.voiceErrorTitle", "Error de voz"),
+        text: movementT("movements.voiceMicrophoneErrorText", "No fue posible usar el micrófono del celular."),
         icon: "error",
         confirmButtonColor: "#3c0000"
       });
@@ -1400,8 +1495,8 @@ async function startVoiceExpense() {
 
   if (!SpeechRecognition) {
     Swal.fire({
-      title: "Reconocimiento de voz no disponible",
-      text: "Tu navegador no permite usar dictado por voz en esta página. Prueba con Chrome.",
+      title: movementT("movements.speechUnavailableTitle", "Reconocimiento de voz no disponible"),
+      text: movementT("movements.speechUnavailableText", "Tu navegador no permite usar dictado por voz en esta página. Prueba con Chrome."),
       icon: "warning",
       confirmButtonColor: "#3c0000"
     });
@@ -1410,12 +1505,12 @@ async function startVoiceExpense() {
 
   const recognition = new SpeechRecognition();
 
-  recognition.lang = "es-CO";
+  recognition.lang = getMovementsLocale();
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
 
   voiceButton.classList.add("listening");
-  voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Escuchando...';
+  voiceButton.innerHTML = `<i class="bi bi-mic-fill"></i> ${movementT("movements.listening", "Escuchando...")}`;
 
   let voiceTimeout = setTimeout(() => {
     try {
@@ -1425,11 +1520,11 @@ async function startVoiceExpense() {
     }
 
     voiceButton.classList.remove("listening");
-    voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+    voiceButton.innerHTML = `<i class="bi bi-mic-fill"></i> ${movementT("movements.dictateExpenseVoice", "Dictar gasto por voz")}`;
 
     Swal.fire({
-      title: "No se detectó voz",
-      text: "No logré escuchar ningún texto. Intenta nuevamente.",
+      title: movementT("movements.noVoiceTitle", "No se detectó voz"),
+      text: movementT("movements.noVoiceText", "No logré escuchar ningún texto. Intenta nuevamente."),
       icon: "warning",
       confirmButtonColor: "#3c0000"
     });
@@ -1449,11 +1544,11 @@ async function startVoiceExpense() {
     clearTimeout(voiceTimeout);
 
     voiceButton.classList.remove("listening");
-    voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+    voiceButton.innerHTML = `<i class="bi bi-mic-fill"></i> ${movementT("movements.dictateExpenseVoice", "Dictar gasto por voz")}`;
 
     Swal.fire({
-      title: "No se pudo escuchar",
-      text: "Revisa el permiso del micrófono o intenta hablar más cerca del dispositivo.",
+      title: movementT("movements.couldNotListenTitle", "No se pudo escuchar"),
+      text: movementT("movements.microphoneCheckText", "Revisa el permiso del micrófono o intenta hablar más cerca del dispositivo."),
       icon: "error",
       confirmButtonColor: "#3c0000"
     });
@@ -1463,7 +1558,7 @@ async function startVoiceExpense() {
     clearTimeout(voiceTimeout);
 
     voiceButton.classList.remove("listening");
-    voiceButton.innerHTML = '<i class="bi bi-mic-fill"></i> Dictar gasto por voz';
+    voiceButton.innerHTML = `<i class="bi bi-mic-fill"></i> ${movementT("movements.dictateExpenseVoice", "Dictar gasto por voz")}`;
   };
 }
 
@@ -1476,7 +1571,7 @@ async function fillExpenseFromVoice(text) {
   const detectedExpense = {
     expense_date: detectedDate || getLocalDate(),
     category: detectedCategory || 'Otro',
-    description: detectedDescription || 'Gasto registrado por voz',
+    description: detectedDescription || movementT("movements.voiceExpenseDefaultDescription", "Gasto registrado por voz"),
     amount: Number(detectedAmount),
     source: 'voice'
   };
@@ -1489,8 +1584,8 @@ async function fillExpenseFromVoice(text) {
 
   if (expenseId.value) {
     Swal.fire({
-      title: 'Estás editando un gasto',
-      text: 'Termina o cancela la edición antes de guardar un gasto por voz automáticamente.',
+      title: movementT("movements.editingExpenseTitle", "Estás editando un gasto"),
+      text: movementT("movements.editingExpenseText", "Termina o cancela la edición antes de guardar un gasto por voz automáticamente."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -1500,8 +1595,8 @@ async function fillExpenseFromVoice(text) {
 
   if (!detectedExpense.amount || detectedExpense.amount <= 0) {
     Swal.fire({
-      title: 'No detecté el valor',
-      text: 'No pude identificar el monto del gasto. Revisa el formulario y guárdalo manualmente.',
+      title: movementT("movements.amountNotDetectedTitle", "No detecté el valor"),
+      text: movementT("movements.expenseAmountNotDetectedText", "No pude identificar el monto del gasto. Revisa el formulario y guárdalo manualmente."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -1528,8 +1623,8 @@ async function saveVoiceExpenseAuto(expenseData) {
 
     if (!response.ok) {
       Swal.fire({
-        title: 'No se pudo guardar',
-        text: data.mensaje || 'No se pudo guardar el gasto por voz.',
+        title: movementT("movements.saveFailedTitle", "No se pudo guardar"),
+        text: getMovementResponseText(data, "movements.voiceExpenseSaveFailedText", "No se pudo guardar el gasto por voz."),
         icon: 'error',
       confirmButtonColor: '#3c0000'
       });
@@ -1591,8 +1686,8 @@ async function saveVoiceExpenseAuto(expenseData) {
     resetFormMode();
 
     Swal.fire({
-      title: 'Gasto guardado automáticamente',
-      text: `${expenseData.description} por ${formatMoney(expenseData.amount)} fue registrado correctamente.`,
+      title: movementT("movements.expenseAutoSavedTitle", "Gasto guardado automáticamente"),
+      text: `${expenseData.description} · ${formatMoney(expenseData.amount)} · ${movementT("movements.expenseAutoSavedSuffix", "fue registrado correctamente.")}`,
       icon: 'success',
       timer: 2600,
       showConfirmButton: false,
@@ -1605,14 +1700,400 @@ async function saveVoiceExpenseAuto(expenseData) {
 
     Swal.fire({
       title: 'Error',
-      text: 'Ocurrió un error al guardar el gasto por voz.',
+      text: movementT("movements.voiceExpenseSaveErrorText", "Ocurrió un error al guardar el gasto por voz."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
   }
 }
 
+function extractEnglishSpokenAmount(text) {
+  const normalizedText =
+    normalizeMoneyText(text)
+      .replace(/-/g, " ");
+
+  // Casos como:
+  // "50 thousand"
+  // "2.5 million"
+  const directScaleMatch =
+    normalizedText.match(
+      /\b(\d+(?:\.\d+)?)\s*(thousand|million)\b/
+    );
+
+  if (directScaleMatch) {
+    const value = Number(directScaleMatch[1]);
+
+    const multiplier =
+      directScaleMatch[2] === "million"
+        ? 1000000
+        : 1000;
+
+    return Math.round(value * multiplier);
+  }
+
+  const numberValues = {
+    zero: 0,
+    one: 1,
+    two: 2,
+    three: 3,
+    four: 4,
+    five: 5,
+    six: 6,
+    seven: 7,
+    eight: 8,
+    nine: 9,
+    ten: 10,
+    eleven: 11,
+    twelve: 12,
+    thirteen: 13,
+    fourteen: 14,
+    fifteen: 15,
+    sixteen: 16,
+    seventeen: 17,
+    eighteen: 18,
+    nineteen: 19,
+    twenty: 20,
+    thirty: 30,
+    forty: 40,
+    fifty: 50,
+    sixty: 60,
+    seventy: 70,
+    eighty: 80,
+    ninety: 90
+  };
+
+  const tokens =
+    normalizedText
+      .split(/\s+/)
+      .filter(Boolean);
+
+  let current = 0;
+  let total = 0;
+  let bestAmount = 0;
+  let hasNumber = false;
+
+  const commitAmount = () => {
+    if (!hasNumber) {
+      return;
+    }
+
+    const amount = total + current;
+
+    if (amount > bestAmount) {
+      bestAmount = amount;
+    }
+
+    current = 0;
+    total = 0;
+    hasNumber = false;
+  };
+
+  tokens.forEach((token) => {
+    if (/^\d+$/.test(token)) {
+      current += Number(token);
+      hasNumber = true;
+      return;
+    }
+
+    if (
+      Object.prototype.hasOwnProperty.call(
+        numberValues,
+        token
+      )
+    ) {
+      current += numberValues[token];
+      hasNumber = true;
+      return;
+    }
+
+    if (token === "hundred") {
+      current =
+        Math.max(current, 1) * 100;
+
+      hasNumber = true;
+      return;
+    }
+
+    if (token === "thousand") {
+      total +=
+        Math.max(current, 1) * 1000;
+
+      current = 0;
+      hasNumber = true;
+      return;
+    }
+
+    if (token === "million") {
+      total +=
+        Math.max(current, 1) * 1000000;
+
+      current = 0;
+      hasNumber = true;
+      return;
+    }
+
+    if (token === "and" && hasNumber) {
+      return;
+    }
+
+    commitAmount();
+  });
+
+  commitAmount();
+
+  return bestAmount || "";
+}
+
+
+function extractEnglishExpenseCategory(text) {
+  const normalizedText =
+    normalizeMoneyText(text);
+
+  const hasAny = (keywords) =>
+    keywords.some(
+      (keyword) =>
+        normalizedText.includes(keyword)
+    );
+
+  if (
+    hasAny([
+      "bill",
+      "utility",
+      "utilities",
+      "service",
+      "receipt",
+      "electricity",
+      "water",
+      "internet",
+      "phone bill",
+      "gas bill",
+      "utility bill",
+      "internet bill"
+    ])
+  ) {
+    return "Factura";
+  }
+
+  if (
+    hasAny([
+      "food",
+      "lunch",
+      "breakfast",
+      "dinner",
+      "groceries",
+      "grocery",
+      "supermarket",
+      "restaurant"
+    ])
+  ) {
+    return "Alimentación";
+  }
+
+  if (
+    hasAny([
+      "transport",
+      "transportation",
+      "taxi",
+      "uber",
+      "bus",
+      "fare",
+      "ticket"
+    ])
+  ) {
+    return "Transporte";
+  }
+
+  if (
+    hasAny([
+      "health",
+      "medicine",
+      "medication",
+      "doctor",
+      "medical",
+      "pharmacy",
+      "appointment"
+    ])
+  ) {
+    return "Salud";
+  }
+
+  if (
+    hasAny([
+      "movie",
+      "movies",
+      "cinema",
+      "entertainment",
+      "outing"
+    ])
+  ) {
+    return "Entretenimiento";
+  }
+
+  if (
+    hasAny([
+      "loan",
+      "loans"
+    ])
+  ) {
+    return "Prestamos";
+  }
+
+  return "Otro";
+}
+
+
+function cleanEnglishMovementDescription(
+  text,
+  type
+) {
+  let descriptionText =
+    normalizeMoneyText(text);
+
+  if (type === "expense") {
+    descriptionText =
+      descriptionText
+        .replace(
+          /\b(add|register|record|save|note)\b/g,
+          ""
+        )
+        .replace(
+          /\b(spent|spend|paid|pay|bought|buy|purchased|purchase)\b/g,
+          ""
+        )
+        .replace(
+          /\b(an expense|expense)\b/g,
+          ""
+        );
+  } else {
+    descriptionText =
+      descriptionText
+        .replace(
+          /\b(add|register|record|save|note)\b/g,
+          ""
+        )
+        .replace(
+          /\b(received|receive|earned|earn|got|get|collected|collect)\b/g,
+          ""
+        )
+        .replace(
+          /\b(an income|income)\b/g,
+          ""
+        );
+  }
+
+  descriptionText =
+    descriptionText
+      .replace(
+        /\b\d{1,3}(?:[\s.,]\d{3})+\b/g,
+        ""
+      )
+      .replace(
+        /\b\d+(?:\.\d+)?\s*(thousand|million)\b/g,
+        ""
+      )
+      .replace(/\b\d+\b/g, "")
+      .replace(
+        /\b(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million)\b/g,
+        ""
+      )
+      .replace(/\b(pesos|peso|cop)\b/g, "")
+      .replace(/\b(today|yesterday)\b/g, "")
+      .replace(
+        /\b(i|please|the|a|an|for|on|at|of|to|from|worth|value|and)\b/g,
+        ""
+      )
+      .replace(/\s+/g, " ")
+      .trim();
+
+  return descriptionText;
+}
+
+
+function extractEnglishExpenseDescription(text) {
+  const descriptionText =
+    cleanEnglishMovementDescription(
+      text,
+      "expense"
+    );
+
+  if (!descriptionText) {
+    return movementT(
+      "movements.voiceExpenseDefaultDescription",
+      "Gasto registrado por voz"
+    );
+  }
+
+  return (
+    descriptionText.charAt(0).toUpperCase() +
+    descriptionText.slice(1)
+  );
+}
+
+
+function extractEnglishIncomeDescription(text) {
+  const descriptionText =
+    cleanEnglishMovementDescription(
+      text,
+      "income"
+    );
+
+  if (!descriptionText) {
+    return movementT(
+      "movements.voiceIncomeDefaultDescription",
+      "Ingreso registrado por voz"
+    );
+  }
+
+  return (
+    descriptionText.charAt(0).toUpperCase() +
+    descriptionText.slice(1)
+  );
+}
+
+
+function getEnglishMovementVoiceDate(text) {
+  const normalizedText =
+    normalizeMoneyText(text);
+
+  if (normalizedText.includes("today")) {
+    return getLocalDate();
+  }
+
+  if (normalizedText.includes("yesterday")) {
+    const yesterday = new Date();
+
+    yesterday.setDate(
+      yesterday.getDate() - 1
+    );
+
+    const year =
+      yesterday.getFullYear();
+
+    const month =
+      String(
+        yesterday.getMonth() + 1
+      ).padStart(2, "0");
+
+    const day =
+      String(
+        yesterday.getDate()
+      ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+  return getLocalDate();
+}
+
 function extractAmount(text) {
+  if (getMovementsLocale() === "en-US") {
+    const englishSpokenAmount =
+      extractEnglishSpokenAmount(text);
+
+    if (englishSpokenAmount) {
+      return englishSpokenAmount;
+    }
+  }
   const cleanedText = normalizeMoneyText(text);
   const normalizedDigitsText = normalizeSeparatedDigits(cleanedText);
 
@@ -1994,6 +2475,9 @@ function parseSmallSpanishNumber(words) {
 
 
 function extractCategory(text) {
+  if (getMovementsLocale() === "en-US") {
+    return extractEnglishExpenseCategory(text);
+  }
   if (text.includes('factura') || text.includes('servicio') || text.includes('recibo')) {
     return 'Factura';
   }
@@ -2028,6 +2512,9 @@ function extractCategory(text) {
 
 
 function extractDescription(text) {
+  if (getMovementsLocale() === "en-US") {
+    return extractEnglishExpenseDescription(text);
+  }
   let descriptionText = text.toLowerCase();
 
   descriptionText = descriptionText
@@ -2056,6 +2543,9 @@ function extractDescription(text) {
 
 
 function extractDate(text) {
+  if (getMovementsLocale() === "en-US") {
+    return getEnglishMovementVoiceDate(text);
+  }
   if (text.includes('hoy')) {
     return getLocalDate();
   }
@@ -2106,8 +2596,8 @@ async function downloadExpensesExcel() {
     totalExpenses === 0
   ) {
     Swal.fire({
-      title: 'Sin datos para exportar',
-      text: 'No hay ingresos ni gastos registrados para el mes seleccionado.',
+      title: movementT("movements.noDataExportTitle", "Sin datos para exportar"),
+      text: movementT("movements.noDataExportText", "No hay ingresos ni gastos registrados para el mes seleccionado."),
       icon: 'info',
       confirmButtonColor: '#3c0000'
     });
@@ -2375,33 +2865,33 @@ async function downloadExpensesExcel() {
   // HOJA 1: RESUMEN
   // ==================================================
   const summaryData = [
-    ['REPORTE MENSUAL - DÍA EN ORDEN', '', '', ''],
-    [`Mes: ${monthLabel}`, '', '', ''],
+    [movementT("movements.reportTitle", "REPORTE MENSUAL - DÍA EN ORDEN"), "", "", ""],
+    [`${movementT("movements.reportMonth", "Mes")}: ${monthLabel}`, '', '', ''],
     ['', '', '', ''],
-    ['INGRESOS', '', 'GASTOS Y BALANCE', ''],
+    [movementT("movements.reportIncomeSection", "INGRESOS"), '', movementT("movements.reportExpensesBalanceSection", "GASTOS Y BALANCE"), ''],
     [
-      'Ingreso mensual',
+      movementT("movements.reportMonthlyIncome", "Ingreso mensual"),
       Number(currentIncomeAmount || 0),
-      'Total gastos',
+      movementT("movements.reportTotalExpenses", "Total gastos"),
       totalExpenses
     ],
     [
-      'Otros ingresos',
+      movementT("movements.reportOtherIncome", "Otros ingresos"),
       totalAdditionalIncomes,
-      'Balance / ahorro',
+      movementT("movements.reportBalanceSavings", "Balance / ahorro"),
       savings
     ],
     [
-      'Total ingresos',
+      movementT("movements.reportTotalIncome", "Total ingresos"),
       totalIncome,
-      'Movimientos del mes',
+      movementT("movements.reportMonthlyMovements", "Movimientos del mes"),
       totalMovements
     ],
     ['', '', '', ''],
-    ['DETALLE DEL INGRESO MENSUAL', '', '', ''],
+    [movementT("movements.reportMonthlyIncomeDetail", "DETALLE DEL INGRESO MENSUAL"), '', '', ''],
     [
-      'Descripción',
-      incomeDescription.value || 'Sin descripción registrada',
+      movementT("movements.reportDescription", "Descripción"),
+      incomeDescription.value || movementT("movements.reportNoDescription", "Sin descripción registrada"),
       '',
       ''
     ]
@@ -2464,10 +2954,10 @@ async function downloadExpensesExcel() {
   // HOJA 2: INGRESOS
   // ==================================================
   const incomeRows = [
-    ['INGRESOS - DÍA EN ORDEN', '', '', '', ''],
-    [`Mes: ${monthLabel}`, '', '', '', ''],
+    [movementT("movements.reportIncomeTitle", "INGRESOS - DÍA EN ORDEN"), "", "", "", ""],
+    [`${movementT("movements.reportMonth", "Mes")}: ${monthLabel}`, "", "", "", ""],
     ['', '', '', '', ''],
-    ['Tipo', 'Fecha / Mes', 'Descripción', 'Valor', 'Origen']
+    [movementT("movements.reportType", "Tipo"), movementT("movements.reportDateMonth", "Fecha / Mes"), movementT("movements.reportDescription", "Descripción"), movementT("movements.reportAmount", "Valor"), movementT("movements.reportSource", "Origen")]
   ];
 
   let incomeDataCount = 0;
@@ -2489,7 +2979,7 @@ async function downloadExpensesExcel() {
 
   additionalIncomes.forEach((income) => {
     incomeRows.push([
-      'Adicional',
+      movementT("movements.reportAdditional", "Adicional"),
       formatDate(income.income_date),
       income.description,
       Number(income.amount),
@@ -2596,24 +3086,46 @@ async function downloadExpensesExcel() {
   XLSX.utils.book_append_sheet(
     workbook,
     incomeWorksheet,
-    'Ingresos'
+    movementT("movements.reportIncomeSheet", "Ingresos")
   );
 
   // ==================================================
   // HOJA 3: GASTOS
   // ==================================================
   const expenseRows = [
-    ['GASTOS - DÍA EN ORDEN', '', '', '', '', '', ''],
-    [`Mes: ${monthLabel}`, '', '', '', '', '', ''],
-    ['', '', '', '', '', '', ''],
     [
-      'Fecha',
-      'Categoría',
-      'Descripción',
-      'Valor',
-      'Evidencia',
-      'Origen',
-      'Fecha de registro'
+      movementT(
+        "movements.reportExpensesTitle",
+        "GASTOS - DÍA EN ORDEN"
+      ),
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    [
+      `${movementT("movements.reportMonth", "Mes")}: ${monthLabel}`,
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    ["", "", "", "", "", "", ""],
+    [
+      movementT("movements.reportDate", "Fecha"),
+      movementT("movements.reportCategory", "Categoría"),
+      movementT("movements.reportDescription", "Descripción"),
+      movementT("movements.reportAmount", "Valor"),
+      movementT("movements.reportEvidence", "Evidencia"),
+      movementT("movements.reportSource", "Origen"),
+      movementT(
+        "movements.reportRegistrationDate",
+        "Fecha de registro"
+      )
     ]
   ];
 
@@ -2729,7 +3241,7 @@ async function downloadExpensesExcel() {
   XLSX.utils.book_append_sheet(
     workbook,
     expensesWorksheet,
-    'Gastos'
+    movementT("movements.reportExpensesSheet", "Gastos")
   );
 
   const fileName =
@@ -2748,9 +3260,9 @@ async function downloadExpensesExcel() {
     XLSX.writeFile(workbook, fileName);
 
     await Swal.fire({
-      title: 'Excel generado',
+      title: movementT("movements.excelGeneratedTitle", "Excel generado"),
       text:
-        'El reporte mensual fue descargado correctamente.',
+        movementT("movements.excelGeneratedText", "El reporte mensual fue descargado correctamente."),
       icon: 'success',
       confirmButtonColor: '#3c0000'
     });
@@ -2799,12 +3311,12 @@ async function downloadExpensesExcel() {
       });
 
     await Share.share({
-      title: 'Reporte mensual - Día en Orden',
+      title: movementT("movements.shareReportTitle", "Reporte mensual - Día en Orden"),
       text:
-        `Reporte financiero de Día en Orden correspondiente a ${monthLabel}.`,
+        `${movementT("movements.shareReportPrefix", "Reporte financiero de Día en Orden correspondiente a")} ${monthLabel}.`,
       url: fileInfo.uri,
       dialogTitle:
-        'Guardar o compartir reporte'
+        movementT("movements.shareReportDialogTitle", "Guardar o compartir reporte")
     });
 
   } catch (error) {
@@ -2814,9 +3326,9 @@ async function downloadExpensesExcel() {
     );
 
     await Swal.fire({
-      title: 'No se pudo exportar',
+      title: movementT("movements.exportFailedTitle", "No se pudo exportar"),
       text:
-        'El reporte fue generado, pero no se pudo guardar o compartir en el teléfono.',
+        movementT("movements.exportFailedText", "El reporte fue generado, pero no se pudo guardar o compartir en el teléfono."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
@@ -2875,8 +3387,8 @@ async function saveMonthlyIncome() {
 
   if (!amountValue || amountValue < 0) {
     Swal.fire({
-      title: 'Ingreso inválido',
-      text: 'Ingresa un valor válido para el ingreso mensual.',
+      title: movementT("movements.invalidIncomeTitle", "Ingreso inválido"),
+      text: movementT("movements.invalidIncomeText", "Ingresa un valor válido para el ingreso mensual."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -2903,8 +3415,8 @@ async function saveMonthlyIncome() {
 
     if (!response.ok) {
       Swal.fire({
-        title: 'No se pudo guardar',
-        text: data.mensaje || 'Ocurrió un error al guardar el ingreso.',
+        title: movementT("movements.saveFailedTitle", "No se pudo guardar"),
+        text: getMovementResponseText(data, "movements.incomeSaveErrorText", "Ocurrió un error al guardar el ingreso."),
         icon: 'error',
         confirmButtonColor: '#3c0000'
       });
@@ -2924,8 +3436,8 @@ async function saveMonthlyIncome() {
     updateIncomePanel();
 
     Swal.fire({
-      title: 'Ingreso guardado',
-      text: 'El ingreso mensual fue guardado correctamente.',
+      title: movementT("movements.incomeSavedTitle", "Ingreso guardado"),
+      text: movementT("movements.incomeSavedText", "El ingreso mensual fue guardado correctamente."),
       icon: 'success',
       confirmButtonColor: '#3c0000'
     });
@@ -2935,7 +3447,7 @@ async function saveMonthlyIncome() {
 
     Swal.fire({
       title: 'Error',
-      text: 'Ocurrió un error al guardar el ingreso mensual.',
+      text: movementT("movements.monthlyIncomeSaveErrorText", "Ocurrió un error al guardar el ingreso mensual."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
@@ -3023,8 +3535,8 @@ async function startVoiceIncome() {
 
   if (!isMobileApp) {
     Swal.fire({
-      title: 'Voz no disponible',
-      text: 'El dictado de ingresos está disponible en la aplicación móvil.',
+      title: movementT("movements.voiceUnavailableTitle", "Voz no disponible"),
+      text: movementT("movements.incomeVoiceMobileOnlyText", "El dictado de ingresos está disponible en la aplicación móvil."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -3036,8 +3548,8 @@ async function startVoiceIncome() {
     typeof window.startDanyBotNativeSpeech !== 'function'
   ) {
     Swal.fire({
-      title: 'Voz no disponible',
-      text: 'No se encontró la configuración de voz nativa.',
+      title: movementT("movements.voiceUnavailableTitle", "Voz no disponible"),
+      text: movementT("movements.nativeVoiceUnavailableText", "No se encontró la configuración de voz nativa."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -3050,27 +3562,29 @@ async function startVoiceIncome() {
 
     incomeVoiceButton.innerHTML = `
       <i class="bi bi-mic-fill"></i>
-      Escuchando...
+      ${movementT("movements.listening", "Escuchando...")}
     `;
 
     const result = await window.startDanyBotNativeSpeech({
-      language: 'es-CO',
-      prompt: 'Di el ingreso que quieres registrar'
+      language: getMovementsLocale(),
+      prompt: movementT("movements.incomeVoicePrompt", "Di el ingreso que quieres registrar")
     });
 
     incomeVoiceButton.classList.remove('listening');
 
     incomeVoiceButton.innerHTML = `
       <i class="bi bi-mic-fill"></i>
-      Dictar ingreso por voz
+      ${movementT("movements.dictateIncomeVoice", "Dictar ingreso por voz")}
     `;
 
     if (!result.success) {
       Swal.fire({
-        title: 'No se pudo escuchar',
-        text:
-          result.reason ||
-          'No se detectó ningún texto.',
+        title: movementT("movements.couldNotListenTitle", "No se pudo escuchar"),
+        text: getMovementVoiceErrorText(
+          result.reason,
+          "movements.noTextDetectedText",
+          "No se detectó ningún texto."
+        ),
         icon: 'warning',
         confirmButtonColor: '#3c0000'
       });
@@ -3110,8 +3624,8 @@ async function startVoiceIncome() {
 
     if (!detectedAmount || detectedAmount <= 0) {
       Swal.fire({
-        title: 'No detecté el valor',
-        text: 'Revisa el ingreso y completa el valor manualmente.',
+        title: movementT("movements.amountNotDetectedTitle", "No detecté el valor"),
+        text: movementT("movements.incomeAmountNotDetectedText", "Revisa el ingreso y completa el valor manualmente."),
         icon: 'warning',
         confirmButtonColor: '#3c0000'
       });
@@ -3131,12 +3645,12 @@ await saveAdditionalIncome('voice');
 
     incomeVoiceButton.innerHTML = `
       <i class="bi bi-mic-fill"></i>
-      Dictar ingreso por voz
+      ${movementT("movements.dictateIncomeVoice", "Dictar ingreso por voz")}
     `;
 
     Swal.fire({
-      title: 'Error de voz',
-      text: 'No fue posible usar el micrófono del celular.',
+      title: movementT("movements.voiceErrorTitle", "Error de voz"),
+      text: movementT("movements.voiceMicrophoneErrorText", "No fue posible usar el micrófono del celular."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
@@ -3144,6 +3658,9 @@ await saveAdditionalIncome('voice');
 }
 
 function extractIncomeDescription(text) {
+  if (getMovementsLocale() === "en-US") {
+    return extractEnglishIncomeDescription(text);
+  }
   let descriptionText = text.toLowerCase();
 
   descriptionText = descriptionText
@@ -3197,8 +3714,8 @@ async function saveAdditionalIncome(incomeSource = 'manual') {
     additionalIncomeData.amount <= 0
   ) {
     Swal.fire({
-      title: 'Datos incompletos',
-      text: 'Completa la fecha, descripción y valor del ingreso adicional.',
+      title: movementT("movements.incompleteDataTitle", "Datos incompletos"),
+      text: movementT("movements.incompleteAdditionalIncomeText", "Completa la fecha, descripción y valor del ingreso adicional."),
       icon: 'warning',
       confirmButtonColor: '#3c0000'
     });
@@ -3233,8 +3750,10 @@ async function saveAdditionalIncome(incomeSource = 'manual') {
 
     if (!response.ok) {
       Swal.fire({
-        title: isEditing ? 'No se pudo actualizar' : 'No se pudo guardar',
-        text: data.mensaje || 'Ocurrió un error al procesar el ingreso adicional.',
+        title: isEditing
+          ? movementT("movements.updateFailedTitle", "No se pudo actualizar")
+          : movementT("movements.saveFailedTitle", "No se pudo guardar"),
+        text: getMovementResponseText(data, "movements.additionalIncomeProcessErrorText", "Ocurrió un error al procesar el ingreso adicional."),
         icon: 'error',
         confirmButtonColor: '#3c0000'
       });
@@ -3258,7 +3777,7 @@ async function saveAdditionalIncome(incomeSource = 'manual') {
 
     saveAdditionalIncomeButton.innerHTML = `
       <i class="bi bi-plus-circle"></i>
-      Agregar ingreso adicional
+      ${movementT("movements.addAdditionalIncome", "Agregar ingreso adicional")}
     `;
 
     if (isDanyBotMobileApp()) {
@@ -3290,11 +3809,11 @@ await loadAdditionalIncomes();
 
     Swal.fire({
       title: isEditing
-        ? 'Ingreso adicional actualizado'
-        : 'Ingreso adicional guardado',
+        ? movementT("movements.additionalIncomeUpdatedTitle", "Ingreso adicional actualizado")
+        : movementT("movements.additionalIncomeSavedTitle", "Ingreso adicional guardado"),
       text: isEditing
-        ? 'El ingreso adicional fue actualizado correctamente.'
-        : 'El ingreso adicional fue registrado correctamente.',
+        ? movementT("movements.additionalIncomeUpdatedText", "El ingreso adicional fue actualizado correctamente.")
+        : movementT("movements.additionalIncomeSavedText", "El ingreso adicional fue registrado correctamente."),
       icon: 'success',
       confirmButtonColor: '#3c0000'
     });
@@ -3304,7 +3823,7 @@ await loadAdditionalIncomes();
 
     Swal.fire({
       title: 'Error',
-      text: 'Ocurrió un error al procesar el ingreso adicional.',
+      text: movementT("movements.additionalIncomeProcessErrorText", "Ocurrió un error al procesar el ingreso adicional."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
@@ -3327,8 +3846,8 @@ async function deleteAdditionalIncome(additionalIncomeId) {
 
     if (!response.ok) {
       Swal.fire({
-        title: 'No se pudo eliminar',
-        text: data.mensaje || 'Ocurrió un error al eliminar el ingreso adicional.',
+        title: movementT("movements.deleteFailedTitle", "No se pudo eliminar"),
+        text: getMovementResponseText(data, "movements.additionalIncomeDeleteErrorText", "Ocurrió un error al eliminar el ingreso adicional."),
         icon: 'error',
         confirmButtonColor: '#3c0000'
       });
@@ -3344,7 +3863,7 @@ async function deleteAdditionalIncome(additionalIncomeId) {
 
       saveAdditionalIncomeButton.innerHTML = `
         <i class="bi bi-plus-circle"></i>
-        Agregar ingreso adicional
+        ${movementT("movements.addAdditionalIncome", "Agregar ingreso adicional")}
       `;
     }
 
@@ -3371,7 +3890,7 @@ async function deleteAdditionalIncome(additionalIncomeId) {
 
     Swal.fire({
       title: 'Error',
-      text: 'Ocurrió un error al eliminar el ingreso adicional.',
+      text: movementT("movements.additionalIncomeDeleteErrorText", "Ocurrió un error al eliminar el ingreso adicional."),
       icon: 'error',
       confirmButtonColor: '#3c0000'
     });
@@ -3403,7 +3922,7 @@ function getSelectedMonthLabel() {
   const selectedMonth = monthFilter.value || getLocalMonth();
 
   if (!selectedMonth) {
-    return 'Mes seleccionado';
+    return movementT("movements.selectedMonth", "Mes seleccionado");
   }
 
   const [year, month] = selectedMonth.split('-');
@@ -3414,7 +3933,7 @@ function getSelectedMonthLabel() {
     1
   );
 
-  return new Intl.DateTimeFormat('es-CO', {
+  return new Intl.DateTimeFormat(getMovementsLocale(), {
     month: 'long',
     year: 'numeric'
   }).format(date);
@@ -3422,10 +3941,10 @@ function getSelectedMonthLabel() {
 
 function createMobileIncomeRow(income) {
   const description = escapeMovementText(
-    income.description || 'Ingreso'
+    income.description || movementT("movements.incomeLabel", "Ingreso")
   );
 
-  const category = 'Ingreso';
+  const category = movementT("movements.incomeLabel", "Ingreso");
 
   const dateLabel = formatDate(
     income.income_date
@@ -3492,22 +4011,22 @@ function createMobileIncomeRow(income) {
           <div class="mobile-expense-detail-grid">
 
             <div class="mobile-expense-detail">
-              <span>Tipo</span>
+              <span>${movementT("movements.type", "Tipo")}</span>
               <strong>${category}</strong>
             </div>
 
             <div class="mobile-expense-detail">
-              <span>Fecha</span>
+              <span>${movementT("movements.date", "Fecha")}</span>
               <strong>${dateLabel}</strong>
             </div>
 
             <div class="mobile-expense-detail">
-              <span>Origen</span>
+              <span>${movementT("movements.source", "Origen")}</span>
               <strong>${escapeMovementText(sourceLabel)}</strong>
             </div>
 
             <div class="mobile-expense-detail">
-              <span>Valor</span>
+              <span>${movementT("movements.value", "Valor")}</span>
               <strong>${formatMoney(income.amount)}</strong>
             </div>
 
@@ -3519,7 +4038,7 @@ function createMobileIncomeRow(income) {
                 class="mobile-expense-action edit mobile-income-edit-button"
               >
                 <i class="bi bi-pencil"></i>
-                Editar
+                ${movementT("movements.edit", "Editar")}
               </button>
 
               <button
@@ -3527,7 +4046,7 @@ function createMobileIncomeRow(income) {
                 class="mobile-expense-action delete mobile-income-delete-button"
               >
                 <i class="bi bi-trash"></i>
-                Eliminar
+                ${movementT("movements.delete", "Eliminar")}
               </button>
             </div>
 
@@ -3586,7 +4105,7 @@ function createMobileIncomeRow(income) {
 
     saveAdditionalIncomeButton.innerHTML = `
       <i class="bi bi-check-circle"></i>
-      Actualizar ingreso
+      ${movementT("movements.updateIncome", "Actualizar ingreso")}
     `;
 
     document.dispatchEvent(
@@ -3699,11 +4218,10 @@ function renderMobileIncomes() {
           <div class="empty-state">
             <i class="bi bi-arrow-left-circle"></i>
 
-            <h3>No hay ingresos para este mes</h3>
+            <h3>${movementT("movements.noIncomeTitle", "No hay ingresos para este mes")}</h3>
 
             <p>
-              Cuando registres un ingreso,
-              aparecerá listado en esta sección.
+              ${movementT("movements.noIncomeText", "Cuando registres un ingreso, aparecerá listado en esta sección.")}
             </p>
           </div>
         </td>
@@ -3773,11 +4291,10 @@ function renderAllMobileMovements() {
           <div class="empty-state">
             <i class="bi bi-inbox"></i>
 
-            <h3>No hay movimientos para este mes</h3>
+            <h3>${movementT("movements.noMovementsTitle", "No hay movimientos para este mes")}</h3>
 
             <p>
-              Cuando registres un ingreso o gasto,
-              aparecerá listado en esta sección.
+              ${movementT("movements.noMovementsText", "Cuando registres un ingreso o gasto, aparecerá listado en esta sección.")}
             </p>
           </div>
         </td>
@@ -3853,7 +4370,7 @@ function renderAdditionalIncomes() {
   if (!currentAdditionalIncomes || currentAdditionalIncomes.length === 0) {
     additionalIncomesList.innerHTML = `
       <p class="empty-additional-income">
-        No hay ingresos adicionales registrados para este mes.
+        ${movementT("movements.noAdditionalIncomes", "No hay ingresos adicionales registrados para este mes.")}
       </p>
     `;
     return;
@@ -3912,7 +4429,7 @@ function renderAdditionalIncomes() {
 
         saveAdditionalIncomeButton.innerHTML = `
          <i class="bi bi-check-circle"></i>
-         Actualizar ingreso
+         ${movementT("movements.updateIncome", "Actualizar ingreso")}
         `;
     });
 
@@ -4032,10 +4549,10 @@ function renderFinanceSummaryChart() {
   financeSummaryChart = new Chart(canvas, {
     type: 'bar',
     data: {
-      labels: ['Ingresos', 'Gastos', 'Ahorro'],
+      labels: [movementT("movements.reportIncomeSheet", "Ingresos"), movementT("movements.reportExpensesSheet", "Gastos"), movementT("movements.reportSavings", "Ahorro")],
       datasets: [
         {
-          label: 'Resumen del mes',
+          label: movementT("movements.reportMonthlySummary", "Resumen del mes"),
           data: [totalIncome, totalExpenses, savings],
           backgroundColor: [
             '#22c55e',
@@ -4100,7 +4617,7 @@ function renderDailyExpensesChart() {
     }
   });
 
-  const labels = Object.keys(dailyTotals).map((day) => `Día ${day}`);
+  const labels = Object.keys(dailyTotals).map((day) => `${movementT("movements.dayLabel", "Día")} ${day}`);
   const values = Object.values(dailyTotals);
 
   if (dailyExpensesChart) {
@@ -4238,8 +4755,8 @@ function setupMobileExpenseDate() {
     );
 
     toggleButton.textContent = willOpen
-      ? 'Usar fecha de hoy'
-      : 'Cambiar fecha';
+      ? movementT("movements.useToday", "Usar fecha de hoy")
+      : movementT("movements.changeDate", "Cambiar fecha");
 
     if (!willOpen) {
       dateInput.value = getLocalDate();
@@ -4258,14 +4775,14 @@ function renderMovementsMobileHeader() {
     document.getElementById('user-avatar');
 
   if (titleElement) {
-    titleElement.textContent = 'Movimientos';
+    titleElement.textContent = movementT("movements.sectionTitle", "Movimientos");
   }
 
   if (dateTimeElement) {
     const now = new Date();
 
     const dateText = new Intl.DateTimeFormat(
-      'es-CO',
+      getMovementsLocale(),
       {
         weekday: 'long',
         day: 'numeric',
@@ -4275,7 +4792,7 @@ function renderMovementsMobileHeader() {
     ).format(now);
 
     const timeText = new Intl.DateTimeFormat(
-      'es-CO',
+      getMovementsLocale(),
       {
         hour: 'numeric',
         minute: '2-digit',
@@ -4294,7 +4811,7 @@ function renderMovementsMobileHeader() {
   if (user.picture) {
     avatarElement.src = user.picture;
     avatarElement.alt =
-      `Foto de ${user.name || 'usuario'}`;
+      `${movementT("movements.photoOf", "Foto de")} ${user.name || movementT("movements.user", "usuario")}`;
     avatarElement.style.display = 'block';
     return;
   }
@@ -4365,7 +4882,7 @@ function showDanyBotMovementsLoader() {
         aria-hidden="true"
       >
 
-      <p>Cargando tus movimientos</p>
+      <p>${movementT("movements.loading", "Cargando tus movimientos")}</p>
 
       <div
         class="danybot-movements-loader-dots"
@@ -4426,7 +4943,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (file) {
         expenseEvidenceName.textContent = file.name;
       } else {
-        expenseEvidenceName.textContent = 'Ningún archivo seleccionado';
+        expenseEvidenceName.textContent = movementT("movements.noEvidenceFileSelected", "Ningún archivo seleccionado");
       }
     });
   }
@@ -4552,14 +5069,14 @@ document.addEventListener("DOMContentLoaded", () => {
   function getMovementForm(option) {
     if (option === "expense") {
       return {
-        title: "Agregar gasto",
+        title: movementT("movements.addExpenseOption", "Agregar gasto"),
         element: document.querySelector(".expenses-form-section")
       };
     }
 
     if (option === "income") {
       return {
-        title: "Agregar ingreso",
+        title: movementT("movements.addIncome", "Agregar ingreso"),
         element: document
           .getElementById("additionalIncomeDate")
           ?.closest(".income-form-box")
@@ -4685,12 +5202,12 @@ document.addEventListener("DOMContentLoaded", () => {
         movementForm.element.querySelector("h3");
 
       if (incomeHeading) {
-        incomeHeading.textContent = "Ingreso";
+        incomeHeading.textContent = movementT("movements.incomeLabel", "Ingreso");
       }
 
       saveAdditionalIncomeButton.innerHTML = `
         <i class="bi bi-plus-circle"></i>
-        Agregar ingreso
+        ${movementT("movements.addIncomeShort", "Agregar ingreso")}
       `;
     }
 

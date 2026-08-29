@@ -1205,3 +1205,41 @@ button[type="submit"]:hover {
   background: #fff1ef !important;
   color: #3c0000 !important;
 }
+/* ==================================================
+   DANYBOT - IDIOMA LOGIN
+================================================== */
+
+.login-language-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  width: 100%;
+  margin: 0 0 10px;
+}
+
+.login-language-control > i {
+  color: #960018;
+  font-size: 13px;
+}
+
+.login-language-select {
+  min-width: 112px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(150, 0, 24, 0.18);
+  border-radius: 999px;
+  background: #fff7f7;
+  color: #3c0000;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  outline: none;
+  cursor: pointer;
+}
+
+.login-language-select:focus {
+  border-color: rgba(150, 0, 24, 0.45);
+  box-shadow: 0 0 0 3px rgba(150, 0, 24, 0.08);
+  background: #ffffff;
+}

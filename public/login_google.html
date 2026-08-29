@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Día en Orden | Iniciar sesión</title>
+  <title data-i18n="login.pageTitle">Día en Orden | Iniciar sesión</title>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
@@ -20,6 +20,7 @@
 
   <link rel="stylesheet" href="src/css/login_google.css">
   <link rel="stylesheet" href="src/css/login_google-mobile.css">
+  <script src="src/js/i18n.js" defer></script>
   <script src="src/js/script.js" defer></script>
   <script src="src/js/api-config.js"></script>
   <script src="src/js/biometric-login.js" defer></script>
@@ -48,44 +49,58 @@
         <div class="agenda-card-line line-small"></div>
       </div>
 
-        <h2>Organiza tu día desde un solo lugar</h2>
+        <h2 data-i18n="login.visualTitle">Organiza tu día desde un solo lugar</h2>
 
         <p>
-          Gestiona tareas, gastos, recordatorios y calendario con una experiencia simple, bonita y personal.
+          <span data-i18n="login.visualText">Gestiona tareas, gastos, recordatorios y calendario con una experiencia simple, bonita y personal.</span>
         </p>
 
         <div class="visual-mini-cards">
           <div>
-            <strong>Tareas</strong>
-            <span>Prioriza tu día</span>
+            <strong data-i18n="login.tasks">Tareas</strong>
+            <span data-i18n="login.tasksText">Prioriza tu día</span>
           </div>
 
           <div>
-            <strong>Gastos</strong>
-            <span>Controla tu mes</span>
+            <strong data-i18n="login.expenses">Gastos</strong>
+            <span data-i18n="login.expensesText">Controla tu mes</span>
           </div>
 
           <div>
-            <strong>Agenda</strong>
-            <span>No olvides nada</span>
+            <strong data-i18n="login.agenda">Agenda</strong>
+            <span data-i18n="login.agendaText">No olvides nada</span>
           </div>
         </div>
       </div>
     </section>
 
     <section class="login-form-panel">
+
+      <div class="login-language-control">
+        <i class="fa-solid fa-globe" aria-hidden="true"></i>
+
+        <select
+          id="loginLanguageSelect"
+          class="login-language-select"
+          aria-label="Idioma"
+          data-i18n-aria-label="login.language"
+        >
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+      </div>
       <div class="card-header"> 
         <div class="logo-container">
           <img src="src/img/danybot.png" alt="Logo Día en Orden">
         </div>
 
-        <span class="login-kicker">Bienvenida de nuevo</span>
+        <span class="login-kicker" data-i18n="login.welcomeBack">Bienvenida de nuevo</span>
 
         <h1>Día en Orden</h1>
 
         <p>
-          <span class="linea-arriba">Inicia sesión para continuar</span>
-          <span class="linea-abajo">y organizar mejor tu día.</span>
+          <span class="linea-arriba" data-i18n="login.continueLineOne">Inicia sesión para continuar</span>
+          <span class="linea-abajo" data-i18n="login.continueLineTwo">y organizar mejor tu día.</span>
         </p>      
       </div>
 
@@ -106,30 +121,30 @@
       </div>
 
       <div class="login-divider">
-        <span>o continúa con tu correo</span>
+        <span data-i18n="login.continueWithEmail">o continúa con tu correo</span>
       </div>
 
       <form id="login-form" class="form">
 
         <div class="form-fields">
-          <label for="email">Correo electrónico</label>
+          <label for="email" data-i18n="login.email">Correo electrónico</label>
           <input 
             type="email" 
             id="email" 
             name="email" 
-            placeholder="Ingresa tu correo electrónico"
+            placeholder="Ingresa tu correo electrónico" data-i18n-placeholder="login.emailPlaceholder"
             autocomplete="email"
             required
           >
 
-          <label for="password">Contraseña</label>
+          <label for="password" data-i18n="login.password">Contraseña</label>
 
           <div class="login-password-group">
             <input 
               type="password" 
               id="password" 
               name="password" 
-              placeholder="Ingresa tu contraseña"
+              placeholder="Ingresa tu contraseña" data-i18n-placeholder="login.passwordPlaceholder"
               autocomplete="current-password"
               required
             >
@@ -138,14 +153,14 @@
               type="button" 
               class="login-toggle-password" 
               onclick="toggleLoginPassword('password', this)"
-              aria-label="Mostrar u ocultar contraseña"
+              aria-label="Mostrar u ocultar contraseña" data-i18n-aria-label="login.togglePassword"
             >
               <i class="fa-solid fa-eye"></i>
             </button>
           </div>
         </div>
 
-        <button type="submit">Iniciar sesión</button>
+        <button type="submit" data-i18n="login.signIn">Iniciar sesión</button>
         <button
           type="button"
           id="biometricLoginButton"
@@ -153,19 +168,19 @@
           hidden
         >
           <i class="fa-solid fa-fingerprint"></i>
-          Ingresar con huella
+          <span data-i18n="login.fingerprintSignIn">Ingresar con huella</span>
         </button>
       </form>
 
       <p class="forgot-password-text">
         <button type="button" id="forgotPasswordButton" class="forgot-password-button">
-          ¿Olvidaste tu contraseña?
+          <span data-i18n="login.forgotPassword">¿Olvidaste tu contraseña?</span>
         </button>
       </p>
 
       <p class="signup-text">
-        ¿No tienes una cuenta?
-        <a class="register" href="signup.html">Crear cuenta gratis</a>
+        <span data-i18n="login.noAccount">¿No tienes una cuenta?</span>
+        <a class="register" href="signup.html" data-i18n="login.createFreeAccount">Crear cuenta gratis</a>
       </p>
       
       <!-- Contenedor oculto del chatbot -->

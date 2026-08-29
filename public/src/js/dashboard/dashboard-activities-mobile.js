@@ -81,11 +81,11 @@ function createMobileActivityCard(reminder) {
 
         <span class="mobile-activity-meta">
           <span>
-            ${reminder.category || 'Personal'}
+            ${getActivityCategoryDisplayLabel(reminder.category)}
           </span>
 
           <span>
-            ${formatRepeatType(reminder.repeat_type)}
+            ${getActivityRepeatDisplayLabel(reminder.repeat_type)}
           </span>
         </span>
       </span>
@@ -124,7 +124,7 @@ function createMobileActivityCard(reminder) {
 
       <div class="mobile-activity-detail-grid">
         <div class="mobile-activity-detail">
-          <span>Fecha límite</span>
+          <span>${activityT("activities.dueDate", "Fecha límite")}</span>
 
           <strong>
             <i class="fa-solid fa-calendar-check"></i>
@@ -133,7 +133,7 @@ function createMobileActivityCard(reminder) {
         </div>
 
         <div class="mobile-activity-detail">
-          <span>Aviso</span>
+          <span>${activityT("activities.reminder", "Aviso")}</span>
 
           <strong>
             <i class="fa-solid fa-bell"></i>
@@ -142,7 +142,7 @@ function createMobileActivityCard(reminder) {
         </div>
 
         <div class="mobile-activity-detail">
-          <span>Repetición</span>
+          <span>${activityT("activities.repeat", "Repetición")}</span>
 
           <strong>
             <i
@@ -151,7 +151,7 @@ function createMobileActivityCard(reminder) {
               )}"
             ></i>
 
-            ${formatRepeatType(reminder.repeat_type)}
+            ${getActivityRepeatDisplayLabel(reminder.repeat_type)}
           </strong>
         </div>
       </div>

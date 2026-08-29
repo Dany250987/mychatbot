@@ -1,3 +1,68 @@
+function loginT(key, fallback) {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.t === "function"
+  ) {
+    return window.DANYBOT_I18N.t(key) || fallback;
+  }
+
+  return fallback;
+}
+
+function getLoginLanguage() {
+  if (
+    window.DANYBOT_I18N &&
+    typeof window.DANYBOT_I18N.getLanguage === "function"
+  ) {
+    return window.DANYBOT_I18N.getLanguage();
+  }
+
+  return "es";
+}
+
+function getLoginResponseText(data, key, fallback) {
+  if (getLoginLanguage() === "en") {
+    return loginT(key, fallback);
+  }
+
+  return (
+    data?.error ||
+    data?.message ||
+    data?.mensaje ||
+    loginT(key, fallback)
+  );
+}
+
+function setupLoginLanguageSelector() {
+  const languageSelect =
+    document.getElementById("loginLanguageSelect");
+
+  if (!languageSelect) {
+    return;
+  }
+
+  languageSelect.value =
+    getLoginLanguage();
+
+  languageSelect.addEventListener(
+    "change",
+    () => {
+      const language = languageSelect.value;
+
+      if (
+        window.DANYBOT_I18N &&
+        typeof window.DANYBOT_I18N.setLanguage === "function"
+      ) {
+        window.DANYBOT_I18N.setLanguage(language);
+      }
+    }
+  );
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  setupLoginLanguageSelector
+);
 // ===============================
 // Autenticación de usuarios
 // Login con Google y login clásico
@@ -87,7 +152,7 @@ async function resetPassword(email, code, newPassword) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || data.mensaje || "No se pudo cambiar la contraseña.");
+    throw new Error(getLoginResponseText(data, "login.passwordResetFailed", "No se pudo cambiar la contraseña."));
   }
 
   return data;
@@ -95,14 +160,14 @@ async function resetPassword(email, code, newPassword) {
 
 async function startForgotPasswordFlow() {
   const emailResult = await Swal.fire({
-    title: "Recuperar contraseña",
-    text: "Ingresa el correo registrado en tu cuenta.",
+    title: loginT("login.passwordResetTitle", "Recuperar contraseña"),
+    text: loginT("login.passwordResetText", "Ingresa el correo registrado en tu cuenta."),
     input: "email",
     inputPlaceholder: "correo@ejemplo.com",
 
     showCancelButton: true,
-    confirmButtonText: "Enviar código",
-    cancelButtonText: "Cancelar",
+    confirmButtonText: loginT("login.sendCode", "Enviar código"),
+    cancelButtonText: loginT("login.cancel", "Cancelar"),
 
     confirmButtonColor: "#3c0000",
     cancelButtonColor: "#6b7280",
@@ -124,7 +189,7 @@ async function startForgotPasswordFlow() {
       const cleanEmail = String(email || "").trim().toLowerCase();
 
       if (!cleanEmail) {
-        Swal.showValidationMessage("Ingresa tu correo.");
+        Swal.showValidationMessage(loginT("login.enterEmail", "Ingresa tu correo."));
         return false;
       }
 
@@ -145,16 +210,16 @@ async function startForgotPasswordFlow() {
   const email = emailResult.value;
 
   const resetResult = await Swal.fire({
-    title: "Código enviado",
+    title: loginT("login.codeSentTitle", "Código enviado"),
 
     html: `
-      <p>Enviamos un código de recuperación a:</p>
+      <p>${loginT("login.codeSentText", "Enviamos un código de recuperación a:")}</p>
       <strong>${email}</strong>
 
       <input
         id="resetPasswordCode"
         class="swal2-input"
-        placeholder="Código de verificación"
+        placeholder="${loginT("login.verificationCode", "Código de verificación")}"
         maxlength="6"
       >
 
@@ -162,20 +227,20 @@ async function startForgotPasswordFlow() {
         id="resetNewPassword"
         type="password"
         class="swal2-input"
-        placeholder="Nueva contraseña"
+        placeholder="${loginT("login.newPassword", "Nueva contraseña")}"
       >
 
       <input
         id="resetConfirmPassword"
         type="password"
         class="swal2-input"
-        placeholder="Confirmar nueva contraseña"
+        placeholder="${loginT("login.confirmNewPassword", "Confirmar nueva contraseña")}"
       >
     `,
 
     showCancelButton: true,
-    confirmButtonText: "Cambiar contraseña",
-    cancelButtonText: "Cancelar",
+    confirmButtonText: loginT("login.changePassword", "Cambiar contraseña"),
+    cancelButtonText: loginT("login.cancel", "Cancelar"),
 
     confirmButtonColor: "#3c0000",
     cancelButtonColor: "#6b7280",
@@ -199,17 +264,17 @@ async function startForgotPasswordFlow() {
       const confirmPassword = document.getElementById("resetConfirmPassword").value;
 
       if (!code || !newPassword || !confirmPassword) {
-        Swal.showValidationMessage("Completa el código y la nueva contraseña.");
+        Swal.showValidationMessage(loginT("login.completeResetData", "Completa el código y la nueva contraseña."));
         return false;
       }
 
       if (newPassword.length < 6) {
-        Swal.showValidationMessage("La contraseña debe tener al menos 6 caracteres.");
+        Swal.showValidationMessage(loginT("login.passwordMinLength", "La contraseña debe tener al menos 6 caracteres."));
         return false;
       }
 
       if (newPassword !== confirmPassword) {
-        Swal.showValidationMessage("Las contraseñas no coinciden.");
+        Swal.showValidationMessage(loginT("login.passwordMismatch", "Las contraseñas no coinciden."));
         return false;
       }
 
@@ -227,8 +292,8 @@ async function startForgotPasswordFlow() {
   }
 
   await showAuthMessage({
-    title: "Contraseña actualizada",
-    text: resetResult.value?.mensaje || "Ya puedes iniciar sesión con tu nueva contraseña.",
+    title: loginT("login.passwordUpdatedTitle", "Contraseña actualizada"),
+    text: getLoginResponseText(resetResult.value, "login.passwordUpdatedText", "Ya puedes iniciar sesión con tu nueva contraseña."),
     icon: "success"
   });
 }
@@ -241,8 +306,8 @@ async function handleCredentialResponse(response) {
   try {
     if (!response || !response.credential) {
       await showAuthMessage({
-        title: "No se pudo iniciar sesión",
-        text: "Google no devolvió una credencial válida.",
+        title: loginT("login.loginFailedTitle", "No se pudo iniciar sesión"),
+        text: loginT("login.googleNoCredential", "Google no devolvió una credencial válida."),
         icon: "error"
       });
       return;
@@ -262,8 +327,8 @@ async function handleCredentialResponse(response) {
 
     if (!apiResponse.ok || !data.user || !data.token) {
       await showAuthMessage({
-        title: "No se pudo iniciar sesión",
-        text: data.message || data.error || "Ocurrió un error al validar tu cuenta de Google.",
+        title: loginT("login.loginFailedTitle", "No se pudo iniciar sesión"),
+        text: getLoginResponseText(data, "login.googleValidationError", "Ocurrió un error al validar tu cuenta de Google."),
         icon: "error"
       });
       return;
@@ -272,7 +337,7 @@ async function handleCredentialResponse(response) {
     saveUserSession(data.user, data.token);
 
     await showAuthMessage({
-      title: "Bienvenida",
+      title: loginT("login.welcomeTitle", "Bienvenida"),
       text: data.message || `Hola ${data.user.name}, ingresaste correctamente.`,
       icon: "success"
     });
@@ -294,7 +359,7 @@ async function handleCredentialResponse(response) {
 
     await showAuthMessage({
       title: "Error",
-      text: "Hubo un problema al iniciar sesión con Google.",
+      text: loginT("login.googleLoginProblem", "Hubo un problema al iniciar sesión con Google."),
       icon: "error"
     });
   }
@@ -330,8 +395,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!email || !password) {
       await showAuthMessage({
-        title: "Datos incompletos",
-        text: "Ingresa tu correo y contraseña.",
+        title: loginT("login.incompleteTitle", "Datos incompletos"),
+        text: loginT("login.enterEmailPassword", "Ingresa tu correo y contraseña."),
         icon: "warning"
       });
       return;
@@ -350,8 +415,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!response.ok || !data.user || !data.token) {
         await showAuthMessage({
-          title: "No se pudo iniciar sesión",
-          text: data.error || data.message || "Correo o contraseña incorrectos.",
+          title: loginT("login.loginFailedTitle", "No se pudo iniciar sesión"),
+          text: getLoginResponseText(data, "login.invalidCredentials", "Correo o contraseña incorrectos."),
           icon: "error"
         });
         return;
@@ -360,8 +425,8 @@ document.addEventListener("DOMContentLoaded", () => {
       saveUserSession(data.user, data.token);
 
       await showAuthMessage({
-        title: "Bienvenida",
-        text: `Hola ${data.user.name}, ingresaste correctamente.`,
+        title: loginT("login.welcomeTitle", "Bienvenida"),
+        text: `${loginT("login.hello", "Hola")} ${data.user.name}, ${loginT("login.loginSuccessSuffix", "ingresaste correctamente.")}`,
         icon: "success"
       });
 

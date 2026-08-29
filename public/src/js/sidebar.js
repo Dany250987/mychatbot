@@ -1,6 +1,17 @@
 function renderSidebar(activePage = "") {
   const sidebar = document.getElementById("appSidebar");
 
+  const t = (key, fallback) => {
+    if (
+      window.DANYBOT_I18N &&
+      typeof window.DANYBOT_I18N.t === "function"
+    ) {
+      return window.DANYBOT_I18N.t(key);
+    }
+
+    return fallback;
+  };
+
   if (!sidebar) {
     return;
   }
@@ -26,7 +37,7 @@ const calendarMenuItem = isMobileApp
       <a href="./dashboard.html#calendario"
          class="sidebar-link ${activePage === "calendario" ? "active" : ""}">
         <i class="fa-solid fa-calendar-days"></i>
-        <span>Calendario</span>
+        <span>${t("navigation.calendar", "Calendario")}</span>
       </a>
     `;
 
@@ -49,43 +60,43 @@ const calendarMenuItem = isMobileApp
       }
 
       <div class="sidebar-brand-text">
-        <strong>Agenda Personal</strong>
-        <small>Inteligente</small>
+        <strong>${t("app.personalAgenda", "Agenda Personal")}</strong>
+        <small>${t("app.intelligent", "Inteligente")}</small>
       </div>
     </div>
 
     <nav class="sidebar-menu">
       <a href="./dashboard.html" class="sidebar-link ${activePage === "dashboard" ? "active" : ""}">
         <i class="fa-solid fa-house"></i>
-        <span>Inicio</span>
+        <span>${t("navigation.home", "Inicio")}</span>
       </a>
 
       <a href="./dashboard.html#recordatorios" class="sidebar-link ${activePage === "recordatorios" ? "active" : ""}">
         <i class="fa-solid fa-bell"></i>
-        <span>Actividades</span>
+        <span>${t("navigation.activities", "Actividades")}</span>
       </a>
 
       ${calendarMenuItem}
 
       <a href="./gastos.html" class="sidebar-link ${activePage === "gastos" ? "active" : ""}">
         <i class="fa-solid fa-wallet"></i>
-        <span>Movimientos</span>
+        <span>${t("navigation.movements", "Movimientos")}</span>
       </a>
 
       <a href="./documentos.html" class="sidebar-link ${activePage === "documentos" ? "active" : ""}">
         <i class="fa-solid fa-folder-open"></i>
-        <span>Documentos</span>
+        <span>${t("navigation.documents", "Documentos")}</span>
       </a>
 
       <a href="./dashboard.html#cuenta" class="sidebar-link ${activePage === "cuenta" ? "active" : ""}">
         <i class="fa-solid fa-user-gear"></i>
-        <span>Mi cuenta</span>
+        <span>${t("navigation.account", "Mi cuenta")}</span>
       </a>
     </nav>
 
     <button type="button" class="sidebar-logout" onclick="logoutFromSidebar()">
       <i class="fa-solid fa-right-from-bracket"></i>
-      <span>Cerrar sesión</span>
+      <span>${t("navigation.logout", "Cerrar sesión")}</span>
     </button>
   `;
 

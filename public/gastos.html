@@ -92,7 +92,7 @@
         type="button"
         id="openMovementOptionsButton"
         class="mobile-movement-floating-button"
-        aria-label="Agregar movimiento"
+        aria-label="Agregar movimiento" data-i18n-aria-label="movements.addMovement"
       >
         <i class="fa-solid fa-plus"></i>
       </button>
@@ -103,26 +103,26 @@
         <div class="header-content">
           <div class="header-badge">
             <i class="bi bi-stars"></i>
-            Control financiero personal
+            <span data-i18n="movements.personalFinanceControl">Control financiero personal</span>
           </div>
 
           <h1>
-            Organiza tus gastos de forma simple
+            <span data-i18n="movements.organizeExpenses">Organiza tus gastos de forma simple</span>
           </h1>
 
           <p>
-            Registra facturas, pagos diarios y compras del mes para visualizar mejor en qué estás gastando tu dinero.
+            <span data-i18n="movements.organizeExpensesText">Registra facturas, pagos diarios y compras del mes para visualizar mejor en qué estás gastando tu dinero.</span>
           </p>
 
           <div class="header-actions">
             <a href="./dashboard.html" class="back-link">
               <i class="bi bi-arrow-left-circle"></i>
-              Volver al inicio
+              <span data-i18n="movements.backHome">Volver al inicio</span>
             </a>
 
             <a href="#expenseForm" class="primary-header-link">
               <i class="bi bi-plus-circle"></i>
-              Registrar gasto
+              <span data-i18n="movements.addExpense">Registrar gasto</span>
             </a>
           </div>
         </div>
@@ -131,16 +131,16 @@
           <div class="floating-card card-one">
             <i class="bi bi-receipt"></i>
             <div>
-              <span>Facturas</span>
-              <strong>Servicios y pagos</strong>
+              <span data-i18n="movements.bills">Facturas</span>
+              <strong data-i18n="movements.servicesPayments">Servicios y pagos</strong>
             </div>
           </div>
 
           <div class="floating-card card-two">
             <i class="bi bi-cash-coin"></i>
             <div>
-              <span>Gastos diarios</span>
-              <strong>Control mensual</strong>
+              <span data-i18n="movements.dailyExpenses">Gastos diarios</span>
+              <strong data-i18n="movements.monthlyControl">Control mensual</strong>
             </div>
           </div>
 
@@ -160,7 +160,7 @@
           </div>
 
           <div>
-            <span>Total del mes</span>
+            <span data-i18n="movements.monthlyTotal">Total del mes</span>
             <p id="monthlyTotal">$0</p>
           </div>
         </article>
@@ -171,7 +171,7 @@
           </div>
 
           <div>
-            <span>Gastos registrados</span>
+            <span data-i18n="movements.registeredExpenses">Gastos registrados</span>
             <p id="expenseCount">0</p>
           </div>
         </article>
@@ -182,7 +182,7 @@
           </div>
 
           <div>
-            <span>Gasto más alto</span>
+            <span data-i18n="movements.highestExpense">Gasto más alto</span>
             <p id="highestExpense">$0</p>
           </div>
         </article>
@@ -198,14 +198,14 @@
           </span>
 
           <div>
-            <h2>Mes de trabajo</h2>
-            <p>Selecciona el mes que quieres consultar antes de registrar, revisar o analizar tus movimientos.</p>
+            <h2 data-i18n="movements.workingMonth">Mes de trabajo</h2>
+            <p data-i18n="movements.workingMonthText">Selecciona el mes que quieres consultar antes de registrar, revisar o analizar tus movimientos.</p>
           </div>
         </div>
 
         <div class="toolbar-actions">
           <div class="month-control">
-            <label for="monthFilter">Mes</label>
+            <label for="monthFilter" data-i18n="movements.month">Mes</label>
             <input type="month" id="monthFilter">
           </div>
         </div>
@@ -215,14 +215,14 @@
       <!-- Filtros móviles de movimientos -->
       <nav
         class="mobile-movement-filters"
-        aria-label="Filtrar movimientos"
+        aria-label="Filtrar movimientos" data-i18n-aria-label="movements.filterMovements"
       >
         <button
           type="button"
           class="mobile-movement-filter is-active"
           data-movement-filter="all"
         >
-          Todos
+          <span data-i18n="movements.all">Todos</span>
         </button>
 
         <button
@@ -230,7 +230,7 @@
           class="mobile-movement-filter"
           data-movement-filter="income"
         >
-          Ingresos
+          <span data-i18n="movements.income">Ingresos</span>
         </button>
 
         <button
@@ -238,7 +238,7 @@
           class="mobile-movement-filter"
           data-movement-filter="expense"
         >
-          Gastos
+          <span data-i18n="movements.expenses">Gastos</span>
         </button>
       </nav>
 
@@ -249,9 +249,9 @@
           <div>
             <h2>
               <i class="bi bi-plus-circle"></i>
-              Registrar gasto
+              <span data-i18n="movements.addExpense">Registrar gasto</span>
             </h2>
-            <p>Agrega gastos manualmente o usa el dictado por voz.</p>
+            <p data-i18n="movements.addExpenseText">Agrega gastos manualmente o usa el dictado por voz.</p>
           </div>
 
           <button 
@@ -261,7 +261,7 @@
             aria-expanded="true"
           >
             <i class="bi bi-chevron-up"></i>
-            <span>Ocultar</span>
+            <span data-i18n="movements.hide">Ocultar</span>
           </button>
         </div>
 
@@ -276,7 +276,7 @@
     <div class="voice-box full-field">
               <button type="button" id="voiceButton" class="voice-button">
                 <i class="bi bi-mic-fill"></i>
-                Dictar gasto por voz
+                <span data-i18n="movements.voiceExpense">Dictar gasto por voz</span>
               </button>
 
               
@@ -284,7 +284,7 @@
     <div class="expense-date-heading">
       <label for="expenseDate">
         <i class="bi bi-calendar-check"></i>
-        Fecha del gasto
+        <span data-i18n="movements.expenseDate">Fecha del gasto</span>
       </label>
 
     
@@ -301,19 +301,19 @@
             <div class="form-field">
               <label for="category">
                 <i class="bi bi-tags"></i>
-                Categoría
+                <span data-i18n="movements.category">Categoría</span>
               </label>
 
               <div class="input-shell">
                 <select id="category" required>
-                  <option value="">Selecciona una categoría</option>
-                  <option value="Factura">Factura</option>
-                  <option value="Alimentación">Alimentación</option>
-                  <option value="Transporte">Transporte</option>
-                  <option value="Salud">Salud</option>
-                  <option value="Entretenimiento">Entretenimiento</option>
-                  <option value="Prestamos">Prestamos</option>
-                  <option value="Otro">Otro</option>
+                  <option value="" data-i18n="movements.selectCategory">Selecciona una categoría</option>
+                  <option value="Factura" data-i18n="movements.bill">Factura</option>
+                  <option value="Alimentación" data-i18n="movements.food">Alimentación</option>
+                  <option value="Transporte" data-i18n="movements.transportation">Transporte</option>
+                  <option value="Salud" data-i18n="movements.health">Salud</option>
+                  <option value="Entretenimiento" data-i18n="movements.entertainment">Entretenimiento</option>
+                  <option value="Prestamos" data-i18n="movements.loans">Prestamos</option>
+                  <option value="Otro" data-i18n="movements.other">Otro</option>
                 </select>
               </div>
             </div>
@@ -321,14 +321,14 @@
             <div class="form-field full-field">
               <label for="description">
                 <i class="bi bi-card-text"></i>
-                Descripción
+                <span data-i18n="movements.description">Descripción</span>
               </label>
 
               <div class="input-shell">
                 <input 
                   type="text" 
                   id="description" 
-                  placeholder="Ej: Pago de servicio público, compra de alimentos, transporte diario..." 
+                  placeholder="Ej: Pago de servicio público, compra de alimentos, transporte diario..." data-i18n-placeholder="movements.descriptionPlaceholder"
                   required
                 >
               </div>
@@ -354,7 +354,7 @@
             <div class="form-col evidence-field">
               <label for="expenseEvidence" class="evidence-label">
                 <i class="fa-solid fa-paperclip"></i>
-                Evidencia opcional
+                <span data-i18n="movements.expenseEvidenceOptional">Evidencia opcional</span>
               </label>
 
               <div class="custom-file-upload">
@@ -368,17 +368,17 @@
                 <label for="expenseEvidence" class="custom-file-label">
                   <span class="file-button">
                     <i class="fa-solid fa-upload"></i>
-                    Seleccionar archivo
+                    <span data-i18n="movements.selectEvidenceFile">Seleccionar archivo</span>
                   </span>
 
                   <span class="file-name" id="expenseEvidenceName">
-                    Ningún archivo seleccionado
+                    <span data-i18n="movements.noEvidenceFileSelected">Ningún archivo seleccionado</span>
                   </span>
                 </label>
             </div>
 
   <p class="field-help">
-    Puedes adjuntar PDF, JPG, PNG o WEBP. Máximo 5 MB. No es obligatorio.
+    <span data-i18n="movements.evidenceFileHelp">Puedes adjuntar PDF, JPG, PNG o WEBP. Máximo 5 MB. No es obligatorio.</span>
   </p>
 </div>
 
@@ -389,7 +389,7 @@
             <div class="form-actions full-field">
               <button type="submit" id="submitExpenseButton">
                 <i class="bi bi-save2"></i>
-                Guardar gasto
+                <span data-i18n="movements.saveExpense">Guardar gasto</span>
               </button>
 
               <button type="button" id="cancelEditButton" style="display: none;">
@@ -428,7 +428,7 @@
             aria-expanded="true"
           >
             <i class="bi bi-chevron-up"></i>
-            <span>Ocultar</span>
+            <span data-i18n="movements.hide">Ocultar</span>
           </button>
         </div>
 
@@ -438,12 +438,12 @@
             <thead>
               <tr>
                 <th>Fecha</th>
-                <th>Categoría</th>
-                <th>Descripción</th>
-                <th>Valor</th>
-                <th>Evidencia</th>
-                <th>Origen</th>
-                <th>Acciones</th>
+                <th data-i18n="movements.category">Categoría</th>
+                <th data-i18n="movements.description">Descripción</th>
+                <th data-i18n="movements.value">Valor</th>
+                <th data-i18n="movements.evidence">Evidencia</th>
+                <th data-i18n="movements.source">Origen</th>
+                <th data-i18n="movements.actions">Acciones</th>
               </tr>
             </thead>
 
@@ -483,17 +483,17 @@
 
           <div class="income-summary-row">
             <div class="income-summary-item">
-              <span>Ingreso mensual</span>
+              <span data-i18n="movements.monthlyIncomeSummaryLabel">Ingreso mensual</span>
               <strong id="monthlyIncome">$0</strong>
             </div>
 
             <div class="income-summary-item">
-              <span>Ingresos adicionales</span>
+              <span data-i18n="movements.additionalIncomeSummary">Ingresos adicionales</span>
               <strong id="additionalIncomeTotal">$0</strong>
             </div>
 
             <div class="income-summary-item">
-              <span>Ahorro estimado</span>
+              <span data-i18n="movements.estimatedSavings">Ahorro estimado</span>
               <strong id="monthlySavings">$0</strong>
             </div>
           </div>
@@ -501,31 +501,31 @@
           <div class="income-forms-grid">
 
             <div class="income-form-box">
-              <h3>Ingreso principal</h3>
+              <h3 data-i18n="movements.mainIncome">Ingreso principal</h3>
 
-              <label for="incomeAmount">Valor del ingreso mensual</label>
+              <label for="incomeAmount" data-i18n="movements.monthlyIncomeValue">Valor del ingreso mensual</label>
               <input 
                 type="number" 
                 id="incomeAmount" 
-                placeholder="Ej: 3000000"
+                placeholder="Ej: 3000000" data-i18n-placeholder="movements.mainIncomeAmountPlaceholder"
                 min="0"
               >
 
-              <label for="incomeDescription">Descripción</label>
+              <label for="incomeDescription" data-i18n="movements.description">Descripción</label>
               <input 
                 type="text" 
                 id="incomeDescription" 
-                placeholder="Ej: Salario mensual, pago de nómina..."
+                placeholder="Ej: Salario mensual, pago de nómina..." data-i18n-placeholder="movements.mainIncomeDescriptionPlaceholder"
               >
 
               <button type="button" id="saveIncomeButton">
                 <i class="bi bi-check-circle"></i>
-                Guardar ingreso principal
+                <span data-i18n="movements.saveMainIncome">Guardar ingreso principal</span>
               </button>
             </div>
 
             <div class="income-form-box">
-              <h3>Ingreso adicional</h3>
+              <h3 data-i18n="movements.additionalIncomeTitle">Ingreso adicional</h3>
 
                <div class="voice-box full-field">
                 <button
@@ -534,46 +534,46 @@
                   class="voice-button"
                 >
                   <i class="bi bi-mic-fill"></i>
-                  Dictar ingreso por voz
+                  <span data-i18n="movements.dictateIncomeVoice">Dictar ingreso por voz</span>
                 </button>
               </div>
 
-              <label for="additionalIncomeDate">Fecha</label>
+              <label for="additionalIncomeDate" data-i18n="movements.incomeDate">Fecha</label>
               <input 
                 type="date" 
                 id="additionalIncomeDate"
               >
 
-              <label for="additionalIncomeDescription">Descripción</label>
+              <label for="additionalIncomeDescription" data-i18n="movements.incomeDescription">Descripción</label>
               <input 
                 type="text" 
                 id="additionalIncomeDescription" 
-                placeholder="Ej: Freelance, venta, prima, bono..."
+                placeholder="Ej: Freelance, venta, prima, bono..." data-i18n-placeholder="movements.incomeDescriptionPlaceholder"
               >
 
-              <label for="additionalIncomeAmount">Valor</label>
+              <label for="additionalIncomeAmount" data-i18n="movements.incomeValue"><span data-i18n="movements.value">Valor</span></label>
               <input 
                 type="number" 
                 id="additionalIncomeAmount" 
-                placeholder="Ej: 300000"
+                placeholder="Ej: 300000" data-i18n-placeholder="movements.additionalIncomeAmountPlaceholder"
                 min="0"
               >
 
 
               <button type="button" id="saveAdditionalIncomeButton">
                 <i class="bi bi-plus-circle"></i>
-                Agregar ingreso adicional
+                <span data-i18n="movements.addAdditionalIncome">Agregar ingreso adicional</span>
               </button>
             </div>
 
           </div>
 
           <div class="additional-income-list">
-            <h3>Ingresos adicionales registrados</h3>
+            <h3 data-i18n="movements.registeredAdditionalIncomes">Ingresos adicionales registrados</h3>
 
             <div id="additionalIncomesList" class="additional-incomes-list">
               <p class="empty-additional-income">
-                No hay ingresos adicionales registrados para este mes.
+                <span data-i18n="movements.noAdditionalIncomes">No hay ingresos adicionales registrados para este mes.</span>
               </p>
             </div>
           </div>
@@ -651,7 +651,7 @@
         <div class="toolbar-actions">
           <button type="button" id="downloadExcelButton" class="download-excel-button">
             <i class="bi bi-file-earmark-excel"></i>
-            Descargar Reporte
+            <span data-i18n="movements.downloadReport">Descargar Reporte</span>
           </button>
         </div>
 
@@ -676,15 +676,15 @@
     >
       <header class="movement-options-header">
         <div>
-          <span>Nuevo movimiento</span>
-          <h2 id="movementOptionsTitle">¿Qué deseas agregar?</h2>
+          <span data-i18n="movements.newMovement">Nuevo movimiento</span>
+          <h2 id="movementOptionsTitle" data-i18n="movements.whatAdd">¿Qué deseas agregar?</h2>
         </div>
 
         <button
           type="button"
           class="movement-options-close"
           data-close-movement-modal
-          aria-label="Cerrar"
+          aria-label="Cerrar" data-i18n-aria-label="movements.close"
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -700,8 +700,8 @@
           <i class="fa-solid fa-wallet"></i>
 
           <span>
-            <strong>Agregar gasto</strong>
-            <small>Registrar una compra o pago</small>
+            <strong data-i18n="movements.addExpenseOption">Agregar gasto</strong>
+            <small data-i18n="movements.expenseOptionText">Registrar una compra o pago</small>
           </span>
 
           <i class="fa-solid fa-chevron-right"></i>
@@ -715,8 +715,8 @@
           <i class="fa-solid fa-money-bill-wave"></i>
 
           <span>
-            <strong>Agregar ingreso</strong>
-            <small>Registrar dinero recibido</small>
+            <strong data-i18n="movements.addIncome">Agregar ingreso</strong>
+            <small data-i18n="movements.incomeOptionText">Registrar dinero recibido</small>
           </span>
 
           <i class="fa-solid fa-chevron-right"></i>
@@ -730,21 +730,21 @@
             type="button"
             id="backToMovementOptionsButton"
             class="movement-form-back"
-            aria-label="Volver a las opciones"
+            aria-label="Volver a las opciones" data-i18n-aria-label="movements.backOptions"
           >
             <i class="fa-solid fa-arrow-left"></i>
           </button>
 
           <div>
-            <span>Nuevo movimiento</span>
-            <h2 id="movementFormTitle">Agregar movimiento</h2>
+            <span data-i18n="movements.newMovement">Nuevo movimiento</span>
+            <h2 id="movementFormTitle" data-i18n="movements.addMovement">Agregar movimiento</h2>
           </div>
 
           <button
             type="button"
             class="movement-options-close"
             data-close-movement-modal
-            aria-label="Cerrar"
+            aria-label="Cerrar" data-i18n-aria-label="movements.close"
           >
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -782,6 +782,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
+  <script src="./src/js/i18n.js"></script>
   <script src="./src/js/sidebar.js"></script>
   <script>
     renderSidebar("gastos");
