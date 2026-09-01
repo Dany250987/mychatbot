@@ -254,6 +254,9 @@ router.get('/', async (req, res) => {
   const searchLike =
     `%${searchText}%`;
 
+  const searchTerms =
+    getGlobalSearchTerms(searchText);
+
   try {
 
     // =====================================
