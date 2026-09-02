@@ -12,6 +12,8 @@ const expenseRoutes = require('./routes/expenseRoutes');
 const incomeRoutes = require('./routes/incomeRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const reminderRoutes = require('./routes/reminderRoutes');
+const pushRoutes = require('./routes/pushRoutes');
+const { startReminderPushScheduler } = require('./services/pushService');
 const searchRoutes = require('./routes/searchRoutes');
 const documentRoutes = require('./routes/documentRoutes');
 
@@ -68,6 +70,7 @@ app.use('/api/expenses', expenseRoutes);
 app.use('/api/incomes', incomeRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/reminders', reminderRoutes);
+app.use('/api/push', pushRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/documents', documentRoutes);
 
@@ -78,6 +81,8 @@ app.get('/', (req, res) => {
 
 // Escuchar puerto
 const PORT = process.env.PORT || 3000;
+
+startReminderPushScheduler();
 
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
