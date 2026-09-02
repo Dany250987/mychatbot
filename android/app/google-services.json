@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "913525023971",
+    "project_id": "dia-en-orden",
+    "storage_bucket": "dia-en-orden.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:913525023971:android:01c5d0394a424ffbcfd1d6",
+        "android_client_info": {
+          "package_name": "com.danybot.agenda"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOdNKdZI2RMCMuoHn5kng8PcykQedUhRg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
