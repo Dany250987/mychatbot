@@ -257,6 +257,11 @@ router.get('/', async (req, res) => {
   const searchTerms =
     getGlobalSearchTerms(searchText);
 
+  const moduleTargets =
+    getGlobalSearchModuleTargets(
+      normalizeGlobalSearchTerm(searchText)
+    );
+
   try {
 
     // =====================================
