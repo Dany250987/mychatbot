@@ -6,7 +6,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title data-i18n="login.pageTitle">Día en Orden | Iniciar sesión</title>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const isNativeApp = Boolean(
+        (
+          window.Capacitor &&
+          typeof window.Capacitor.isNativePlatform === "function" &&
+          window.Capacitor.isNativePlatform()
+        ) ||
+        window.location.origin === "http://localhost" ||
+        window.location.origin === "https://localhost" ||
+        window.location.protocol === "capacitor:" ||
+        window.location.protocol === "ionic:"
+      );
+
+      if (isNativeApp) {
+        return;
+      }
+
+      const googleIdentityScript = document.createElement("script");
+      googleIdentityScript.src = "https://accounts.google.com/gsi/client";
+      googleIdentityScript.async = true;
+      googleIdentityScript.defer = true;
+
+      document.head.appendChild(googleIdentityScript);
+    });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
